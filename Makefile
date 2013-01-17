@@ -3,7 +3,6 @@ export SRC_DIR	= src
 export INCL_DIR = include
 export EXPL_DIR = examples
 export TEST_DIR = test
-export KNAPSACK_DIR = knapsack
 
 export CC=gcc
 
@@ -15,20 +14,17 @@ export LDFLAGS=-g
 export CFLAGS=-Wall -g -DNDEBUG -O3
 export LDFLAGS=-g -O3
 
-default : src knapsack
+default : src 
 
-all : src tests examples knapsack
+all : src tests examples 
 
-.PHONY: clean src examples test knapsack
+.PHONY: clean src examples test
 
 src : 
 	@(cd $(SRC_DIR) && $(MAKE))
 
 examples : 
 	@(cd $(EXPL_DIR) && $(MAKE))
-
-knapsack :
-	@(cd $(KNAPSACK_DIR) && $(MAKE))
 
 install : knapsack
 	strip $(KNAPSACK_DIR)/knapsack
@@ -42,7 +38,6 @@ clean :
 	@(cd $(SRC_DIR) && $(MAKE) $@)
 	@(cd $(EXPL_DIR) && $(MAKE) $@)
 	@(cd $(TEST_DIR) && $(MAKE) $@)
-	@(cd $(KNAPSACK_DIR) && $(MAKE) $@)
 
 .c.o :
 	$(CC) -I. $< -c
