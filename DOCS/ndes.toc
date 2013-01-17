@@ -1,0 +1,15 @@
+\select@language {french}
+\contentsline {section}{\numberline {1}Les sondes}{3}{section.1}
+\contentsline {subsection}{\numberline {1.1}Les m\'ethodes}{3}{subsection.1.1}
+\contentsline {subsubsection}{\numberline {1.1.1}L'\'echantillonage}{3}{subsubsection.1.1.1}
+\contentsline {subsubsection}{\numberline {1.1.2}Consultation d'un \'echantillon}{3}{subsubsection.1.1.2}
+\contentsline {subsubsection}{\numberline {1.1.3}La moyenne}{3}{subsubsection.1.1.3}
+\contentsline {subsubsection}{\numberline {1.1.4}Les valeurs extr\`emes}{3}{subsubsection.1.1.4}
+\contentsline {subsubsection}{\numberline {1.1.5}La sauvegarde}{3}{subsubsection.1.1.5}
+\contentsline {subsection}{\numberline {1.2}Les diff\'erents types}{3}{subsection.1.2}
+\contentsline {subsubsection}{\numberline {1.2.1}L'histogramme}{3}{subsubsection.1.2.1}
+\contentsline {subsubsection}{\numberline {1.2.2}La fen\^etre glissante}{3}{subsubsection.1.2.2}
+\contentsline {subsubsection}{\numberline {1.2.3}La moyenne}{3}{subsubsection.1.2.3}
+\contentsline {subsubsection}{\numberline {1.2.4}La moyenne par tranches temporelles}{3}{subsubsection.1.2.4}
+\contentsline {section}{\numberline {2}L'affichage par GnuPlot}{4}{section.2}
+\contentsline {section}{\numberline {3}Notion de simulation et de campagne}{4}{section.3}

@@ -1,0 +1,315 @@
+\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{srcltx}
+\usepackage[pdftex]{thumbpdf}
+\usepackage[pdftex,colorlinks]{hyperref}
+
+\title{Mes notes sur mon ``simulateur réseau''}
+
+\author{Emmanuel Chaput}
+
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+   Début de doc
+
+   o Modèle de transmission des PDU
+
+   - Tout module susceptible de produire ou transférer des PDU doit
+fournir une fonction de la forme
+
+   {\tt struct PDU\_t * getPDU(void * source);}
+
+   Le paramètre est un pointeur vers des "données privées" permettant
+d'identifier l'instance du module (typiquement un pointeur direct sur
+cette instance).
+
+   Le pointeur retourné est celui d'une PDU qui n'est plus prise en
+compte par la source. Elle doit donc absolument être gérée (ou, au
+moins, détruite) par l'utilisateur de cette fonction. En cas
+d'indisponibilité de PDU, la valeur NULL est retournée.
+
+   Cette fonction et le pointeur associé doivent être fournis à
+l'entité destinataire, s'il en existe une !
+
+   Si le nom du module est toto, la fonction sera nommée par exemple
+{\tt toto\_getPDU().}
+
+   - Tout module susceptible de recevoir des PDU doit fournir une
+fonction de la forme :
+
+{\tt
+   void processPDU(void * rec,
+                   getPDU\_t getPDU,
+                   void * source);
+}
+   C'est cette fonction qu'invoquera une source pour lui notifier la
+disponibilité d'une PDU. Cette fonction aura donc la responsabilité
+d'aller récupérer la PDU (grâce la la fonction getPDU et à la source
+fournies) et de la traiter. La récupération et le traitement pourront
+être remis à plus tard (en cas d'indisponibilité) mais au risque
+d'avoir un pointeur NULL retourné par getPDU(). 
+
+   Si le nom du module est {\tt toto}, la fonction sera nommée par exemple
+{\tt toto\_processPDU()}.
+
+
+
+
+
+   Le problème ici est que ce modèle, censé permettre plus simplement
+d'avoir plusieurs producteurs vers un même consommateur (grâce à la
+fonction getPDU et au pointeur source passés en paramètres plutôt que
+stockés comme attributs) rend délicat le "report" de l'invocation du
+getPDU. Comment, dans un serveur par exemple, assurer que cette
+invocation se fera dans le même traitement que la fin de traitement ?
+Cela dit, est-ce vraiment nécessaire ? Pour le moment, cela implique
+un événement pour la fin du traitement et un événement pour chaque
+getPDU.
+
+  La difficulté est d'assurer un traitement dans le bon ordre de
+ces événements qui ont la même date ... J'ai pourtant dans l'idée que
+c'est la bonne solution. Plusieurs pistes pour rêgler ce problème des
+événements "simultanés" mais devant être traités dans un ordre donné,
+sachant que le problème des événements simultanés est complexe :
+
+   . A date égale, les événements sont insérés dans l'ordre de
+création et exécutés dans l'ordre d'insertion. Bof, notemment dans la
+mesure oû la date est un réel. Avantage : c'est simple !
+   . Gérer des chaines d'événements ?
+
+  Bon, en fait, ici, le mieux est peut-être d'abandonner cette
+idée. Elle n'est pas logique. Si plusieurs sources signalent des
+paquets disponibles, il n'y a aucune raison que ça provoque des
+événements simultanés ! Il faut donc stocker le getPDU et le pointeur
+associé. Eventuellement dans une liste (ordonnée) pour en permettre
+plusieurs. Le traitement n'est pas alors différé à un nouvel événement
+mais reporté à la fin du service en cours.
+
+
+%========================================================================
+%
+%========================================================================
+\section{Les sondes}
+
+   Les sondes sont implantées dans le modules {\tt probe}. Les sondes
+permettent d'enregistrer des mesures de paramètres scalaires. Ce sont
+elles qui permettront ensuite d'analyser le résultat de la simulation,
+d'évaluer les performances du système, de tracer des courbes, \ldots
+
+   Chaque échantillon d'une mesure prélevé par une sonde est daté. Il
+est égalament possible de n'enregistrer que la date d'un événement,
+sans aucune mesure associée.
+
+   Les sondes peuvent être placées en divers points des outils de
+simulation via des fonctions de la forme
+\lstinline!<type>_add<point>Probe(...)!. Plusieurs sondes peuvent être
+ainsi ``chaînées'' sur un même point de mesure. En revanche, la même
+sonde {\bf ne peut pas} être chaînée plusieurs fois.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Les méthodes de base}
+\subsubsection{L'échantillonage}
+
+   La méthode suivante permet d'échantilloner une valeur dans une
+sonde 
+
+\begin{verbatim}
+/*
+ * Echantillonage d'une valeur
+ */
+void probe_sample(struct probe_t * probe, double value);
+\end{verbatim}
+
+   Il est également possible d'échantilloner une date, sans valeur
+associée, de la façon suivante 
+
+\begin{verbatim}
+/*
+ * Echantillonage de la date d'occurence d'un evenement
+ */
+void probe_sampleEvent(struct probe_t * probe);
+\end{verbatim}
+
+\subsubsection{Consultation d'un échantillon}
+
+\subsubsection{La moyenne}
+
+\subsubsection{Les valeurs extrèmes}
+
+
+\subsubsection{La sauvegarde}
+
+   Une sonde peut être dumpée dans un fichier ouvert grâce à la
+fonction
+
+{\tt void probe\_graphBarDumpFd(struct probe\_t * probe, int fd, int
+format);}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsubsection{La mesure du débit}
+
+   Les valeurs échantillonées pourront souvent être des tailles de
+messages, émis ou reçus. Dans ce cas, il peut être intéressant
+d'utiliser la fonction suivante qui fournit une mesure du ``débit
+instantané''.
+
+\begin{verbatim}
+double probe_throughput(struct probe_t * p);
+\end{verbatim}
+
+   Bien sûr, le mode d'estimation de cette valeur est dépendant de la
+nature de la sonde.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Les différents types}
+
+\subsubsection{Les ``méta-sondes''}
+
+   À chaque échantillon, certaines sondes mettent à jours des
+informations que l'on peut souhaiter conserver (par exemple la moyenne
+mobile) afin de tracer leur évolution dans le temps.
+
+   Pour cela, une sonde périodique \lstinline!P! peut être placée sur
+une sonde observée \lstinline!O!. La sonde \lstinline!P! permettra
+ainsi d'observer une propriété de la sonde\lstinline!O! sur la base
+d'un échantillonage à une fréquence caractérisant la sonde
+\lstinline!P!. 
+
+   Cette technique permet également de collecter dans une sonde unique
+\lstinline!G! des échantillons prélevés dans plusieurs sondes
+différentes \lstinline!S1!, \lstinline!S2!, ldots Pour cela,
+\lstinline!G! sera ajoutée comme sonde sur les échantillons de
+\lstinline!S1!, \lstinline!S2!, ldots 
+
+\subsubsection{La sonde exhaustive}
+
+\subsubsection{L'histogramme}
+
+\subsubsection{La fenêtre glissante}
+
+   Ces sondes conservent tous les échantillons sur une fenêtre
+glissante dont la taille est fournie en paramêtre du constructeur :
+
+\begin{verbatim}
+struct probe_t * probe_slidingWindowCreate(int windowLength);
+\end{verbatim}
+
+\subsubsection{La sonde périodique}
+
+   Le but d'une sonde périodique est de prélever un échantillon toutes
+les $\tau$ unitées de temps. On se fonde pour cela sur l'idée que la
+valeur mesurée n'est modifier qu'au cours du traitement d'un
+événement.
+
+
+\subsubsection{La moyenne mobile}
+
+   Une moyenne du type \lstinline!EMAProbeType! conserve à tout moment
+une moyenne mobile calculée à chaque nouvel échantillon $e$ de la façon
+suivante $m <- \alpha . m + (1 - \alpha).e$.
+
+\subsubsection{La moyenne par tranches temporelles}
+
+   Cette sonde conserve une moyenne pour chaque tranche temporelle de
+durée {\tt t}, passée en paramètre du constructeur (les fenêtres
+temporelles sont sautantes donc disjointes):
+
+\begin{verbatim}
+struct probe_t * probe_createTimeAverage(double t);
+\end{verbatim}
+
+
+%========================================================================
+%
+%========================================================================
+\section{Les files}
+
+   C'est l'outil de base pour stocker des objets selon une stratégie
+{\sc fifo}. Elles sont définies dans le fichier {\tt file\_pdu.h}.
+
+\subsection{Création}
+
+   Une file est créée de la façon suivante 
+
+\begin{verbatim}
+struct filePDU_t * filePDU_create(void * destination,
+			    processPDU_t destProcessPDU);
+\end{verbatim}
+
+   Le paramètre \lstinline!destination! est un pointeur sur l'objet
+vers lequel sont transmis les objets présents dans la file. Dés qu'un
+objet est inséré dans la file, si la destination est disponible, il
+lui est envoyé.
+
+\subsection{Gestion de la taille}
+
+\subsection{Les sondes}
+
+   Les files sont dotées des sondes suivantes
+
+\begin{description}
+   \item[{\tt InsertSize}] pour mesurer la taille des paquets insérés
+     dans la file. A chaque insertion d'une {\sc pdu}, la taille de
+     cette dernière est échantillonée avec la date d'insertion.
+   \item[{\tt ExtractSize}] pour mesurer la taille des paquets extraits
+     de la file. A chaque extraction d'une {\sc pdu}, la taille de
+     cette dernière est échantillonée avec la date d'extraction.
+   \item[{\tt Sejourn}]
+\end{description}
+
+
+%========================================================================
+%
+%========================================================================
+\section{L'affichage par GnuPlot}
+
+\section{Notion de simulation et de campagne}
+
+   Une simulation est une instance unique d'exécution d'une séquence
+d'événements suite à l'initialisation du modèle. Une campagne est une
+suite de simulations sur un même modèle avec une ré-initialisation des
+variables entre deus simulations.
+
+   Les sondes liées à la simulation sont ré-initialisées à la fin de
+la simulation. Des sondes peuvent être liées à la campagne ; elles ne
+seront réinitialisées qu'à la fin de cette dernière et peuvent
+permettre ainsi à établir des valeurs inter-simulation, par exemple
+des intervalles de confiance.
+
+
+\chapter{Des exemples}
+
+\section{Utilisation des sondes}
+
+\subsection{Mesurer un débit}
+
+   Considérons le cas simple d'une source, dont nous voulons mesurer
+le débit de sortie. Pour cela, nous allons insérer une sonde sur la
+taille des paquets transmis grâce à la méthode {\tt
+  PDUSource\_setPDUGenerationSizeProbe}.
+
+   Le type de sonde dépendra de la mesure souhaitée.
+
+\subsubsection{Débit moyen}
+
+   Supposons que nous voulons simplement connaître le débit moyen sur
+toute la transmission, alors une sonde mesurant la moyenne sera parfaitement
+suffisante :
+
+\subsubsection{Débit ``instantanté''}
+
+\end{document}
