@@ -26,10 +26,8 @@ src :
 examples : 
 	@(cd $(EXPL_DIR) && $(MAKE))
 
-install : knapsack
-	strip $(KNAPSACK_DIR)/knapsack
-	rm $(HOME)/bin/knapsack
-	cp $(KNAPSACK_DIR)/knapsack $(HOME)/bin
+install : src/libndes.a
+	cp src/libndes.a lib
 
 tests : 
 	@(cd $(TEST_DIR) && $(MAKE))
