@@ -4,6 +4,7 @@
 \usepackage[french]{babel}
 \usepackage{graphicx}
 \usepackage{srcltx}
+\usepackage{listings}
 \usepackage[pdftex]{thumbpdf}
 \usepackage[pdftex,colorlinks]{hyperref}
 
@@ -16,6 +17,59 @@
 \maketitle
 
 \tableofcontents
+
+%========================================================================
+%
+%========================================================================
+\section{Tutoriel}
+
+%------------------------------------------------------------------------
+\subsection{Introduction}
+
+   Félicitations ! Tu t'apprètes à entrer dans le monde fabuleux de
+{\sc ndes}, \ldots
+
+   Il s'agit en gros d'une sorte de librairie astucieusement
+agrémentée de nombreux bugs dont le but et de t'aider (ou pas) à faire
+ton propre simulateur réseau ! Si tu es moi, tout ça est à peu près
+vrai ; pour les autres, il y a mieux ailleurs.
+
+   L'implantation d'un simulateur passera donc par l'écriture d'un
+programme C utilisant cette librairie.
+
+%------------------------------------------------------------------------
+\subsection{Installation}
+
+\begin{verbatim}
+ $ git clone https://github.com/Manu-31/ndes.git
+ $ cd ndes
+ $ make
+ $ make install
+\end{verbatim}
+
+   Pas de panique, ça n'installe rien pour le moment !
+
+%------------------------------------------------------------------------
+\subsection{Ma première simulation : chouette, une file M/M/1 !}
+
+   Le fichier source (et son Makefile, parce qu'on ne se moque pas du
+client) se trouve dans le répertoire {\tt example/tutorial-1}.
+
+   Dans {\sc ndes}, le système va être modélisé par une source, suivie
+d'une file d'attente, en aval de laquelle se trouve un serveur suivi
+par un puits. Je te laisse faire un dessin et je publierai ici le plus
+joli !
+
+\subsubsection{Création du simulateur}
+
+   Avant toute manipulatio, on crée le simulateur de la façon suivante
+
+\begin{verbatim}
+   motSim_create();
+\end{verbatim}
+
+
+
 \newpage
 
    Début de doc
@@ -291,11 +345,11 @@ permettre ainsi à établir des valeurs inter-simulation, par exemple
 des intervalles de confiance.
 
 
-\chapter{Des exemples}
+\section{Des exemples}
 
-\section{Utilisation des sondes}
+\subsection{Utilisation des sondes}
 
-\subsection{Mesurer un débit}
+\subsubsection{Mesurer un débit}
 
    Considérons le cas simple d'une source, dont nous voulons mesurer
 le débit de sortie. Pour cela, nous allons insérer une sonde sur la
@@ -304,12 +358,12 @@ taille des paquets transmis grâce à la méthode {\tt
 
    Le type de sonde dépendra de la mesure souhaitée.
 
-\subsubsection{Débit moyen}
+\paragraph{Débit moyen}
 
    Supposons que nous voulons simplement connaître le débit moyen sur
 toute la transmission, alors une sonde mesurant la moyenne sera parfaitement
 suffisante :
 
-\subsubsection{Débit ``instantanté''}
+\paragraph{Débit ``instantanté''}
 
 \end{document}

@@ -50,16 +50,16 @@ int main() {
    sink = PDUSink_create();
 
    /* Le serveur */
-   serveur = srvGen_create(sink, PDUSink_processPDU);
+   serveur = srvGen_create(sink, (processPDU_t)PDUSink_processPDU);
 
    /* La file */
-   filePDU = filePDU_create(serveur, srvGen_processPDU);
+   filePDU = filePDU_create(serveur, (processPDU_t)srvGen_processPDU);
 
    /* Création d'un générateur de date */
    dateGenExp = dateGenerator_createExp(lambda);
 
    /* La source */
-   sourcePDU = PDUSource_create(dateGenExp, filePDU, filePDU_processPDU);
+   sourcePDU = PDUSource_create(dateGenExp, filePDU, (processPDU_t)filePDU_processPDU);
 
    /* Les sondes */
    iaProbe = probe_createExhaustive();
@@ -85,7 +85,7 @@ int main() {
    tracer(sejProbe, "Temps de séjour", 100);
 
    printf("*** ^C pour finir ;-)\n");
-   pause();
+   while (1) {};
 
    return 1;
 }

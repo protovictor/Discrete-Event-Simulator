@@ -1,15 +1,31 @@
 \select@language {french}
-\contentsline {section}{\numberline {1}Les sondes}{3}{section.1}
-\contentsline {subsection}{\numberline {1.1}Les m\'ethodes}{3}{subsection.1.1}
-\contentsline {subsubsection}{\numberline {1.1.1}L'\'echantillonage}{3}{subsubsection.1.1.1}
-\contentsline {subsubsection}{\numberline {1.1.2}Consultation d'un \'echantillon}{3}{subsubsection.1.1.2}
-\contentsline {subsubsection}{\numberline {1.1.3}La moyenne}{3}{subsubsection.1.1.3}
-\contentsline {subsubsection}{\numberline {1.1.4}Les valeurs extr\`emes}{3}{subsubsection.1.1.4}
-\contentsline {subsubsection}{\numberline {1.1.5}La sauvegarde}{3}{subsubsection.1.1.5}
-\contentsline {subsection}{\numberline {1.2}Les diff\'erents types}{3}{subsection.1.2}
-\contentsline {subsubsection}{\numberline {1.2.1}L'histogramme}{3}{subsubsection.1.2.1}
-\contentsline {subsubsection}{\numberline {1.2.2}La fen\^etre glissante}{3}{subsubsection.1.2.2}
-\contentsline {subsubsection}{\numberline {1.2.3}La moyenne}{3}{subsubsection.1.2.3}
-\contentsline {subsubsection}{\numberline {1.2.4}La moyenne par tranches temporelles}{3}{subsubsection.1.2.4}
-\contentsline {section}{\numberline {2}L'affichage par GnuPlot}{4}{section.2}
-\contentsline {section}{\numberline {3}Notion de simulation et de campagne}{4}{section.3}
+\contentsline {section}{\numberline {1}Tutoriel}{2}{section.1}
+\contentsline {subsection}{\numberline {1.1}Installation}{2}{subsection.1.1}
+\contentsline {subsection}{\numberline {1.2}Ma premi\`ere simulation : chouette, une file M/M/1 !}{2}{subsection.1.2}
+\contentsline {section}{\numberline {2}Les sondes}{4}{section.2}
+\contentsline {subsection}{\numberline {2.1}Les m\'ethodes de base}{4}{subsection.2.1}
+\contentsline {subsubsection}{\numberline {2.1.1}L'\'echantillonage}{4}{subsubsection.2.1.1}
+\contentsline {subsubsection}{\numberline {2.1.2}Consultation d'un \'echantillon}{4}{subsubsection.2.1.2}
+\contentsline {subsubsection}{\numberline {2.1.3}La moyenne}{4}{subsubsection.2.1.3}
+\contentsline {subsubsection}{\numberline {2.1.4}Les valeurs extr\`emes}{4}{subsubsection.2.1.4}
+\contentsline {subsubsection}{\numberline {2.1.5}La sauvegarde}{4}{subsubsection.2.1.5}
+\contentsline {subsubsection}{\numberline {2.1.6}La mesure du d\'ebit}{4}{subsubsection.2.1.6}
+\contentsline {subsection}{\numberline {2.2}Les diff\'erents types}{5}{subsection.2.2}
+\contentsline {subsubsection}{\numberline {2.2.1}Les ``m\'eta-sondes''}{5}{subsubsection.2.2.1}
+\contentsline {subsubsection}{\numberline {2.2.2}La sonde exhaustive}{5}{subsubsection.2.2.2}
+\contentsline {subsubsection}{\numberline {2.2.3}L'histogramme}{5}{subsubsection.2.2.3}
+\contentsline {subsubsection}{\numberline {2.2.4}La fen\^etre glissante}{5}{subsubsection.2.2.4}
+\contentsline {subsubsection}{\numberline {2.2.5}La sonde p\'eriodique}{5}{subsubsection.2.2.5}
+\contentsline {subsubsection}{\numberline {2.2.6}La moyenne mobile}{5}{subsubsection.2.2.6}
+\contentsline {subsubsection}{\numberline {2.2.7}La moyenne par tranches temporelles}{5}{subsubsection.2.2.7}
+\contentsline {section}{\numberline {3}Les files}{6}{section.3}
+\contentsline {subsection}{\numberline {3.1}Cr\'eation}{6}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Gestion de la taille}{6}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}Les sondes}{6}{subsection.3.3}
+\contentsline {section}{\numberline {4}L'affichage par GnuPlot}{6}{section.4}
+\contentsline {section}{\numberline {5}Notion de simulation et de campagne}{6}{section.5}
+\contentsline {section}{\numberline {6}Des exemples}{7}{section.6}
+\contentsline {subsection}{\numberline {6.1}Utilisation des sondes}{7}{subsection.6.1}
+\contentsline {subsubsection}{\numberline {6.1.1}Mesurer un d\'ebit}{7}{subsubsection.6.1.1}
+\contentsline {paragraph}{D\'ebit moyen}{7}{section*.2}
+\contentsline {paragraph}{D\'ebit ``instantant\'e''}{7}{section*.3}

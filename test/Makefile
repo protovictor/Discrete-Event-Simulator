@@ -7,8 +7,7 @@ TESTS = file-pdu file-pdu-2 file-pdu-3 \
 	generators-3 generators-4 \
 	probes-1 probes-2 probes-3 probes-4 \
 	muxfcfs-1 \
-	intconf \
-	mm1
+	intconf
 
 
 .PHONY: clean 
@@ -29,9 +28,6 @@ generators-4 : generators-4.o ../$(SRC_DIR)/libndes.a
 
 intconf : intconf.o ../$(SRC_DIR)/libndes.a
 	$(CC) $(LDFLAGS) intconf.o -o intconf -lm -L../$(SRC_DIR) -lndes
-
-mm1 : mm1.o ../$(SRC_DIR)/libndes.a
-	$(CC) $(LDFLAGS) mm1.o -o mm1 -lm -L../$(SRC_DIR) -lndes
 
 debits : debits.o ../$(SRC_DIR)/libndes.a
 	$(CC) $(LDFLAGS) debits.o -o debits -lm -L../$(SRC_DIR) -lndes
