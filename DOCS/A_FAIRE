@@ -1,0 +1,270 @@
+URGENT
+======
+   . EXAMPLES/DEBITS
+      - Pourquoi ce n'est pas reproductible ?
+   . [RANDOM]
+      - Une version avec une source qui devient une sonde au premier reset
+   . [GNUPLOT]
+      - setXMin, XMax, YMin, YMax
+   . [TOUS]
+      - Un objet général input et un output dont tout le monde "hérite"
+      - Un débit d'entrée pour les input et un de sortie pour les output
+   . Un niveau de log paramétrable
+      - Afficher "régulièrement" des messages montrant l'avancée
+      - Suppression de certains messages de debug
+      - Des warning *pour la simu* activable par un booleen (pour voir
+        s'il reste des événements, des objets dans des files, ...)
+   . [KNAPSACK]
+      - Mettre dans un répertoire spécifique, ...
+      - Une option pour les débits
+      - Calculer les débits autrement
+   . Afficher l'état actuel en cas de ^C ...
+   . Créer une probe qui ne fait que compter les événements
+      - Refaire les probes, avec une structure qui inclue les fonctions
+
+   . Utiliser le type PDU comme cellule de base de la file de PDU !
+      - Le champ private contiendra la date (bof, attention à la taille)
+      - Ajouter un champ date_creation au type PDU ? Mieux !
+   . Utiliser les PDU comme cellule des files !
+
+   . Créer la notion de simulation et de campagne
+      - Il faut en particulier clarifier ce qui est fait au démarrage
+        de la simulation (reset ?), à la fin, ...
+      - L'idée d'un reset au début (ou tout est initialisé, les alloc
+        ayant lieu avant) est tentante, mais il faut être sûr que tout
+        peut y être intégré ...
+      - Définir une notion de domaine qui spécifie quand une entité
+        doit être réinitialisée (début de simu, de campagne, ...)
+      - Voir la doc ci dessous
+
+   . Vérifier l'utilisation réelle de la mémoire !!
+      - La mémoire allouée ne fait que croître !!!
+      - Faire un test qui détruise aussi vite qu'il crée.
+   . Fusionner event et event-file
+   . Un canal de propagation
+      - Parfait (sans erreurs !) dans un premier temps, c'est donc
+        juste un retard qui peut contenir plusieurs PD simultanément
+   . Remplacer les exit() par un mostim_fatal
+   . Tous les reset ne sont pas faits !
+      - Files !
+      - Générateurs, ...
+   . Deux types "génériques" producteur et consommateur
+      - De sorte à ne pas dupliquer le code
+      - qui exportent leur fonction get et leur fonction process
+   . Sondes 
+      -"glissantes" qui mémorisent tous les n échantillons la
+        valeur moyenne des m dernières mesures
+         . Attention au type de moyenne (pas temporelle)
+      - moyenne cumulée
+   . Generateurs
+      - Loi uniforme
+         . Et le programme de test !
+      - Source alea
+         . random
+         . entropie
+   . Comment mesurer le temps de séjour ?
+      - Temps d'attente + temps de traitement
+      - Faire un serveur avec file intégrée 
+         . Bof, c'est un peu une solution "adhoc"
+      - associer à une PDU une date_in et une date_out,
+systématiquement mises à jour lors du passage d'un élément à l'autre,
+mais avec la possibilité de "fusionner" plusieurs éléments de ce point
+de vue (pas de modif de l'out et de l'in). Ca devrait permetre de
+faire des sondes génériques.
+      - créer un objet encapsulant les deux
+         . Notion de "sous-système"
+         . L'intéret est que ça permet de définir un type de PDU qui
+encapsule les PDU entrantes (qui sont désencapsulées en sortie, bien
+sûr). On peut ainsi ajouter à ces dernières des informations
+transistoires, comme une date d'entrée. 
+         .subSystem_create(), subSystem_append();
+      - Un mix des deux précédentes peut-être ? Par exemple en
+fonction de la façon de construire.
+
+EN COURS
+========
+   . [FILE]
+      - Test du débit et de la capacité limitée
+   . Des événements spécifiques
+      - Périodiques (un seul objet !)
+      - Récurrents (idem mais reconduit par l'utilisateur)
+      - Attention, ils ne sont pas compatibles !
+   . Meilleure gestion de la mémoire
+      - Il reste des malloc !
+      - Faire un gestionnaire indépendant ?
+   . Multiplexeur
+      - n entrées -> 1 sortie
+   . Un module_init par module à invoquer par motsim
+      - Par exemple pour créer les sondes systeme dans probe
+   . [SONDES]
+      - Un chaînage de sondes
+         . Il faudrait faire une structure de liste de sondes plus propre
+         . Seul l'échantillonage en tire profit pour le moment
+      - sondes "système" ?
+         . Définir certaines sondes système
+           - une dans PDU_create, une dans PDU_delete
+         . Les définir dans probe.[ch] ?
+         . Elles sont initialisées dans motsim ...
+           - A faire dans probe.c ?
+   . Des tests de non régression avec un mode automatique
+      - genre "make test"
+   . randomGenerator
+   . Documenter le modele in/out (voir plus bas)
+   . module gnuplot
+      - permettre de voir la console
+      - générer des fichiers images
+   . Un test pour les files
+      - générer quelques centaines de paquets dans une file
+      - lancer un puis sur la file
+      - sonder le temps d'attente
+      - ...
+   . Général
+      - Utiliser un handler pour les fins de process
+      - Utiliser "on_exit()" pour terminer proprement
+         . effacer les fichiers temporaires
+
+A FAIRE
+=======
+   . [FILE-PDU]
+      - dégager la file d'objets générique de la file de PDU ?
+      - un "cache" qui permette d'accéder en temps constant à la neme
+valeur en lecture, en attendant une vraie refont qui optimise tout ça ...
+   . [RANDOM]
+      - Finir la restructuration ! La distinction entre les 3 niveaux
+      est évidemment difficile
+   . Insérer les fonctions dans les structures
+      - notemment sur les sondes
+      - éviter les switch
+      - permettre un fichier par type de sonde
+   . pdu-sink
+      - sonde sur les interarives
+      - sonde sur les pdu recues
+   . Interface TUN/TAP pour communiquer avec le monde réel
+   . Traceur gnuplot
+      - Sélection du nom de fichier ou nom unique par défaut
+   . Générateur de taille de paquet
+   . Un xxx_free() pour chaque xxx_create()
+   . Gérer les includes. Un seul ?
+   . Normaliser les notations
+   . Des Makefile plus génériques
+   . Fonction processPDU par défaut ?
+   . motsim
+      - Attention, le dernier événement sorti peut ne pas être exécuté
+   . Un serveur générique
+      - Choix de la fonction donnant le temps de traitement
+         - Constant
+         - Fonction linéaire de la taille
+         - Un générateur aléatoire
+   . Programmes de test
+      - Une source, une file, un serveur, un puits, des sondes, des courbes
+      - Des "tests de non régression"
+   . sched_kse
+      - gérer le modcod dans le remplissage
+      - construire une bbframe en vérifiant la cohérence du remplissage
+   . Notion de campagne
+      - à paramètre(s) variable(s)
+      - pour des rejeux
+   . sondes 
+      - sondes par tranches (pour histogramme)
+         . Tranches de temps
+      - sondes par moyenne mobile
+      - sonde en fonction de sondes !!! Malin !!!
+      - sonde en fonction de fichier
+      - sonde périodique (attention, pas trivial !, c'est sur l'objet
+        sondé qu'il faut agir périodiquement)
+      - types
+      - probe_sampleEvent est-elle utile avec les dates !?
+      - intervalle de confiance
+      - supprimer les échantillons mais garder les stat (pour campagnes)
+      - backend 
+         - fichier (fd)
+         - tracé (gnuplot)
+   . pdu-source
+      - start_at, stop_at
+      - un nombre max de PDU
+      - une sonde sur les "pertes"
+   . file-pdu
+      - renommer (queue ?)
+      - si plusieurs producteurs ?
+      - possibilite de capacite limitee
+      - sondes
+         . longueur/volume
+         . pertes
+
+A DOCUMENTER
+============
+   . [SONDES]
+      - Sondes périodiques ?
+      - Sondes de sondes ? (Conserver plein de valeurs d'une EMA par exemple)
+
+FAIT
+====
+   . [FILE]
+      - Une version à capacité limitée
+        . En taille
+        . En nombre de PDUs avec une politique "tapis roulant"
+      - Mesure du débit
+        . Somme des tailles / (date de la dernière  - date de la première)
+   . Meilleure gestion de la mémoire
+      - Les PDU détruites ne sont pas rendues à free
+      - [FAIT] A faire pour les événements
+   . Supprimer les cellules dans la liste d'event 
+      - pour minimiser les malloc
+      - les events intègrent déjà un prev et un next
+   . Général
+      - Utiliser "on_exit()" pour terminer proprement
+         . Même sur ^C
+         . Terminer le process gnuplot
+   . module gnuplot
+      - Associer une structure à chaque tracé
+      - Permettre de choisir les min et max
+      - utiliser un processus unique
+      - terminer correctement le processus
+   . file-pdu
+      - sondes
+         . temps de séjour
+   . [SONDES]
+      - dater les événements
+      - sondes par tranches (pour histogramme)
+         . Tranches de valeurs
+      - Mesure du débit
+        . Divers types
+          + moyenne mobile
+          + fenêtre glissante
+            + Par événement 
+   . Passer le simulateur dans un répertoire
+   . Debogage
+      - Definir des macros ?
+
+BUG
+===
+   . gnuplot
+      - Probleme d'affichage des titres avec ISO 8859-1
+     
+******************************************************************
+
+QUELQUES REMARQUES
+
+   Un consommateur doit-il connaitre sa source ?
+      Si oui
+         + Il peut aller consommer simplement lorsqu'il est pret
+         (eg fin de service)
+         - Comment gérer plusieurs sources ?
+         + Il semble difficile de ne pas faire ça, sinon comment
+         assurer qu'une PDU soit fournie quand le consomateur est
+         pret ?
+
+      Si non
+         - comment gérer ses indisponibilités ?
+            Une fonction de notification dans laquelle il cree
+            un evenement ?
+               Il faut y passer en parametre de quoi aller chercher
+               une PDU lorsqu'il sera dispo (evt)
+
+   Comment gérer la "synchro" entre un producteur et un consomateur ?
+      Si le consomateur n'est pas pret à recevoir (eg file pleine, serveur
+      en service, ...) la PDU est perdue, sauf si le producteur peut la
+      garder (eg file non pleine).
+
+============================================================================
+
