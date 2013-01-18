@@ -27,13 +27,16 @@ struct PDU_t * srvGen_getPDU(struct srvGen_t * srv);
 /*
  * Fonction de calcul du temps de service
  */
-typedef void (*serviceTime_t)(struct PDU_t * pdu);
-void srvGen_setServiceTime(struct srvGen_t * srv, serviceTime_t st);
+enum serviceTime_t {
+   serviceTimeCst,
+   serviceTimeExp,
+   serviceTimeProp
+} ;
 
-/*
- * Quelques fonctions prédéfinies
- */
-void 
+void srvGen_setServiceTime(struct srvGen_t * srv,
+			   enum serviceTime_t st,
+			   double parameter);
+
 /*
  * Affectation d'une sonde sur le temps de service
  */

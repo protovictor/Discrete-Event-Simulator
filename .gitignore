@@ -2,6 +2,7 @@
 *~
 *.log
 *.aux
+*.pdf
 
 # Object files
 *.o

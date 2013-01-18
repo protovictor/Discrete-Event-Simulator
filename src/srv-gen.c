@@ -21,8 +21,14 @@ struct srvGen_t {
    enum srvState_t          srvState;
    struct PDU_t           * currentPDU;   // The PDU being served
    float                    serviceStartTime;
+
+   // Dealing with service time
+   // C'est un peu de la merde parceque mes dates ne savent pas 
+   // gérer un débit, ...
    struct dateGenerator_t * dateGenerator;
-  
+   enum serviceTime_t       serviceTime;
+   double                   serviceTimeParameter;
+
    // Gestion du destinataire
    void * destination;          // L'objet auquel sont destinées les PDUs
    processPDU_t destProcessPDU; // La fonction permettant d'envoyer la PDU   
@@ -51,8 +57,10 @@ struct srvGen_t * srvGen_create(void * destination,
    result->destination = destination;
    result->destProcessPDU = destProcessPDU;
 
-   // Le mode de calcul du temps de traitement
-   result->dateGenerator = dateGenerator_createExp(10.0);
+   // Le mode de calcul du temps de traitement (par défaut débit unitaire)
+   result->dateGenerator = NULL;
+   result->serviceTime = serviceTimeProp;
+   result->serviceTimeParameter = 1.0;
 
    // WARNING A modifier (cf struct)
    result->source = NULL;
@@ -84,7 +92,11 @@ void srvGen_startService(struct srvGen_t * srv, struct PDU_t * pdu)
    srv->currentPDU = pdu;
 
    //Déterminer une date de fin en fonction du temps de traitement
-   date = dateGenerator_nextDate(srv->dateGenerator, motSim_getCurrentTime());
+   if (srv->dateGenerator) {
+      date = dateGenerator_nextDate(srv->dateGenerator, motSim_getCurrentTime());
+   } else {
+      date = motSim_getCurrentTime() + PDU_size(pdu) * srv->serviceTimeParameter;
+   }
 
    printf_debug(DEBUG_SRV, " PDU %d from %6.3f to %6.3f\n", PDU_id(pdu), motSim_getCurrentTime(), date);
 
@@ -180,13 +192,25 @@ struct PDU_t * srvGen_getPDU(struct srvGen_t * srv)
    return pdu;
 }
 
-/*----------------------------------------------------------------------*/
-/*   Traitement en un temps constant                                    */
-/*----------------------------------------------------------------------*/
+void srvGen_setServiceTime(struct srvGen_t * srv,
+			   enum serviceTime_t st,
+			   double parameter)
+{
+   srv->serviceTime = st;
+   srv->serviceTimeParameter = parameter;
 
-/*----------------------------------------------------------------------*/
-/*   Traitement en un temps dépendant linéairement de la taille         */
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
-/*   Traitement en un temps dépendant linéairement de la taille         */
-/*----------------------------------------------------------------------*/
+   switch (srv->serviceTime) {
+      case serviceTimeCst :
+         srv->dateGenerator = dateGenerator_createPeriodic(parameter);
+      break ;
+      case serviceTimeExp :
+         srv->dateGenerator = dateGenerator_createExp(parameter);
+      break ;
+      case serviceTimeProp :
+      	 srv->dateGenerator = NULL;
+      break ;
+      default :
+         motSim_error(MS_FATAL, "Unknown service time strategy");
+      break;
+   }
+}

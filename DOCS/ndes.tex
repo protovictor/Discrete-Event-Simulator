@@ -123,7 +123,26 @@ puits. La raison est que le serveur doit savoir à qui envoyer les
 clients (des {\sc pdu}s pour {\sc ndes}) après les avoir servis. Il
 faut donc lui dire quelle fonction leur appliquer (ici {\tt
   PDUSink\_processPDU} un fonction spécifiques aux puits) et à quelle
-entité cette fonction s'applique (notre unique puits, ici).
+entité cette fonction s'applique (notre unique puits, ici). Pour
+connaître   la fonction, il faut la chercher dans la description de
+l'entité cible. Dans notre exemple, la fonction {\tt
+  PDUSink\_processPDU} est décrite dans la section dédiée aux puits.
+
+   Plus de précisions sur cette histoire de fonctions dans la section
+\ref{section:architecture} de description de l'architecture générale.
+
+   Comme nous voulons une file M/M/1, nous devons dire à notre serveur
+que son temps de traitement est exponentiel de paramètre {\tt mu}. Et
+zou :
+
+\begin{verbatim}
+   float   mu = 10.0; // Paramètre du serveur
+
+   ...
+
+   /* Paramétrage du serveur */
+   srvGen_setServiceTime(serveur, serviceTimeExp, mu);
+\end{verbatim}
 
    Les serveurs génériques sont décrits plus précisément dans la
 section \ref{section:srv_gen}.
@@ -145,14 +164,233 @@ construit ainsi
    filePDU = filePDU_create(serveur, (processPDU_t)srvGen_processPDU);
 \end{verbatim}
 
-   Les files sont décrites plus précisément dans la section
-   \ref{section:file}.
+   Sans autre forme de procès, les files ne sont pas bornées. Elles
+sont décrites plus précisément dans la section \ref{section:file}. Les
+deux paramètres de la fonction de création ont le même rôle que ceux
+de la fonction de création du serveur.
 
+%........................................................................
+%
+%........................................................................
+\subsubsection{Création de la source}
+
+   Nous voilà à la source ! Nous allons utiliser un objet de {\sc
+ndes} dont le rôle est de produire des {\sc pdu}s. Mais avant cela,
+nous devons créer un autre objet qui lui indiquera les dates
+auxquelles les produire : il s'agit d'un ``générateur de date'',
+original, non ? Les générateurs de dates sont décrits dans la section \ref{section:date_generator}.
+
+   On veut une source poisonnienne, donc un générateur exponentiel :
+
+\begin{verbatim}
+#include <date-generator.h>
+
+...
+
+   struct dateGenerator_t * dateGenExp; // Un générateur de dates
+   float   lambda = 5.0 ; // Intensité du processus d'arrivée
+
+   ...
+
+   /* Création d'un générateur de date */
+   dateGenExp = dateGenerator_createExp(lambda);
+\end{verbatim}
+
+   Et maintenant nous pouvons donc créer notre source :
+
+\begin{verbatim}
+#include <pdu-source.h>
+
+...
+
+   struct PDUSource_t     * sourcePDU;  // Une source
+
+   ...
+
+   sourcePDU = PDUSource_create(dateGenExp, 
+				filePDU,
+				(processPDU_t)filePDU_processPDU);
+\end{verbatim}
+
+   Le premier paramètre est donc l'objet qui lui permet de déterminer
+les dates d'envoi. Les deux suivants sont similaires à ceux passés
+lors de la cration de la file et du serveur.
+   
+%........................................................................
+%
+%........................................................................
+\subsubsection{Mise en place de sondes}
+
+   Oui, je sais, le titre fait un peu peur, mais ça va bien se
+passer. Lorsqu'on veut lancer un simulateur, on espère en général
+obtenir des résulats. Dans {\sc ndes}, ceux-ci seront collectés par un
+outil spécifique, la sonde.
+
+   Les différents types de sonde sont décrits dans la section
+\ref{section:sondes}. Nous utiliserons ici uniquement des sondes
+exhaustives. Pour chaque objet décrit, la liste des sondes
+disponibles est fournie. 
+
+   Nous les déclarons et initialisons comme ça :
+
+\begin{verbatim}
+#include <probe.h>
+
+...
+
+   struct probe_t         * sejProbe, * iaProbe, * srvProbe; // Les sondes
+
+...
+
+   /* Une sonde sur les interarrivées */
+   iaProbe = probe_createExhaustive();
+   dateGenerator_setInterArrivalProbe(dateGenExp, iaProbe);
+
+   /* Une sonde sur les temps de séjour */
+   sejProbe = probe_createExhaustive();
+   filePDU_addSejournProbe(filePDU, sejProbe);
+
+   /* Une sonde sur les temps de service */
+   srvProbe = probe_createExhaustive();
+   srvGen_setServiceProbe(serveur, srvProbe);
+\end{verbatim}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Lancement de la simulation}
+
+   Ça y est, nous y sommes enfin, voici comment démarrer la
+simulation. Nous devons activer les entités voulue au moment
+voulu. Ici, il n'y a que l'unique source à activer, et nous souhaitons
+le faire dès le début de la simulation :
+
+\begin{verbatim}
+   /* On active la source */
+   PDUSource_start(sourcePDU);
+\end{verbatim}
+
+   Nous lançons maintenant la simulation. Nous allons la faire durer
+100 secondes :
+
+\begin{verbatim}
+   /* C'est parti pour 100 000 millisecondes de temps simulé */
+   motSim_runUntil(100000.0);
+\end{verbatim}
+
+   Nous pouvons ensuite afficher quelques paramètres internes du
+simulateur :
+
+\begin{verbatim}
+   motSim_printStatus();
+\end{verbatim}
+
+   Et voilà !
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Affichage des résultats}
+
+   Maintenant que notre simulation est terminée, on a certainement 
+envie d'en voir le résultat. On utilisera pour cela des fonctions
+founies par les sondes, par exemple :
+
+\begin{verbatim}
+   /* Affichage de quelques résultats scalaires */
+   printf("%d paquets restant dans  la file\n",
+	  filePDU_length(filePDU));
+   printf("Temps moyen de sejour dans la file = %f\n",
+	  probe_mean(sejProbe));
+   printf("Interarive moyenne     = %f (1/lambda = %f)\n",
+	  probe_mean(iaProbe), 1.0/lambda);
+   printf("Temps de service moyen = %f (1/mu     = %f)\n",
+	  probe_mean(srvProbe), 1.0/mu);
+\end{verbatim}
+
+   Génial, non ? Non ! Mais la suite est plus rigolote, \ldots
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Tracé de courbes}
+
+   Pour obtenir des résultats plus riches, nous allons utiliser
+(depuis le simulateur) un affichage {\em gnuplot}. Nous avons ici au
+moins deux courbes intéressantes à tracer, donc nous allons écrire une
+ fonction pour cela :
+
+\begin{verbatim}
+
+/*
+ * Affichage (via gnuplot) de la probre pr
+ * elle sera affichée comme un graphbar de nbBar barres
+ * avec le nom name
+ */
+void tracer(struct probe_t * pr, char * name, int nbBar)
+{
+   struct probe_t   * gb;
+   struct gnuplot_t * gp;
+
+   /* On crée une sonde de type GraphBar */
+   gb = probe_createGraphBar(probe_min(pr), probe_max(pr), nbBar);
+
+   /* On convertit la sonde passée en paramètre en GraphBar */
+   probe_exhaustiveToGraphBar(pr, gb);
+
+   /* On la baptise */
+   probe_setName(gb, name);
+
+   /* On initialise une section gnuplot */
+   gp = gnuplot_create();
+
+   /* On recadre les choses */
+   gnuplot_setXRange(gp, probe_min(gb), probe_max(gb)/2.0);
+
+   /* On affiche */
+   gnuplot_displayProbe(gp, WITH_BOXES, gb);
+}
+\end{verbatim}
+
+   L'utilisation de {\em gnuplot} est décrite dans la section
+\ref{section:gnuplot}.
+
+   Attention à ne pas oublier de mettre une petite pause à la fin de
+notre programme principal, sinon il s'arrète et il tue ses processus
+fils, et donc l'affichage disparait.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Utilisation de notre premier simulateur}
+
+   Il ne nous reste plus qu'à compiler notre programme et à le
+lancer. Le répertoire {\tt examples/tutorial-1} contient également un
+makefile, donc :
+
+\begin{verbatim}
+ $ cd examples/tutorial-1
+ $ make
+ $ ./mm1
+\end{verbatim}
+
+%========================================================================
+%
+%========================================================================
+\section{L'architecture générale}
+\label{section:architecture}
+
+%========================================================================
+%
+%========================================================================
+\section{Le moteur de simulation}
+\label{section:motsim}
 
 %========================================================================
 %
 %========================================================================
 \section{Les sondes}
+\label{section:sondes}
 
    Les sondes sont implantées dans le modules {\tt probe}. Les sondes
 permettent d'enregistrer des mesures de paramètres scalaires. Ce sont
@@ -300,6 +538,12 @@ serveur. Il est définit dans le fichier {\tt srv-gen.h}.
 %========================================================================
 %
 %========================================================================
+\section{Le puits}
+\label{section:puits}
+
+%========================================================================
+%
+%========================================================================
 \section{Les files}
 \label{section:file}
 
@@ -350,7 +594,11 @@ lui est envoyé.
 %
 %========================================================================
 \section{L'affichage par GnuPlot}
+\label{section:gnuplot}
 
+%========================================================================
+%
+%========================================================================
 \section{Notion de simulation et de campagne}
 
    Une simulation est une instance unique d'exécution d'une séquence
