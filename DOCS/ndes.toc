@@ -14,34 +14,41 @@
 \contentsline {subsubsection}{\numberline {1.3.9}Trac\'e de courbes}{7}{subsubsection.1.3.9}
 \contentsline {subsubsection}{\numberline {1.3.10}Utilisation de notre premier simulateur}{7}{subsubsection.1.3.10}
 \contentsline {section}{\numberline {2}L'architecture g\'en\'erale}{8}{section.2}
-\contentsline {section}{\numberline {3}Le moteur de simulation}{8}{section.3}
-\contentsline {section}{\numberline {4}Les sondes}{8}{section.4}
-\contentsline {subsection}{\numberline {4.1}Les m\'ethodes de base}{8}{subsection.4.1}
-\contentsline {subsubsection}{\numberline {4.1.1}L'\'echantillonage}{8}{subsubsection.4.1.1}
-\contentsline {subsubsection}{\numberline {4.1.2}Consultation d'un \'echantillon}{8}{subsubsection.4.1.2}
-\contentsline {subsubsection}{\numberline {4.1.3}La moyenne}{8}{subsubsection.4.1.3}
-\contentsline {subsubsection}{\numberline {4.1.4}Les valeurs extr\`emes}{8}{subsubsection.4.1.4}
-\contentsline {subsubsection}{\numberline {4.1.5}La sauvegarde}{8}{subsubsection.4.1.5}
-\contentsline {subsubsection}{\numberline {4.1.6}La mesure du d\'ebit}{9}{subsubsection.4.1.6}
-\contentsline {subsection}{\numberline {4.2}Les diff\'erents types}{9}{subsection.4.2}
-\contentsline {subsubsection}{\numberline {4.2.1}Les ``m\'eta-sondes''}{9}{subsubsection.4.2.1}
-\contentsline {subsubsection}{\numberline {4.2.2}La sonde exhaustive}{9}{subsubsection.4.2.2}
-\contentsline {subsubsection}{\numberline {4.2.3}L'histogramme}{9}{subsubsection.4.2.3}
-\contentsline {subsubsection}{\numberline {4.2.4}La fen\^etre glissante}{9}{subsubsection.4.2.4}
-\contentsline {subsubsection}{\numberline {4.2.5}La sonde p\'eriodique}{9}{subsubsection.4.2.5}
-\contentsline {subsubsection}{\numberline {4.2.6}La moyenne mobile}{9}{subsubsection.4.2.6}
-\contentsline {subsubsection}{\numberline {4.2.7}La moyenne par tranches temporelles}{10}{subsubsection.4.2.7}
-\contentsline {section}{\numberline {5}Le serveur g\'en\'erique}{10}{section.5}
-\contentsline {section}{\numberline {6}Le puits}{10}{section.6}
-\contentsline {section}{\numberline {7}Les files}{10}{section.7}
-\contentsline {subsection}{\numberline {7.1}Cr\'eation}{10}{subsection.7.1}
-\contentsline {subsection}{\numberline {7.2}Gestion de la taille}{10}{subsection.7.2}
-\contentsline {subsection}{\numberline {7.3}Les sondes}{10}{subsection.7.3}
-\contentsline {section}{\numberline {8}L'affichage par GnuPlot}{11}{section.8}
-\contentsline {section}{\numberline {9}Notion de simulation et de campagne}{11}{section.9}
-\contentsline {section}{\numberline {10}Des exemples}{11}{section.10}
-\contentsline {subsection}{\numberline {10.1}Utilisation des sondes}{11}{subsection.10.1}
-\contentsline {subsubsection}{\numberline {10.1.1}Mesurer un d\'ebit}{11}{subsubsection.10.1.1}
-\contentsline {paragraph}{D\'ebit moyen}{11}{section*.2}
-\contentsline {paragraph}{D\'ebit ``instantant\'e''}{11}{section*.3}
-\contentsline {section}{\numberline {11}Vrac}{11}{section.11}
+\contentsline {subsection}{\numberline {2.1}Type de simulation}{8}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Sch\'ema g\'en\'eral des mod\`eles}{8}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Fonctions d'\'echange des {\sc pdu}}{9}{subsection.2.3}
+\contentsline {subsubsection}{\numberline {2.3.1}Transmission d'une {\sc pdu}}{9}{subsubsection.2.3.1}
+\contentsline {subsubsection}{\numberline {2.3.2}Arriv\'ee d'une {\sc pdu}}{10}{subsubsection.2.3.2}
+\contentsline {subsubsection}{\numberline {2.3.3}Chronologie des \'ev\'enements}{10}{subsubsection.2.3.3}
+\contentsline {paragraph}{\lstinline !schedRRProcessPDU!}{10}{section*.2}
+\contentsline {paragraph}{\lstinline !schedRRGetPDU!}{11}{section*.3}
+\contentsline {section}{\numberline {3}Le moteur de simulation}{11}{section.3}
+\contentsline {section}{\numberline {4}Les sondes}{11}{section.4}
+\contentsline {subsection}{\numberline {4.1}Les m\'ethodes de base}{11}{subsection.4.1}
+\contentsline {subsubsection}{\numberline {4.1.1}L'\'echantillonage}{11}{subsubsection.4.1.1}
+\contentsline {subsubsection}{\numberline {4.1.2}Consultation d'un \'echantillon}{12}{subsubsection.4.1.2}
+\contentsline {subsubsection}{\numberline {4.1.3}La moyenne}{12}{subsubsection.4.1.3}
+\contentsline {subsubsection}{\numberline {4.1.4}Les valeurs extr\`emes}{12}{subsubsection.4.1.4}
+\contentsline {subsubsection}{\numberline {4.1.5}La sauvegarde}{12}{subsubsection.4.1.5}
+\contentsline {subsubsection}{\numberline {4.1.6}La mesure du d\'ebit}{12}{subsubsection.4.1.6}
+\contentsline {subsection}{\numberline {4.2}Les diff\'erents types}{12}{subsection.4.2}
+\contentsline {subsubsection}{\numberline {4.2.1}Les ``m\'eta-sondes''}{12}{subsubsection.4.2.1}
+\contentsline {subsubsection}{\numberline {4.2.2}La sonde exhaustive}{12}{subsubsection.4.2.2}
+\contentsline {subsubsection}{\numberline {4.2.3}L'histogramme}{12}{subsubsection.4.2.3}
+\contentsline {subsubsection}{\numberline {4.2.4}La fen\^etre glissante}{12}{subsubsection.4.2.4}
+\contentsline {subsubsection}{\numberline {4.2.5}La sonde p\'eriodique}{13}{subsubsection.4.2.5}
+\contentsline {subsubsection}{\numberline {4.2.6}La moyenne mobile}{13}{subsubsection.4.2.6}
+\contentsline {subsubsection}{\numberline {4.2.7}La moyenne par tranches temporelles}{13}{subsubsection.4.2.7}
+\contentsline {section}{\numberline {5}Le serveur g\'en\'erique}{13}{section.5}
+\contentsline {section}{\numberline {6}Le puits}{13}{section.6}
+\contentsline {section}{\numberline {7}Les files}{13}{section.7}
+\contentsline {subsection}{\numberline {7.1}Cr\'eation}{13}{subsection.7.1}
+\contentsline {subsection}{\numberline {7.2}Gestion de la taille}{14}{subsection.7.2}
+\contentsline {subsection}{\numberline {7.3}Les sondes}{14}{subsection.7.3}
+\contentsline {section}{\numberline {8}L'affichage par GnuPlot}{14}{section.8}
+\contentsline {section}{\numberline {9}Notion de simulation et de campagne}{14}{section.9}
+\contentsline {section}{\numberline {10}Des exemples}{14}{section.10}
+\contentsline {subsection}{\numberline {10.1}Utilisation des sondes}{14}{subsection.10.1}
+\contentsline {subsubsection}{\numberline {10.1.1}Mesurer un d\'ebit}{14}{subsubsection.10.1.1}
+\contentsline {paragraph}{D\'ebit moyen}{14}{section*.4}
+\contentsline {paragraph}{D\'ebit ``instantant\'e''}{14}{section*.5}
