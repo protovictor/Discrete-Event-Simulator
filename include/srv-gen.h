@@ -31,6 +31,10 @@ typedef void (*serviceTime_t)(struct PDU_t * pdu);
 void srvGen_setServiceTime(struct srvGen_t * srv, serviceTime_t st);
 
 /*
+ * Quelques fonctions prédéfinies
+ */
+void 
+/*
  * Affectation d'une sonde sur le temps de service
  */
 void srvGen_setServiceProbe(struct srvGen_t * srv, struct probe_t * serviceProbe);

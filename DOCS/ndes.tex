@@ -60,92 +60,93 @@ d'une file d'attente, en aval de laquelle se trouve un serveur suivi
 par un puits. Je te laisse faire un dessin et je publierai ici le plus
 joli !
 
+%........................................................................
 \subsubsection{Création du simulateur}
 
-   Avant toute manipulatio, on crée le simulateur de la façon suivante
+   Avant toute manipulation, on crée le simulateur de la façon suivante
 
 \begin{verbatim}
+#include <motsim.h>
+
+...
+
+   /* Creation du simulateur */
    motSim_create();
 \end{verbatim}
 
+%........................................................................
+\subsubsection{Création du puits}
 
+   Un puits sera un objet qui reçoit sans rechigner des messages et
+qui les détruit instantanément. On le crée très simplement de la façon
+suivante
 
-\newpage
+\begin{verbatim}
+#include <pdu-sink.h>
 
-   Début de doc
+...
 
-   o Modèle de transmission des PDU
+   struct PDUSink_t       * sink; // Déclaration d'un puits
 
-   - Tout module susceptible de produire ou transférer des PDU doit
-fournir une fonction de la forme
+   ...
 
-   {\tt struct PDU\_t * getPDU(void * source);}
+   /* Crétion du puits */
+   sink = PDUSink_create();
+\end{verbatim}
 
-   Le paramètre est un pointeur vers des "données privées" permettant
-d'identifier l'instance du module (typiquement un pointeur direct sur
-cette instance).
+%........................................................................
+%
+%........................................................................
+\subsubsection{Création du serveur}
 
-   Le pointeur retourné est celui d'une PDU qui n'est plus prise en
-compte par la source. Elle doit donc absolument être gérée (ou, au
-moins, détruite) par l'utilisateur de cette fonction. En cas
-d'indisponibilité de PDU, la valeur NULL est retournée.
+   Dans la mesure où on ne souhaite rien faire de bien intelligent
+avec notre serveur, nous allons utiliser un serveur générique, offert
+par la maison, qui ne recule devant aucun sacrifice !
 
-   Cette fonction et le pointeur associé doivent être fournis à
-l'entité destinataire, s'il en existe une !
+   Il s'utilise comme ça 
 
-   Si le nom du module est toto, la fonction sera nommée par exemple
-{\tt toto\_getPDU().}
+\begin{verbatim}
+#include <srv-gen.h>
 
-   - Tout module susceptible de recevoir des PDU doit fournir une
-fonction de la forme :
+...
 
-{\tt
-   void processPDU(void * rec,
-                   getPDU\_t getPDU,
-                   void * source);
-}
-   C'est cette fonction qu'invoquera une source pour lui notifier la
-disponibilité d'une PDU. Cette fonction aura donc la responsabilité
-d'aller récupérer la PDU (grâce la la fonction getPDU et à la source
-fournies) et de la traiter. La récupération et le traitement pourront
-être remis à plus tard (en cas d'indisponibilité) mais au risque
-d'avoir un pointeur NULL retourné par getPDU(). 
+   struct srvGen_t        * serveur; // Déclaration d'un serveur générique
 
-   Si le nom du module est {\tt toto}, la fonction sera nommée par exemple
-{\tt toto\_processPDU()}.
+...
 
+   /* Création du serveur */
+   serveur = srvGen_create(sink, (processPDU_t)PDUSink_processPDU);
+\end{verbatim}
 
+   La création du serveur est un peu plus compliquée que celle du
+puits. La raison est que le serveur doit savoir à qui envoyer les
+clients (des {\sc pdu}s pour {\sc ndes}) après les avoir servis. Il
+faut donc lui dire quelle fonction leur appliquer (ici {\tt
+  PDUSink\_processPDU} un fonction spécifiques aux puits) et à quelle
+entité cette fonction s'applique (notre unique puits, ici).
 
+   Les serveurs génériques sont décrits plus précisément dans la
+section \ref{section:srv_gen}.
 
+%........................................................................
+%
+%........................................................................
+\subsubsection{Création de la file}
 
-   Le problème ici est que ce modèle, censé permettre plus simplement
-d'avoir plusieurs producteurs vers un même consommateur (grâce à la
-fonction getPDU et au pointeur source passés en paramètres plutôt que
-stockés comme attributs) rend délicat le "report" de l'invocation du
-getPDU. Comment, dans un serveur par exemple, assurer que cette
-invocation se fera dans le même traitement que la fin de traitement ?
-Cela dit, est-ce vraiment nécessaire ? Pour le moment, cela implique
-un événement pour la fin du traitement et un événement pour chaque
-getPDU.
+   Une file permet de stocker des {\sc pdu} en transit. On la
+construit ainsi
 
-  La difficulté est d'assurer un traitement dans le bon ordre de
-ces événements qui ont la même date ... J'ai pourtant dans l'idée que
-c'est la bonne solution. Plusieurs pistes pour rêgler ce problème des
-événements "simultanés" mais devant être traités dans un ordre donné,
-sachant que le problème des événements simultanés est complexe :
+\begin{verbatim}
+   struct filePDU_t       * filePDU; // Déclaration de notre file
 
-   . A date égale, les événements sont insérés dans l'ordre de
-création et exécutés dans l'ordre d'insertion. Bof, notemment dans la
-mesure oû la date est un réel. Avantage : c'est simple !
-   . Gérer des chaines d'événements ?
+    ...
 
-  Bon, en fait, ici, le mieux est peut-être d'abandonner cette
-idée. Elle n'est pas logique. Si plusieurs sources signalent des
-paquets disponibles, il n'y a aucune raison que ça provoque des
-événements simultanés ! Il faut donc stocker le getPDU et le pointeur
-associé. Eventuellement dans une liste (ordonnée) pour en permettre
-plusieurs. Le traitement n'est pas alors différé à un nouvel événement
-mais reporté à la fin du service en cours.
+   /* Création de la file */
+   filePDU = filePDU_create(serveur, (processPDU_t)srvGen_processPDU);
+\end{verbatim}
+
+   Les files sont décrites plus précisément dans la section
+   \ref{section:file}.
 
 
 %========================================================================
@@ -290,11 +291,24 @@ struct probe_t * probe_createTimeAverage(double t);
 %========================================================================
 %
 %========================================================================
+\section{Le serveur générique}
+\label{section:srv_gen}
+
+   Le serveur générique permet de modéliser à moindre frais un
+serveur. Il est définit dans le fichier {\tt srv-gen.h}.
+
+%========================================================================
+%
+%========================================================================
 \section{Les files}
+\label{section:file}
 
    C'est l'outil de base pour stocker des objets selon une stratégie
 {\sc fifo}. Elles sont définies dans le fichier {\tt file\_pdu.h}.
 
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
 \subsection{Création}
 
    Une file est créée de la façon suivante 
@@ -309,8 +323,14 @@ vers lequel sont transmis les objets présents dans la file. Dés qu'un
 objet est inséré dans la file, si la destination est disponible, il
 lui est envoyé.
 
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
 \subsection{Gestion de la taille}
 
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
 \subsection{Les sondes}
 
    Les files sont dotées des sondes suivantes
@@ -365,5 +385,83 @@ toute la transmission, alors une sonde mesurant la moyenne sera parfaitement
 suffisante :
 
 \paragraph{Débit ``instantanté''}
+
+\section{Vrac}
+
+   Début de doc
+
+   o Modèle de transmission des PDU
+
+   - Tout module susceptible de produire ou transférer des PDU doit
+fournir une fonction de la forme
+
+   {\tt struct PDU\_t * getPDU(void * source);}
+
+   Le paramètre est un pointeur vers des "données privées" permettant
+d'identifier l'instance du module (typiquement un pointeur direct sur
+cette instance).
+
+   Le pointeur retourné est celui d'une PDU qui n'est plus prise en
+compte par la source. Elle doit donc absolument être gérée (ou, au
+moins, détruite) par l'utilisateur de cette fonction. En cas
+d'indisponibilité de PDU, la valeur NULL est retournée.
+
+   Cette fonction et le pointeur associé doivent être fournis à
+l'entité destinataire, s'il en existe une !
+
+   Si le nom du module est toto, la fonction sera nommée par exemple
+{\tt toto\_getPDU().}
+
+   - Tout module susceptible de recevoir des PDU doit fournir une
+fonction de la forme :
+
+{\tt
+   void processPDU(void * rec,
+                   getPDU\_t getPDU,
+                   void * source);
+}
+   C'est cette fonction qu'invoquera une source pour lui notifier la
+disponibilité d'une PDU. Cette fonction aura donc la responsabilité
+d'aller récupérer la PDU (grâce la la fonction getPDU et à la source
+fournies) et de la traiter. La récupération et le traitement pourront
+être remis à plus tard (en cas d'indisponibilité) mais au risque
+d'avoir un pointeur NULL retourné par getPDU(). 
+
+   Si le nom du module est {\tt toto}, la fonction sera nommée par exemple
+{\tt toto\_processPDU()}.
+
+
+
+
+
+   Le problème ici est que ce modèle, censé permettre plus simplement
+d'avoir plusieurs producteurs vers un même consommateur (grâce à la
+fonction getPDU et au pointeur source passés en paramètres plutôt que
+stockés comme attributs) rend délicat le "report" de l'invocation du
+getPDU. Comment, dans un serveur par exemple, assurer que cette
+invocation se fera dans le même traitement que la fin de traitement ?
+Cela dit, est-ce vraiment nécessaire ? Pour le moment, cela implique
+un événement pour la fin du traitement et un événement pour chaque
+getPDU.
+
+  La difficulté est d'assurer un traitement dans le bon ordre de
+ces événements qui ont la même date ... J'ai pourtant dans l'idée que
+c'est la bonne solution. Plusieurs pistes pour rêgler ce problème des
+événements "simultanés" mais devant être traités dans un ordre donné,
+sachant que le problème des événements simultanés est complexe :
+
+   . A date égale, les événements sont insérés dans l'ordre de
+création et exécutés dans l'ordre d'insertion. Bof, notemment dans la
+mesure oû la date est un réel. Avantage : c'est simple !
+   . Gérer des chaines d'événements ?
+
+  Bon, en fait, ici, le mieux est peut-être d'abandonner cette
+idée. Elle n'est pas logique. Si plusieurs sources signalent des
+paquets disponibles, il n'y a aucune raison que ça provoque des
+événements simultanés ! Il faut donc stocker le getPDU et le pointeur
+associé. Eventuellement dans une liste (ordonnée) pour en permettre
+plusieurs. Le traitement n'est pas alors différé à un nouvel événement
+mais reporté à la fin du service en cours.
+
 
 \end{document}

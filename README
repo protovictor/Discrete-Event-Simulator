@@ -1,6 +1,5 @@
 Instructions
 
-   make
 
    cd DOCS
    pdflatex ndes

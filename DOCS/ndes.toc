@@ -1,31 +1,38 @@
 \select@language {french}
 \contentsline {section}{\numberline {1}Tutoriel}{2}{section.1}
-\contentsline {subsection}{\numberline {1.1}Installation}{2}{subsection.1.1}
-\contentsline {subsection}{\numberline {1.2}Ma premi\`ere simulation : chouette, une file M/M/1 !}{2}{subsection.1.2}
+\contentsline {subsection}{\numberline {1.1}Introduction}{2}{subsection.1.1}
+\contentsline {subsection}{\numberline {1.2}Installation}{2}{subsection.1.2}
+\contentsline {subsection}{\numberline {1.3}Ma premi\`ere simulation : chouette, une file M/M/1 !}{2}{subsection.1.3}
+\contentsline {subsubsection}{\numberline {1.3.1}Cr\'eation du simulateur}{2}{subsubsection.1.3.1}
+\contentsline {subsubsection}{\numberline {1.3.2}Cr\'eation du puits}{3}{subsubsection.1.3.2}
+\contentsline {subsubsection}{\numberline {1.3.3}Cr\'eation du serveur}{3}{subsubsection.1.3.3}
+\contentsline {subsubsection}{\numberline {1.3.4}Cr\'eation de la file}{3}{subsubsection.1.3.4}
 \contentsline {section}{\numberline {2}Les sondes}{4}{section.2}
 \contentsline {subsection}{\numberline {2.1}Les m\'ethodes de base}{4}{subsection.2.1}
 \contentsline {subsubsection}{\numberline {2.1.1}L'\'echantillonage}{4}{subsubsection.2.1.1}
-\contentsline {subsubsection}{\numberline {2.1.2}Consultation d'un \'echantillon}{4}{subsubsection.2.1.2}
-\contentsline {subsubsection}{\numberline {2.1.3}La moyenne}{4}{subsubsection.2.1.3}
-\contentsline {subsubsection}{\numberline {2.1.4}Les valeurs extr\`emes}{4}{subsubsection.2.1.4}
-\contentsline {subsubsection}{\numberline {2.1.5}La sauvegarde}{4}{subsubsection.2.1.5}
-\contentsline {subsubsection}{\numberline {2.1.6}La mesure du d\'ebit}{4}{subsubsection.2.1.6}
+\contentsline {subsubsection}{\numberline {2.1.2}Consultation d'un \'echantillon}{5}{subsubsection.2.1.2}
+\contentsline {subsubsection}{\numberline {2.1.3}La moyenne}{5}{subsubsection.2.1.3}
+\contentsline {subsubsection}{\numberline {2.1.4}Les valeurs extr\`emes}{5}{subsubsection.2.1.4}
+\contentsline {subsubsection}{\numberline {2.1.5}La sauvegarde}{5}{subsubsection.2.1.5}
+\contentsline {subsubsection}{\numberline {2.1.6}La mesure du d\'ebit}{5}{subsubsection.2.1.6}
 \contentsline {subsection}{\numberline {2.2}Les diff\'erents types}{5}{subsection.2.2}
 \contentsline {subsubsection}{\numberline {2.2.1}Les ``m\'eta-sondes''}{5}{subsubsection.2.2.1}
 \contentsline {subsubsection}{\numberline {2.2.2}La sonde exhaustive}{5}{subsubsection.2.2.2}
 \contentsline {subsubsection}{\numberline {2.2.3}L'histogramme}{5}{subsubsection.2.2.3}
 \contentsline {subsubsection}{\numberline {2.2.4}La fen\^etre glissante}{5}{subsubsection.2.2.4}
 \contentsline {subsubsection}{\numberline {2.2.5}La sonde p\'eriodique}{5}{subsubsection.2.2.5}
-\contentsline {subsubsection}{\numberline {2.2.6}La moyenne mobile}{5}{subsubsection.2.2.6}
-\contentsline {subsubsection}{\numberline {2.2.7}La moyenne par tranches temporelles}{5}{subsubsection.2.2.7}
-\contentsline {section}{\numberline {3}Les files}{6}{section.3}
-\contentsline {subsection}{\numberline {3.1}Cr\'eation}{6}{subsection.3.1}
-\contentsline {subsection}{\numberline {3.2}Gestion de la taille}{6}{subsection.3.2}
-\contentsline {subsection}{\numberline {3.3}Les sondes}{6}{subsection.3.3}
-\contentsline {section}{\numberline {4}L'affichage par GnuPlot}{6}{section.4}
-\contentsline {section}{\numberline {5}Notion de simulation et de campagne}{6}{section.5}
-\contentsline {section}{\numberline {6}Des exemples}{7}{section.6}
-\contentsline {subsection}{\numberline {6.1}Utilisation des sondes}{7}{subsection.6.1}
-\contentsline {subsubsection}{\numberline {6.1.1}Mesurer un d\'ebit}{7}{subsubsection.6.1.1}
+\contentsline {subsubsection}{\numberline {2.2.6}La moyenne mobile}{6}{subsubsection.2.2.6}
+\contentsline {subsubsection}{\numberline {2.2.7}La moyenne par tranches temporelles}{6}{subsubsection.2.2.7}
+\contentsline {section}{\numberline {3}Le serveur g\'en\'erique}{6}{section.3}
+\contentsline {section}{\numberline {4}Les files}{6}{section.4}
+\contentsline {subsection}{\numberline {4.1}Cr\'eation}{6}{subsection.4.1}
+\contentsline {subsection}{\numberline {4.2}Gestion de la taille}{6}{subsection.4.2}
+\contentsline {subsection}{\numberline {4.3}Les sondes}{6}{subsection.4.3}
+\contentsline {section}{\numberline {5}L'affichage par GnuPlot}{7}{section.5}
+\contentsline {section}{\numberline {6}Notion de simulation et de campagne}{7}{section.6}
+\contentsline {section}{\numberline {7}Des exemples}{7}{section.7}
+\contentsline {subsection}{\numberline {7.1}Utilisation des sondes}{7}{subsection.7.1}
+\contentsline {subsubsection}{\numberline {7.1.1}Mesurer un d\'ebit}{7}{subsubsection.7.1.1}
 \contentsline {paragraph}{D\'ebit moyen}{7}{section*.2}
 \contentsline {paragraph}{D\'ebit ``instantant\'e''}{7}{section*.3}
+\contentsline {section}{\numberline {8}Vrac}{7}{section.8}

@@ -34,9 +34,9 @@ void tracer(struct probe_t * pr, char * name, int nbBar)
 int main() {
    struct PDUSource_t     * sourcePDU;
    struct dateGenerator_t * dateGenExp;
-   struct filePDU_t       * filePDU;
-   struct srvGen_t        * serveur;
-   struct PDUSink_t       * sink;
+   struct filePDU_t       * filePDU; // Déclaration de notre file
+   struct srvGen_t        * serveur; // Déclaration d'un serveur générique
+   struct PDUSink_t       * sink; // Déclaration d'un puits
 
    struct probe_t         * sejProbe, * iaProbe, * srvProbe;
 
@@ -46,13 +46,13 @@ int main() {
    /* Creation du simulateur */
    motSim_create();
 
-   /* Le puits */
+   /* Crétion du puits */
    sink = PDUSink_create();
 
-   /* Le serveur */
+   /* Création du serveur */
    serveur = srvGen_create(sink, (processPDU_t)PDUSink_processPDU);
 
-   /* La file */
+   /* Création de la file */
    filePDU = filePDU_create(serveur, (processPDU_t)srvGen_processPDU);
 
    /* Création d'un générateur de date */
