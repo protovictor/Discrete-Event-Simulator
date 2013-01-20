@@ -357,7 +357,7 @@ void tracer(struct probe_t * pr, char * name, int nbBar)
 
    Attention à ne pas oublier de mettre une petite pause à la fin de
 notre programme principal, sinon il s'arrète et il tue ses processus
-fils, et donc l'affichage disparait.
+fils, et donc l'affichage {\rm gnuplot} disparaît.
 
 %........................................................................
 %
@@ -366,7 +366,9 @@ fils, et donc l'affichage disparait.
 
    Il ne nous reste plus qu'à compiler notre programme et à le
 lancer. Le répertoire {\tt examples/tutorial-1} contient également un
-makefile, donc :
+makefile que je te laisse observer, mais en gros, il faut aller
+chercher les includes et la librairie. En utilisant ce {\tt Makefile},
+on a donc :
 
 \begin{verbatim}
  $ cd examples/tutorial-1
@@ -635,7 +637,7 @@ elles qui permettront ensuite d'analyser le résultat de la simulation,
 d'évaluer les performances du système, de tracer des courbes, \ldots
 
    Chaque échantillon d'une mesure prélevé par une sonde est daté. Il
-est égalament possible de n'enregistrer que la date d'un événement,
+est également possible de n'enregistrer que la date d'un événement,
 sans aucune mesure associée.
 
    Les sondes peuvent être placées en divers points des outils de
@@ -643,6 +645,10 @@ simulation via des fonctions de la forme
 \lstinline!<type>_add<point>Probe(...)!. Plusieurs sondes peuvent être
 ainsi ``chaînées'' sur un même point de mesure. En revanche, la même
 sonde {\bf ne peut pas} être chaînée plusieurs fois.
+
+   Pour chacun des objets décrit dans ce fabuleux document, je
+tâcherai de lister (dans une section''Les sondes'') les différents
+points de mesure disponibles.
 
 %------------------------------------------------------------------------
 %
@@ -766,17 +772,27 @@ struct probe_t * probe_createTimeAverage(double t);
 %========================================================================
 %
 %========================================================================
-\section{Le serveur générique}
-\label{section:srv_gen}
+\section{Les {\sc pdu}s}
+\label{section:pdu}
 
-   Le serveur générique permet de modéliser à moindre frais un
-serveur. Il est définit dans le fichier {\tt srv-gen.h}.
+   La {\sc pdu} est l'objet de base échangé entre les entités du
+simulateur. Si on voit considère deux entités homologues qui
+dialoguent, il est effectivement légitime d'utiliser ce
+terme. Cependant, dans une simulation réseau faite avec {\sc ndes}, la
+notion d'entité est bien plus vaste que cela si bien que ce nom est
+finalement mal choisi ! N'empèche que pour le moment, je vais le
+conserver !
 
-%========================================================================
+   Les {\sc pdu}s sont définies dans le fichier {\tt pdu.h} et
+implantées dans le fichier {\tt pdu.c}. Une {\sc pdu} est une
+structure extrèmement légère, dotée de quelques caractéristiques de
+base : un identifiant, une taille, une date de création (dans le temps
+simulé), et des données privées (un pointeur).
+
+%------------------------------------------------------------------------
 %
-%========================================================================
-\section{Le puits}
-\label{section:puits}
+%------------------------------------------------------------------------
+\subsection{Les données privées}
 
 %========================================================================
 %
@@ -785,7 +801,11 @@ serveur. Il est définit dans le fichier {\tt srv-gen.h}.
 \label{section:file}
 
    C'est l'outil de base pour stocker des objets selon une stratégie
-{\sc fifo}. Elles sont définies dans le fichier {\tt file\_pdu.h}.
+{\sc fifo}. Elles sont définies dans le fichier {\tt file\_pdu.h} et
+implantées dans le fichier {\tt file\_pdu.c}. Une file ne contient que
+des {\sc pdu}s mais, comme on l'a vu, les {\sc pdu}s peuvent être
+utilisées pour véhiculer tout et n'importe quoi grâce à leurs données
+privées. Il est donc simple de construire des files de n'importe quoi !
 
 %------------------------------------------------------------------------
 %
@@ -802,7 +822,8 @@ struct filePDU_t * filePDU_create(void * destination,
    Le paramètre \lstinline!destination! est un pointeur sur l'objet
 vers lequel sont transmis les objets présents dans la file. Dés qu'un
 objet est inséré dans la file, si la destination est disponible, il
-lui est envoyé.
+lui est envoyé au travers de la fonction \lstinline!destProcessPDU!
+passée en paramètre.
 
 %------------------------------------------------------------------------
 %
@@ -814,7 +835,7 @@ lui est envoyé.
 %------------------------------------------------------------------------
 \subsection{Les sondes}
 
-   Les files sont dotées des sondes suivantes
+   Les files sont dotées des points de mesure suivants
 
 \begin{description}
    \item[{\tt InsertSize}] pour mesurer la taille des paquets insérés
@@ -823,9 +844,32 @@ lui est envoyé.
    \item[{\tt ExtractSize}] pour mesurer la taille des paquets extraits
      de la file. A chaque extraction d'une {\sc pdu}, la taille de
      cette dernière est échantillonée avec la date d'extraction.
+   \item[{\tt DropSize}]
    \item[{\tt Sejourn}]
 \end{description}
 
+   On peut ajouter une sonde sur chacun de ces points de mesure avec
+une fonction de la forme
+
+\begin{verbatim}
+   void filePDU_add<measure>Probe(struct filePDU_t * file,
+                                  struct probe_t   * probe);
+\end{verbatim}
+
+%========================================================================
+%
+%========================================================================
+\section{Le serveur générique}
+\label{section:srv_gen}
+
+   Le serveur générique permet de modéliser à moindre frais un
+serveur. Il est définit dans le fichier {\tt srv-gen.h}.
+
+%========================================================================
+%
+%========================================================================
+\section{Le puits}
+\label{section:puits}
 
 %========================================================================
 %
