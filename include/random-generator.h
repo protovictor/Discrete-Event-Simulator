@@ -58,6 +58,22 @@ struct randomGenerator_t * randomGenerator_createUInt(int distribution,
 						      unsigned int max);
 
 /*
+ * Création d'un générateur aléatoire de nombres entiers parmis un
+ * ensemble discret.
+ */
+struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
+							      unsigned int * values);
+ 
+
+/*
+ * Le nombre de valeurs possibles est passé en paramètre ainsi que la
+ * liste de ces valeurs puis la liste de leurs probabilité.
+ */
+struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(int nbValues,
+                                     unsigned int * values, double * proba);
+ 
+
+/*
  * R+, default distribution : exponential
  */
 struct randomGenerator_t * randomGenerator_createDouble(double lambda);
@@ -74,18 +90,11 @@ struct randomGenerator_t * randomGenerator_createDoubleRange(double min,
 							     double max);
 
 struct randomGenerator_t * randomGenerator_createDoubleDiscrete(int nbValues,
+                                     double * values);
+ 
+struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(int nbValues,
                                      double * values, double * proba);
  
-/*
- * Création d'un générateur aléatoire de nombres entiers.
- *
- * Le nombre de valeurs possibles est passé en paramètre ainsi que la
- * liste de ces valeurs puis la liste de leurs probabilité.
- */
-struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
-                                     unsigned int * values, double * proba);
- 
-
 // Use a (previously built) probe to re-run a sequence
 struct randomGenerator_t * randomGenerator_createFromProbe(struct probe_t * p);
 
@@ -119,5 +128,16 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
  * d'expériences, on utilisera des sondes.
  */
 double randomGenerator_getExpectation(struct randomGenerator_t * rg);
+
+/*
+ * Choix de la distribution
+ */
+
+// Un nombre discret de probabilités
+void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
+					     int nb,
+                                             double * proba);
+// Choix d'une loi uniforme
+void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
 
 #endif

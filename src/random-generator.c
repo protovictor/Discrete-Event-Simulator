@@ -5,7 +5,7 @@
  *
  *  - Le type des données renvoyées (entier, réel, ...)
  *  - La distribution
- *  - La source d'aléa (random, /dev/random, un fichier, ...
+ *  - La source d'aléa (un PRNG, /dev/random, un fichier, ...)
  */
 
 #include <stdio.h>     // printf
@@ -226,7 +226,8 @@ double randomGenerator_discreteGetNext(struct randomGenerator_t * rg)
 /*
  * Initialisation of discrete distribution
  */
-void randomGenerator_discreteInit(struct randomGenerator_t * rg, int nb, double * proba)
+void randomGenerator_discreteInit(struct randomGenerator_t * rg,
+				  int nb, double * proba)
 {
 
    int v;
@@ -452,32 +453,42 @@ struct randomGenerator_t * randomGenerator_createDoubleRange(double min,
 
 /*
  * Création d'un générateur aléatoire de nombres entiers.
- *
- * Le nombre de valeurs possibles est passé en paramètre ainsi que la
- * liste de ces valeurs puis la liste de leurs probabilité.
  */
-struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues, unsigned int * values, double * proba)
+struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
+							      unsigned int * values)
 {
-   int v;
- 
    struct randomGenerator_t * result = randomGenerator_createRaw();
+   int v;
 
    // Data type
    result->valueType = rGTypeUIntEnum; 
-   //    Initialisation des valeurs et des proba
+
+   //    Initialisation des valeurs 
    result->param.uid.nbValues = nbValues;
    result->param.uid.value = (unsigned int *) sim_malloc(nbValues*sizeof(unsigned int));
    //    un bcopy ferait l'affaire
    for (v = 0 ; v < nbValues ; v++){
       result->param.uid.value[v] = values[v];
-      //printf("%d - %u, ", v, result->param.uid.value[v]);
-   }//printf("\n");
+   }
+   return result;
+}
 
-   // Distribution-specific
-   result->distribution = rGDistDiscrete;
-   randomGenerator_discreteInit(result, nbValues, proba);
 
-   // Source
+/*
+ * Le nombre de valeurs possibles est passé en paramètre ainsi que la
+ * liste de ces valeurs puis la liste de leurs probabilité.
+ */
+struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(int nbValues, unsigned int * values, double * proba)
+{
+ 
+   // Create a discrete UInt generator
+   struct randomGenerator_t * result 
+         = randomGenerator_createUIntDiscrete(nbValues, values);
+
+   // Specifying an explicit distribution
+   randomGenerator_setDistributionDiscrete(result, nbValues, proba);
+
+   // Selecting the source
    result->source = rGSourceErand48; // WARNING use rgSourceDefault
    randomGenerator_erand48Init(result); // ... ?
 
@@ -485,7 +496,7 @@ struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues, unsi
 }
 
 struct randomGenerator_t * randomGenerator_createDoubleDiscrete(int nbValues,
-                                     double * values, double * proba)
+                                     double * values)
 {
    int v;
  
@@ -493,7 +504,8 @@ struct randomGenerator_t * randomGenerator_createDoubleDiscrete(int nbValues,
 
    // Data type
    result->valueType = rGTypeDoubleEnum; 
-   //    Initialisation des valeurs et des proba
+
+   //    Initialisation des valeurs 
    result->param.dd.nbValues = nbValues;
    result->param.dd.value = (double *) sim_malloc(nbValues*sizeof(double));
    //    un bcopy ferait l'affaire
@@ -501,11 +513,20 @@ struct randomGenerator_t * randomGenerator_createDoubleDiscrete(int nbValues,
       result->param.dd.value[v] = values[v];
    }
 
-   // Distribution-specific
-   result->distribution = rGDistDiscrete;
-   randomGenerator_discreteInit(result, nbValues, proba);
+   return result;
+}
 
-   // Source
+struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(int nbValues,
+                                     double * values, double * proba)
+{
+   // Create a discrete double generator
+   struct randomGenerator_t * result 
+         = randomGenerator_createDoubleDiscrete(nbValues, values);
+
+   // Specifying an explicit distribution
+   randomGenerator_setDistributionDiscrete(result, nbValues, proba);
+
+   // Selecting the source
    result->source = rGSourceErand48; // WARNING use rgSourceDefault
    randomGenerator_erand48Init(result); // ... ?
 
@@ -553,4 +574,20 @@ void randomGenerator_recordThenReplay(struct randomGenerator_t * rg)
 
    // Cette probe, par définition, ne doit pas être resetée
    probe_setPersistent(rg->values);
+}
+
+/*
+ * Choix de la distribution
+ */
+
+// Un nombre discret de probabilités
+void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
+					     int nb,
+                                             double * proba)
+{
+   // Spécification de la dist
+   rg->distribution = rGDistDiscrete;
+
+   // Initialisation des valeurs
+   randomGenerator_discreteInit(rg, nb, proba);
 }

@@ -388,10 +388,25 @@ Temps de service moyen = 0.100176 (1/mu     = 0.100000)
  $
 \end{verbatim}
 
+
+%------------------------------------------------------------------------
+\subsection{Ma deuxiéme simulation : super, encore une file M/M/1 !}
+
+   Le premier exemple est sympa, vas-tu me dire, mais ce serait mieux
+si le temps de traitement dépendait de la taille des clients (comme
+des paquets dont le temps d'émission dépend de la taille !)
+
+   Et bien soit ! C'est ce que nous allons faire dans ce deuxième
+tutoriel. Les fichiers se trouvent dans le répertoire {\tt
+example/tutorial-2}.
+
+
+ 
+
 %========================================================================
 %
 %========================================================================
- \section{L'architecture générale}
+\section{L'architecture générale}
 \label{section:architecture}
 
    Le but de cette section est de décrire la logique de {\sc
@@ -854,6 +869,98 @@ une fonction de la forme
 \begin{verbatim}
    void filePDU_add<measure>Probe(struct filePDU_t * file,
                                   struct probe_t   * probe);
+\end{verbatim}
+
+%========================================================================
+%
+%========================================================================
+\section{Les générateurs aléatoires}
+\label{section:rand-gen}
+
+   Dans un simulateur, la génération de nombres aléatoires est un
+élément important. Dans {\sc ndes}, on prend ces choses-là très au
+sérieux. Du coup, la gestion des nombres aléatoires est une horreur
+sans nom ! J'avoue avoir moi-même du mal à comprendre. La bonne
+nouvelle c'est que du coup le résultat est vraiment \ldots{}
+aléatoire.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Caractéristiques d'un générateur aléatoire}
+
+   Un générateur aléatoire est caractérisé par trois paramètres
+fondamentaux 
+
+\begin{description}
+   \item[Le type des données générées] peut être réel, entier,
+     discret, \ldots
+   \item[La loi] peut être uniforme, exponentielle, \ldots
+   \item[La source] permet de déterminer la qualité de l'aléa, et par
+     exemple de le rendre déterministe (afin d'obtenir la même
+     séquence sur plusieurs simulation).
+\end{description}
+
+   Attention, ces trois composantes sont éventuellement constitutées
+d'un jeu de paramètres.
+
+   Le principe général est le suivant.
+
+\begin{itemize}
+   \item Un nombre aléatoire est fourni par la source. Ce sera un
+     entier entre deux valeurs extrèmes, par exemple, en fonction de
+     la nature de la source.
+   \item Une transformation est appliquée afin de respecter la
+     densité de probabilité de la loi.
+   \item Une seconde transformation est appliquée pour obtenir une
+     valeur du type voulu.
+\end{itemize}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Création et destruction}
+
+   On crée un générateur aléatoire à valeur réelle de la façon
+suivante
+
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDouble(double lambda);
+\end{verbatim}
+
+
+
+   On détruit un générateur grâce à la fonction
+
+\index{randomGenerator_delete}
+\begin{verbatim}
+void randomGenerator_delete(struct randomGenerator_t * rg);
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Choix de la loi}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Choix de la source}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Génération d'une valeur}
+
+\index{randomGenerator_getNextUInt}
+\index{randomGenerator_getNextDouble}
+
+   Une nouvelle valeur est obtenue à chaque appel d'une des fonctions
+suivantes (à choisir en fonction du type attendu)
+
+\begin{verbatim}
+unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg);
+double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
 \end{verbatim}
 
 %========================================================================

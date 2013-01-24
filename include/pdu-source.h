@@ -20,14 +20,16 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
  * Spécification du générateur de taille de PDU associé. En l'absence
  * d'un tel générateur, les PDUs générées sont de taille nulle.
  */
-void PDUSource_setPDUSizeGenerator(struct PDUSource_t * src, struct randomGenerator_t * rg);
+void PDUSource_setPDUSizeGenerator(struct PDUSource_t * src,
+				   struct randomGenerator_t * rg);
 
 /*
  * Positionnement d'une sonde sur la taille des PDUs produites. Toutes
  * les PDUs créées sont concernées, même si elles ne sont pas
  * récupérées par la destination.
  */
-void PDUSource_addPDUGenerationSizeProbe(struct PDUSource_t * src, struct probe_t *  PDUGenerationSizeProbe);
+void PDUSource_addPDUGenerationSizeProbe(struct PDUSource_t * src,
+					 struct probe_t *  PDUGenerationSizeProbe);
 
 /*
  * Démarrage d'une source dans le cadre d'un simulateur.
