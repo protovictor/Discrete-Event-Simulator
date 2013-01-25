@@ -100,7 +100,7 @@ struct dateGenerator_t * dateGenerator_createPeriodic(double period)
   struct dateGenerator_t * result = (struct dateGenerator_t * )
                   sim_malloc(sizeof(struct dateGenerator_t));
 
-  result->randGen = randomGenerator_createDoubleDiscrete(1, &period, &un);
+  result->randGen = randomGenerator_createDoubleDiscreteProba(1, &period, &un);
   result->interArrivalProbe = NULL;
 
   return result;
