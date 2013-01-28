@@ -7,12 +7,12 @@ export TEST_DIR = test
 export CC=gcc
 
 # Debugage
-export CFLAGS=-Wall -g -DDEBUG_NDES
-export LDFLAGS=-g 
+#export CFLAGS=-Wall -g -DDEBUG_NDES
+#export LDFLAGS=-g 
 
 # Performances
 export CFLAGS=-Wall -g -DNDEBUG -O3
-export LDFLAGS=-g -O3
+export LDFLAGS=-g -O3 -L../$(SRC_DIR) -lndes -lm
 
 default : src 
 

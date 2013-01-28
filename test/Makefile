@@ -18,49 +18,49 @@ tests :  $(TESTS)
 	./run-tests.sh $(TESTS)
 
 generators-0 : generators-0.o ../$(SRC_DIR)/libndes.a
-	$(CC) generators-0.o -o generators-0 -lm -L../$(SRC_DIR) -lndes
+	$(CC) generators-0.o -o generators-0 $(LDFLAGS)
 
 generators-1 : generators-1.o ../$(SRC_DIR)/libndes.a
-	$(CC) generators-1.o -o generators-1 -lm -L../$(SRC_DIR) -lndes
+	$(CC) generators-1.o -o generators-1 $(LDFLAGS)
 
 generators-3 : generators-3.o ../$(SRC_DIR)/libndes.a
-	$(CC) generators-3.o -o generators-3 -lm -L../$(SRC_DIR) -lndes
+	$(CC) generators-3.o -o generators-3 $(LDFLAGS)
 
 generators-4 : generators-4.o ../$(SRC_DIR)/libndes.a
-	$(CC) generators-4.o -o generators-4 -lm -L../$(SRC_DIR) -lndes
+	$(CC) generators-4.o -o generators-4 $(LDFLAGS)
 
 intconf : intconf.o ../$(SRC_DIR)/libndes.a
-	$(CC) $(LDFLAGS) intconf.o -o intconf -lm -L../$(SRC_DIR) -lndes
+	$(CC) $(LDFLAGS) intconf.o -o intconf $(LDFLAGS)
 
 debits : debits.o ../$(SRC_DIR)/libndes.a
-	$(CC) $(LDFLAGS) debits.o -o debits -lm -L../$(SRC_DIR) -lndes
+	$(CC) $(LDFLAGS) debits.o -o debits $(LDFLAGS)
 
 muxfcfs-1 : muxfcfs-1.o ../$(SRC_DIR)/libndes.a
-	$(CC) $(LDFLAGS) muxfcfs-1.o -o muxfcfs-1 -lm -L../$(SRC_DIR) -lndes
+	$(CC) $(LDFLAGS) muxfcfs-1.o -o muxfcfs-1 $(LDFLAGS)
 
 probes-1 : probes-1.o ../$(SRC_DIR)/libndes.a
-	$(CC) $(LDFLAGS) probes-1.o -o probes-1 -lm -L../$(SRC_DIR) -lndes
+	$(CC) $(LDFLAGS) probes-1.o -o probes-1 $(LDFLAGS)
 
 probes-2 : probes-2.o ../$(SRC_DIR)/libndes.a
-	$(CC) $(LDFLAGS) probes-2.o -o probes-2 -lm -L../$(SRC_DIR) -lndes
+	$(CC) $(LDFLAGS) probes-2.o -o probes-2 $(LDFLAGS)
 
 probes-3 : probes-3.o ../$(SRC_DIR)/libndes.a
-	$(CC) $(LDFLAGS) probes-3.o -o probes-3 -lm -L../$(SRC_DIR) -lndes
+	$(CC) $(LDFLAGS) probes-3.o -o probes-3 $(LDFLAGS)
 
 probes-4 : probes-4.o ../$(SRC_DIR)/libndes.a
-	$(CC) $(LDFLAGS) probes-4.o -o probes-4 -lm -L../$(SRC_DIR) -lndes
+	$(CC) $(LDFLAGS) probes-4.o -o probes-4 $(LDFLAGS)
 
 file-pdu : file-pdu.o ../$(SRC_DIR)/libndes.a
-	$(CC) $(LDFLAGS) file-pdu.o -o file-pdu -lm -L../$(SRC_DIR) -lndes
+	$(CC) $(LDFLAGS) file-pdu.o -o file-pdu $(LDFLAGS)
 
 file-pdu-2 : file-pdu-2.o ../$(SRC_DIR)/libndes.a
-	$(CC) $(LDFLAGS) file-pdu-2.o -o file-pdu-2 -lm -L../$(SRC_DIR) -lndes
+	$(CC) $(LDFLAGS) file-pdu-2.o -o file-pdu-2 $(LDFLAGS)
 
 file-pdu-3 : file-pdu-3.o ../$(SRC_DIR)/libndes.a
-	$(CC) $(LDFLAGS) file-pdu-3.o -o file-pdu-3 -lm -L../$(SRC_DIR) -lndes
+	$(CC) $(LDFLAGS) file-pdu-3.o -o file-pdu-3 $(LDFLAGS)
 
 src-exp : src-exp.o ../$(SRC_DIR)/libndes.a
-	$(CC) $(LDFLAGS) src-exp.o -o src-exp -lm -L../$(SRC_DIR) -lndes
+	$(CC) $(LDFLAGS) src-exp.o -o src-exp $(LDFLAGS)
 
 clean :
 	\rm -f $(OBJ_FILES) $(TESTS)

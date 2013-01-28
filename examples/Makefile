@@ -8,16 +8,16 @@ EXAMPLES = debits example-1 example-2 example-3
 all : $(EXAMPLES)
 
 debits : debits.o ../$(SRC_DIR)/libndes.a
-	$(CC) debits.o -o debits -lm -L../$(SRC_DIR) -lndes
+	$(CC) debits.o -o debits $(LDFLAGS)
 
 example-1 : example-1.o ../$(SRC_DIR)/libndes.a
-	$(CC) example-1.o -o example-1 -lm -L../$(SRC_DIR) -lndes
+	$(CC) example-1.o -o example-1 $(LDFLAGS)
 
 example-2 : example-2.o ../$(SRC_DIR)/libndes.a
-	$(CC) example-2.o -o example-2 -lm -L../$(SRC_DIR) -lndes
+	$(CC) example-2.o -o example-2 $(LDFLAGS)
 
 example-3 : example-3.o ../$(SRC_DIR)/libndes.a
-	$(CC) example-3.o -o example-3 -lm -L../$(SRC_DIR) -lndes
+	$(CC) example-3.o -o example-3 $(LDFLAGS)
 
 clean :
 	\rm -f $(OBJ_FILES) $(EXAMPLES)
