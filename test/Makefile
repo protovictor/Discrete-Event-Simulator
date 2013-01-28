@@ -1,7 +1,7 @@
 SRC_FILES= $(wildcard *.c)
 OBJ_FILES= $(SRC_FILES:.c=.o)
 
-TESTS = generators generators-1 \
+TESTS = generators-0 generators-1 \
 	generators-3 generators-4 \
 #	file-pdu file-pdu-2 file-pdu-3 \
 #	debits \
@@ -14,8 +14,11 @@ TESTS = generators generators-1 \
 
 all : $(TESTS)
 
-generators : generators.o ../$(SRC_DIR)/libndes.a
-	$(CC) generators.o -o generators -lm -L../$(SRC_DIR) -lndes
+tests :  $(TESTS)
+	./run-tests.sh $(TESTS)
+
+generators-0 : generators-0.o ../$(SRC_DIR)/libndes.a
+	$(CC) generators-0.o -o generators-0 -lm -L../$(SRC_DIR) -lndes
 
 generators-1 : generators-1.o ../$(SRC_DIR)/libndes.a
 	$(CC) generators-1.o -o generators-1 -lm -L../$(SRC_DIR) -lndes

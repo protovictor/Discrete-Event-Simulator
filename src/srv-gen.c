@@ -92,10 +92,11 @@ void srvGen_startService(struct srvGen_t * srv, struct PDU_t * pdu)
    srv->currentPDU = pdu;
 
    //Déterminer une date de fin en fonction du temps de traitement
-   if (srv->dateGenerator) {
-      date = dateGenerator_nextDate(srv->dateGenerator, motSim_getCurrentTime());
-   } else {
+   if (srv->serviceTime == serviceTimeProp){
       date = motSim_getCurrentTime() + PDU_size(pdu) * srv->serviceTimeParameter;
+   } else {
+      assert(srv->dateGenerator);
+      date = dateGenerator_nextDate(srv->dateGenerator, motSim_getCurrentTime());
    }
 
    printf_debug(DEBUG_SRV, " PDU %d from %6.3f to %6.3f\n", PDU_id(pdu), motSim_getCurrentTime(), date);
@@ -112,7 +113,7 @@ void srvGen_startService(struct srvGen_t * srv, struct PDU_t * pdu)
  */
 void srvGen_setServiceProbe(struct srvGen_t * srv, struct probe_t * serviceProbe)
 {
-  dateGenerator_setInterArrivalProbe(srv->dateGenerator, serviceProbe);
+  srv->serviceProbe =  serviceProbe;
 }
 
 /*
@@ -174,8 +175,8 @@ void srvGen_processPDU(struct srvGen_t * server,
 	    exit(1);
 	 }
       } else {
-        server->source = source;
-        server->getPDU = getPDU;
+         server->source = source;
+         server->getPDU = getPDU;
       }
    }
 }
@@ -207,7 +208,7 @@ void srvGen_setServiceTime(struct srvGen_t * srv,
          srv->dateGenerator = dateGenerator_createExp(parameter);
       break ;
       case serviceTimeProp :
-      	 srv->dateGenerator = NULL;
+         srv->dateGenerator = NULL; // WARNING pas génial de gérer ça ainsi
       break ;
       default :
          motSim_error(MS_FATAL, "Unknown service time strategy");

@@ -6,7 +6,7 @@
 
 #include <stdio.h>     // printf, ...
 
-#define NBECH 10000000
+#define NBECH 100000
 
 /*----------------------------------------------------------------------*/
 /*                                                                      */
@@ -16,9 +16,6 @@ int main() {
    struct probe_t           * pr1, *pr2, *pr3; 
    int n;
    double v ;
-
-   printf("[GENE-4] ... ");
-   fflush(stdout);
 
    motSim_create(); // Les sondes datent les échantillons
 
@@ -30,7 +27,7 @@ int main() {
    probe_setPersistent(pr3);
 
    // On crée un générateur de réels (loi exp par défaut)
-   rg = randomGenerator_createDouble(1.0);
+   rg = randomGenerator_createDoubleExp(1.0);
 
    // On lui fait faire un premier tour
    for (n = 0 ; n < NBECH;n++){

@@ -259,7 +259,7 @@ void randomGenerator_discreteInit(struct randomGenerator_t * rg,
  */
 unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg)
 {
-   unsigned int result ;
+   unsigned int result = 0; // Init contre warning
 
    // Etape 1 : le générateur donne une nouvelle valeur
    //   (elle n'apparait pas explicitement ici, elle est réalisée dans
@@ -295,6 +295,12 @@ unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg)
 	 motSim_error(MS_FATAL, "not implemented\n");
       break;
    }
+
+   // On probe éventuellement
+   if (rg->valueProbe) {
+     probe_sample(rg->valueProbe, (double)result);
+   }
+
    return result;
 }
 
@@ -306,25 +312,30 @@ unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg)
  */
 double randomGenerator_getNextDouble(struct randomGenerator_t * rg)
 {
-   double result;
+   double result = 0.0;
 
    switch (rg->valueType) {
       case rGTypeDouble :
-         return rg->distGetNext(rg);
+         result = rg->distGetNext(rg);
       break;
       case rGTypeDoubleRange :
    // ATTENTION, il faudrait normaliser entre distParam.min et max 
-	return rg->param.d.min + rg->distGetNext(rg) * (rg->param.d.max - rg->param.d.min);
+	result = rg->param.d.min + rg->distGetNext(rg) * (rg->param.d.max - rg->param.d.min);
       break;
       case rGTypeDoubleEnum :
         result = rg->param.dd.value[(int)(rg->param.dd.nbValues*rg->distGetNext(rg))];
-	return result;
       break;
       default :
 	motSim_error(MS_FATAL, "not implemented\n");
-	return 0.0; //  Anti warning
       break;
    }
+
+   // On probe éventuellement
+   if (rg->valueProbe) {
+      probe_sample(rg->valueProbe, result);
+   }
+   return result;
+
 }
 
 double randomGenerator_UIntDiscreteGetExpectation(struct randomGenerator_t * rg)
@@ -394,6 +405,10 @@ struct randomGenerator_t * randomGenerator_createRaw()
    // Ajout à la liste des choses à réinitialiser avant une prochaine simu
    motsim_addToResetList(result, (void (*)(void * data)) randomGenerator_reset);
 
+   // Source
+   result->source = rGSourceErand48; // WARNING use rgSourceDefault
+   randomGenerator_erand48Init(result); // ... ?
+
    return result;
 }
 
@@ -414,27 +429,24 @@ struct randomGenerator_t * randomGenerator_createULong(int distribution,
 /*--------------------------------------------------------------------------*/
 /*      CREATORS : DOUBLE                                                   */
 /*--------------------------------------------------------------------------*/
-/*
- * Default distribution for double is exponential WARNING !
- */
-struct randomGenerator_t * randomGenerator_createDouble(double lambda)
+struct randomGenerator_t * randomGenerator_createDouble()
 {
    struct randomGenerator_t * result = randomGenerator_createRaw();
 
    // Data type
    result->valueType = rGTypeDouble; 
  
-   // Distribution-specific
-avirer   result->distribution = rGDistExponential; // WARNING !!!!!
-   randomGenerator_exponentialInit(result, lambda); // WARNING !!!!!
-
-   // Source
-   result->source = rGSourceErand48; // WARNING use rgSourceDefault
-   randomGenerator_erand48Init(result); // ... ?
-
    return result;
 }
 
+struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda)
+{
+   struct randomGenerator_t * result = randomGenerator_createDouble();
+
+   randomGenerator_setDistributionExp(result, lambda);
+
+   return result;
+}
 /* 
  * A double range [min .. max}, default distribution : uniform
  */
@@ -453,10 +465,6 @@ struct randomGenerator_t * randomGenerator_createDoubleRange(double min,
 
    randomGenerator_uniformInit(result);
 
-   // Source
-   result->source = rGSourceErand48; // WARNING use rgSourceDefault
-   randomGenerator_erand48Init(result); // ... ?
-
    return result;
 }
 
@@ -473,12 +481,6 @@ struct randomGenerator_t * randomGenerator_createUInt()
    // Data type
    result->valueType = rGTypeUInt;
 
-   // Source
-   result->source = rGSourceErand48; // 
-				     // WARNING use rgSourceDefault,
-				     // et à mettre ailleurs !
-   randomGenerator_erand48Init(result); // ... ?
-
    return result;
 }
 
@@ -491,10 +493,6 @@ struct randomGenerator_t * randomGenerator_createUIntRange(unsigned int min,
    result->valueType = rGTypeUIntRange;
    result->param.uir.min = min;
    result->param.uir.max = max;
-
-   // Source
-   result->source = rGSourceErand48; // WARNING use rgSourceDefault
-   randomGenerator_erand48Init(result); // ... ?
 
    return result;
 }
@@ -539,10 +537,6 @@ struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(
    // Specifying an explicit distribution
    randomGenerator_setDistributionDiscrete(result, nbValues, proba);
 
-   // Selecting the source
-   result->source = rGSourceErand48; // WARNING use rgSourceDefault
-   randomGenerator_erand48Init(result); // ... ?
-
    return result;
 }
 
@@ -576,10 +570,6 @@ struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(int nbValue
 
    // Specifying an explicit distribution
    randomGenerator_setDistributionDiscrete(result, nbValues, proba);
-
-   // Selecting the source
-   result->source = rGSourceErand48; // WARNING use rgSourceDefault
-   randomGenerator_erand48Init(result); // ... ?
 
    return result;
 }
@@ -632,7 +622,11 @@ void randomGenerator_setUniformMinMaxDouble(struct randomGenerator_t * rg, doubl
 }
 
 // Choix d'une loi exponentielle
-void randomGenerator_setDistributionExp(struct randomGenerator_t * rg, double lambda);
+void randomGenerator_setDistributionExp(struct randomGenerator_t * rg, double lambda)
+{
+   rg->distribution = rGDistExponential;
+   randomGenerator_exponentialInit(rg, lambda);
+}
 
 
 /*==========================================================================*/
@@ -649,7 +643,12 @@ void randomGenerator_recordThenReplay(struct randomGenerator_t * rg)
    probe_setPersistent(rg->values);
 }
 
-/*
- * Choix de la distribution
- */
+/*==========================================================================*/
+/*   Probes                                                                 */ 
+/*==========================================================================*/
+void randomGenerator_setValueProbe(struct randomGenerator_t * rg,
+				   struct probe_t * p)
+{
+   rg->valueProbe = p;
+}
 

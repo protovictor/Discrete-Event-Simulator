@@ -35,7 +35,10 @@ double dateGenerator_nextDate(struct dateGenerator_t * dateGen, double currentTi
  */
 void dateGenerator_setInterArrivalProbe(struct dateGenerator_t * dateGen, struct probe_t * probe)
 {
+  printf("Salut les mecs !\n");
    dateGen->interArrivalProbe = probe;
+  printf("OK pour moi !\n");
+
 }
 
 /*-------------------------------------------------------------------------*/
@@ -71,14 +74,9 @@ struct dateGenerator_t * dateGenerator_createExp(double lambda)
 {
   struct dateGenerator_t * result = (struct dateGenerator_t * )
                   sim_malloc(sizeof(struct dateGenerator_t));
-
-  //  result->nextDate = loi_expo;
-
-  //  result->data = malloc(sizeof(double));
-  //  ((double*)result->data)[0] = lambda;
-
-  result->randGen = randomGenerator_createDouble(lambda);
   result->interArrivalProbe = NULL;
+
+  result->randGen = randomGenerator_createDoubleExp(lambda);
 
   return result;
 }
@@ -99,12 +97,14 @@ struct dateGenerator_t * dateGenerator_createPeriodic(double period)
   double un = 1.0;
   struct dateGenerator_t * result = (struct dateGenerator_t * )
                   sim_malloc(sizeof(struct dateGenerator_t));
+  result->interArrivalProbe = NULL;
 
   result->randGen = randomGenerator_createDoubleDiscreteProba(1, &period, &un);
-  result->interArrivalProbe = NULL;
 
   return result;
 }
+
+
 /*
  * Prepare for record values in order to replay on each reset
  */

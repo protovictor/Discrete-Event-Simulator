@@ -12,6 +12,7 @@
 #include <pdu-sink.h>
 #include <srv-gen.h>
 #include <date-generator.h>
+#include <random-generator.h>
 #include <probe.h>
 #include <gnuplot.h>
 
@@ -46,17 +47,18 @@ void tracer(struct probe_t * pr, char * name, int nbBar)
 }
 
 int main() {
-   struct PDUSource_t     * sourcePDU;  // Une source
-   struct dateGenerator_t * dateGenExp; // Un générateur de dates
-   struct filePDU_t       * filePDU; // Déclaration de notre file
-   struct srvGen_t        * serveur; // Déclaration d'un serveur générique
-   struct PDUSink_t       * sink;    // Déclaration d'un puits
+   struct PDUSource_t       * sourcePDU;  // Une source
+   struct dateGenerator_t   * dateGenExp; // Un générateur de dates
+   struct randomGenerator_t * sizeGen; // Un générateur de tailles
+   struct filePDU_t         * filePDU; // Déclaration de notre file
+   struct srvGen_t          * serveur; // Déclaration d'un serveur générique
+   struct PDUSink_t         * sink;    // Déclaration d'un puits
 
-   struct probe_t         * sejProbe, * iaProbe, * srvProbe; // Les sondes
+   struct probe_t           * sejProbe, * iaProbe, * srvProbe, *szProbe; // Les sondes
 
-   float   lambda = 5.0;  // Intensité du processus d'arrivée
-   float   mu     = 10.0; // Paramètre du serveur
-   float   debit  = 1.0;  // En bit par seconde
+   float frequencePaquets = 5.0;      // Nombre moyen de pq/s
+   float tailleMoyenne    = 1000.0;   // Taille moyenne des pq
+   float debit            = 10000.0;  // En bit par seconde
 
    /* Creation du simulateur */
    motSim_create();
@@ -68,13 +70,13 @@ int main() {
    serveur = srvGen_create(sink, (processPDU_t)PDUSink_processPDU);
 
    /* Paramétrage du serveur */
-   srvGen_setServiceTime(serveur, serviceTimeProp, mu);
+   srvGen_setServiceTime(serveur, serviceTimeProp, 1.0/debit);
 
    /* Création de la file */
    filePDU = filePDU_create(serveur, (processPDU_t)srvGen_processPDU);
 
    /* Création d'un générateur de date */
-   dateGenExp = dateGenerator_createExp(lambda);
+   dateGenExp = dateGenerator_createExp(frequencePaquets);
 
    /* Création de la source */
    sourcePDU = PDUSource_create(dateGenExp, 
@@ -83,7 +85,11 @@ int main() {
 
    /* Création d'un générateur de taille (tailles non bornées) */
    sizeGen = randomGenerator_createUInt();
-   randomGenerator_setDistributionExp(sizeGen, lambda);
+   randomGenerator_setDistributionExp(sizeGen, 1.0/tailleMoyenne);
+
+   /* Une sonde sur les tailles */
+   szProbe = probe_createExhaustive();
+   randomGenerator_setValueProbe(sizeGen, szProbe);
 
    /* Affectation à la source */
    PDUSource_setPDUSizeGenerator(sourcePDU, sizeGen);
@@ -114,12 +120,13 @@ int main() {
    printf("Temps moyen de sejour dans la file = %f\n",
 	  probe_mean(sejProbe));
    printf("Interarive moyenne     = %f (1/lambda = %f)\n",
-	  probe_mean(iaProbe), 1.0/lambda);
+	  probe_mean(iaProbe), 1.0/frequencePaquets);
    printf("Temps de service moyen = %f (1/mu     = %f)\n",
-	  probe_mean(srvProbe), 1.0/mu);
+	  probe_mean(srvProbe), tailleMoyenne/debit);
 
    tracer(iaProbe, "Interarrivee", 100);
    tracer(sejProbe, "Temps de séjour", 100);
+   tracer(szProbe, "Taille des paquets", 100);
 
    printf("*** ^C pour finir ;-)\n");
    while (1) {};

@@ -7,11 +7,13 @@
 \usepackage{listings}
 \usepackage[pdftex]{thumbpdf}
 \usepackage[pdftex,colorlinks]{hyperref}
+\usepackage{index}
 
 \title{Mes notes sur mon ``simulateur réseau''}
 
 \author{Emmanuel Chaput}
 
+\makeindex
 
 \begin{document}
 \maketitle
@@ -47,7 +49,27 @@ programme C utilisant cette librairie.
  $ make install
 \end{verbatim}
 
-   Pas de panique, ça n'installe rien pour le moment !
+   Pas de panique, ça n'installe rien pour le moment ! Cela ne fait
+que copier une librairie (statique) dans un répertoire dédié dans
+l'arborescence.
+
+   On peut également compiler quelques programmes de tests de non
+régression :
+
+\begin{verbatim}
+ $ make tests-bin
+\end{verbatim}
+%$
+   Et pourquoi pas les lancer :
+
+\begin{verbatim}
+ $ make tests
+\end{verbatim}
+%$
+
+   Évidemment, les messages {\tt OK} ne prouvent rien ! Seuls les
+messages d'erreur prouvent qu'il y a un problème, \ldots {} comme s'il
+y avait besoin de preuves.
 
 %------------------------------------------------------------------------
 \subsection{Ma première simulation : chouette, une file M/M/1 !}
@@ -400,8 +422,69 @@ des paquets dont le temps d'émission dépend de la taille !)
 tutoriel. Les fichiers se trouvent dans le répertoire {\tt
 example/tutorial-2}.
 
+   Comme je n'ai pas que ça à faire, et toi non plus probablement, je
+vais juste commenter les différences par rapport au tutoriel
+précédent.
 
- 
+   Une petite modification cosmétique est apportée dans la définition
+des paramètres de la simulation, que l'on va présenter avec un
+vocabulaire plus réseau et moins file d'attente :
+
+\begin{verbatim}
+   float frequencePaquets = 5.0;      // Nombre moyen de pq/s
+   float tailleMoyenne    = 1000.0;   // Taille moyenne des pq
+   float debit            = 10000.0;  // En bit par seconde
+\end{verbatim}
+
+   Ces valeurs sont peu réalistes, mais choisies astucieusement pour
+avoir les mêmes résultats que le premier tutoriel.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Génération de la taille des paquets}
+
+   Voilà la principale différence avec le premier tutoriel. On va
+utiliser un générateur de nombres aléatoires pour avoir des paquets de
+taille variable :
+
+\begin{verbatim}
+   /* Création d'un générateur de taille (tailles non bornées) */
+   sizeGen = randomGenerator_createUInt();
+   randomGenerator_setDistributionExp(sizeGen, 1.0/tailleMoyenne);
+
+   /* Affectation à la source */
+   PDUSource_setPDUSizeGenerator(sourcePDU, sizeGen);
+\end{verbatim}
+
+  Les générateurs de nombres aléatoires sont décrits dans la section
+\ref{section:rand-gen}. Profitons en pour placer une sonde sur cette
+taille, afin de vérifier qu'elle a bien la bonne tête :
+
+\begin{verbatim}
+   /* Une sonde sur les tailles */
+   szProbe = probe_createExhaustive();
+   randomGenerator_setValueProbe(sizeGen, szProbe);
+\end{verbatim}
+
+   Avec ça, on pourra tracer une jolie courbe de plus !
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Prise en compte par le serveur}
+
+   Ce que l'on vient de faire ne sert à rien si le serveur ne le prend
+pas en compte. Il nous faut donc préciser que ce dernier sert chaque
+client en un temps dépendant de la taille :
+
+\begin{verbatim}
+   /* Paramétrage du serveur */
+   srvGen_setServiceTime(serveur, serviceTimeProp, 1.0/debit);
+\end{verbatim}
+
+   Cela signifie que le temps de service d'un client est proportionnel
+à sa taille avec comme coefficient l'inverse du débit.
 
 %========================================================================
 %
@@ -949,7 +1032,7 @@ distribution à utiliser. Voyons ça type par type.
 
    La fonction de création de base est 
 
-\index{randomGenerator_createUInt}
+\index{randomGenerator\_createUInt}
 \begin{verbatim}
 struct randomGenerator_t * randomGenerator_createUInt();
 \end{verbatim}
@@ -973,7 +1056,7 @@ struct randomGenerator_t * randomGenerator_createUIntRange(unsigned int min,
 
    Pratique pour tirer au hasard des tailles de paquets !
 
-\index{randomGenerator_createUIntDiscrete}
+\index{randomGenerator\_createUIntDiscrete}
 \begin{verbatim}
 struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
 							      unsigned int * values);
@@ -987,7 +1070,7 @@ recopié, donc si tu veux le détruire/modifier ensuite, vis ta vie !
 vouloir associer une probabilité à chaque valeur, on peut utiliser la
 version suivante :
 
-\index{randomGenerator_createUIntDiscreteProba}
+\index{randomGenerator\_createUIntDiscreteProba}
 \begin{verbatim}
 struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(
 				int nbValues,
@@ -1000,7 +1083,19 @@ struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(
 %.......................................................................
 \subsubsection{Des réels double précision}
 
+   On crée un tel générateur avec la fonction suivante
+
+\index{randomGenerator\_createDouble}
 \begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDouble();
+\end{verbatim}
+
+   On peut également en créer un fondé sur une distribution
+exponentielle de paramètre {\tt lambda} :
+
+\index{randomGenerator\_createDoubleExp}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda);
 \end{verbatim}
 
 %.......................................................................
@@ -1016,8 +1111,28 @@ struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(
 %.......................................................................
 \subsubsection{Une liste de réels double précision}
 
+   Pour générer des nombres aléatoires choisis dans une liste fournie
+en paramètre :
+
+\index{randomGenerator\_createDoubleDiscrete}
 \begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDoubleDiscrete(
+                                     int nbValues,
+                                     double * values);
 \end{verbatim}
+
+   ou, en fournissant directement les probabilités :
+
+\index{randomGenerator\_createDoubleDiscreteProba}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(
+                                     int nbValues,
+                                     double * values,
+                                     double * proba);
+\end{verbatim}
+
+   Les paramètres sont analogues à la version fondée sur des entiers
+non signés, bref, voir ci-dessus.
 
 %.......................................................................
 %
@@ -1026,7 +1141,7 @@ struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(
 
    On détruit un générateur grâce à la fonction
 
-\index{randomGenerator_delete}
+\index{randomGenerator\_delete}
 \begin{verbatim}
 void randomGenerator_delete(struct randomGenerator_t * rg);
 \end{verbatim}
@@ -1035,6 +1150,51 @@ void randomGenerator_delete(struct randomGenerator_t * rg);
 %
 %------------------------------------------------------------------------
 \subsection{Choix de la loi}
+
+   Avant de pouvoir être utilisé, un générateur aléatoire doit être
+caractérisé par la loi qui le gouverne. Il existe des fonctions
+spécifiques à cet objectif. Certaines fonctions de création font appel
+à l'une ou l'autre de ces fonctions, mais pas toute ! Attention donc à
+s'assurer qu'une distribution est associée à un générateur avant de
+l'utiliser.
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Loi uniforme}
+
+   On spécifie une loi uniforme grâce à la fonction suivante
+
+\index{randomGenerator\_setDistributionUniform}
+\begin{verbatim}
+void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
+\end{verbatim}
+
+   Attention, le type des données peut être un intervalle borné
+``continu'' ou un ensemble discret, mais s'il s'agit d'un intervalle
+non borné, le résultat est \ldots {} aléatoire.
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Loi  explicite}
+
+   Je ne sais pas trop comment l'appeler celle-là ! L'idée est qu'on
+fournit explicitement toutes les probabilités. Elle est spécifiée par
+la fonction suivante :
+
+\index{randomGenerator\_setDistributionDiscrete}
+\begin{verbatim}
+void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
+					     int nb,
+                                             double * proba);
+\end{verbatim}
+
+   Attention, elle ne s'applique de toute évidence qu'à des données
+discrètes !
+
+   Les probabilités sont copiées par la fonctions donc le pointeur
+{\tt proba} peut être libéré ensuite.
 
 %------------------------------------------------------------------------
 %
@@ -1046,8 +1206,8 @@ void randomGenerator_delete(struct randomGenerator_t * rg);
 %------------------------------------------------------------------------
 \subsection{Génération d'une valeur}
 
-\index{randomGenerator_getNextUInt}
-\index{randomGenerator_getNextDouble}
+\index{randomGenerator\_getNextUInt}
+\index{randomGenerator\_getNextDouble}
 
    Une nouvelle valeur est obtenue à chaque appel d'une des fonctions
 suivantes (à choisir en fonction du type attendu)
@@ -1056,6 +1216,17 @@ suivantes (à choisir en fonction du type attendu)
 unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg);
 double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
 \end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Les sondes}
+
+%========================================================================
+%
+%========================================================================
+\section{Les générateurs de dates}
+\label{section:date-gen}
 
 %========================================================================
 %
@@ -1116,5 +1287,11 @@ suffisante :
 
 \paragraph{Débit ``instantanté''}
 
+%========================================================================
+%
+%========================================================================
+\section{Index des fonctions}
+
+\printindex
 
 \end{document}

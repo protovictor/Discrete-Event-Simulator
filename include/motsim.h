@@ -17,6 +17,7 @@
 #define __DEF_MOTSIM
 
 #include <assert.h>
+#include <stdio.h>   // printf
 #include <stdlib.h>  // malloc
 
 

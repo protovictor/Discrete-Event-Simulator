@@ -29,8 +29,11 @@ examples :
 install : src/libndes.a
 	cp src/libndes.a lib
 
-tests : 
+tests-bin : 
 	@(cd $(TEST_DIR) && $(MAKE))
+
+tests : tests-bin
+	@(cd $(TEST_DIR) && $(MAKE) tests)
 
 clean :
 	@(cd $(SRC_DIR) && $(MAKE) $@)

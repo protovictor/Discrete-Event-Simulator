@@ -1,10 +1,11 @@
 /*
- * Programme de test des divers générateurs
+ * Programme d'un générateur exponentiel
  */
 #include <stdlib.h>    // Malloc, NULL, exit, ...
 #include <assert.h>
 #include <strings.h>   // bzero, bcopy, ...
 #include <stdio.h>     // printf, ...
+#include <math.h>      // fabs
 
 #include <probe.h>
 #include <date-generator.h>
@@ -18,6 +19,7 @@ int main() {
    unsigned long n;
    double d = 0.0;
    double l = 3.0;
+   double m;
 
    /* Les sondes */
    struct probe_t     * iap; // Interarrivee de la source
@@ -32,8 +34,13 @@ int main() {
    for (n = 0 ; n < 10000000;n++){
       d = dateGenerator_nextDate(dateGenExp, d);
    }
-   printf("Lambda = %f : InterArrival  %f (%d samples)\n", l, probe_mean(iap), probe_nbSamples(iap));
 
-    
-   return 1;
+   m = probe_mean(iap);
+   printf("Lambda = %f : InterArrival  %f (%ld samples)\n", l, m, probe_nbSamples(iap));
+
+   if (fabs(m-1.0/l)*l < 0.05) {
+      return 0;
+   } else {
+      return 1;
+   }
 }

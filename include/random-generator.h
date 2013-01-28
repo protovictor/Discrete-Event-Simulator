@@ -81,16 +81,19 @@ struct randomGenerator_t * randomGenerator_createDouble();
 struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda);
 
 /* 
- * A double range [min .. max}, default distribution : uniform
+ * A double range [min .. max}
  */
 struct randomGenerator_t * randomGenerator_createDoubleRange(double min,
 							     double max);
 
-struct randomGenerator_t * randomGenerator_createDoubleDiscrete(int nbValues,
+struct randomGenerator_t * randomGenerator_createDoubleDiscrete(
+                                     int nbValues,
                                      double * values);
  
-struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(int nbValues,
-                                     double * values, double * proba);
+struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(
+                                     int nbValues,
+                                     double * values,
+                                     double * proba);
  
 /*==========================================================================*/
 
@@ -149,5 +152,11 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
  * d'expériences, on utilisera des sondes.
  */
 double randomGenerator_getExpectation(struct randomGenerator_t * rg);
+
+/*==========================================================================*/
+/*   Probes                                                                 */ 
+/*==========================================================================*/
+void randomGenerator_setValueProbe(struct randomGenerator_t * rg,
+				   struct probe_t * p);
 
 #endif
