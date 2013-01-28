@@ -26,7 +26,8 @@ src :
 examples : 
 	@(cd $(EXPL_DIR) && $(MAKE))
 
-install : src/libndes.a
+install : src
+	@(mkdir lib || true)
 	cp src/libndes.a lib
 
 tests-bin : 
