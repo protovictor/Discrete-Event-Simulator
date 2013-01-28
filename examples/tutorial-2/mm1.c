@@ -54,9 +54,9 @@ int main() {
 
    struct probe_t         * sejProbe, * iaProbe, * srvProbe; // Les sondes
 
-   float   lambda = 5.0 ; // Intensité du processus d'arrivée
-   float   mu = 10.0;     // Paramètre du serveur
-   float   debit = 1.0;   // En bit par seconde
+   float   lambda = 5.0;  // Intensité du processus d'arrivée
+   float   mu     = 10.0; // Paramètre du serveur
+   float   debit  = 1.0;  // En bit par seconde
 
    /* Creation du simulateur */
    motSim_create();
@@ -81,9 +81,9 @@ int main() {
 				filePDU,
 				(processPDU_t)filePDU_processPDU);
 
-   /* Création d'un générateur de taille */
+   /* Création d'un générateur de taille (tailles non bornées) */
    sizeGen = randomGenerator_createUInt();
-   randomGenerator_createUInt
+   randomGenerator_setDistributionExp(sizeGen, lambda);
 
    /* Affectation à la source */
    PDUSource_setPDUSizeGenerator(sourcePDU, sizeGen);

@@ -1,13 +1,13 @@
 SRC_FILES= $(wildcard *.c)
 OBJ_FILES= $(SRC_FILES:.c=.o)
 
-TESTS = file-pdu file-pdu-2 file-pdu-3 \
-	debits \
-	generators generators-1 \
+TESTS = generators generators-1 \
 	generators-3 generators-4 \
-	probes-1 probes-2 probes-3 probes-4 \
-	muxfcfs-1 \
-	intconf
+#	file-pdu file-pdu-2 file-pdu-3 \
+#	debits \
+#	probes-1 probes-2 probes-3 probes-4 \
+#	muxfcfs-1 \
+#	intconf
 
 
 .PHONY: clean 

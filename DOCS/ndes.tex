@@ -889,8 +889,8 @@ aléatoire.
 %------------------------------------------------------------------------
 \subsection{Caractéristiques d'un générateur aléatoire}
 
-   Un générateur aléatoire est caractérisé par trois paramètres
-fondamentaux 
+   Un générateur aléatoire est caractérisé par trois composantes
+fondamentales 
 
 \begin{description}
    \item[Le type des données générées] peut être réel, entier,
@@ -904,7 +904,7 @@ fondamentaux
    Attention, ces trois composantes sont éventuellement constitutées
 d'un jeu de paramètres.
 
-   Le principe général est le suivant.
+   Le principe général de génération d'une valeur est le suivant.
 
 \begin{itemize}
    \item Un nombre aléatoire est fourni par la source. Ce sera un
@@ -916,19 +916,113 @@ d'un jeu de paramètres.
      valeur du type voulu.
 \end{itemize}
 
+   Bref, tout est fait pour laisser sa place au hasard \ldots
+
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Utilisation}
+
+   Le schéma général d'utilisation est simple : on crée un générateur,
+on l'initialise avec le type de données voulu, on lui associe une
+distribution, éventuellement on peut changer la source d'aléa sur
+laquelle il se fonde, puis on peut lui extirper des valeurs aléatoires
+et enfin on le détruit sans un mot de remerciement.
+
+   Observons en détail les fonctions utiles à ce programme alléchant.
+
 %------------------------------------------------------------------------
 %
 %------------------------------------------------------------------------
 \subsection{Création et destruction}
 
-   On crée un générateur aléatoire à valeur réelle de la façon
-suivante
+   Il existe au moins une fonction de création pour chaque type de
+données géré (il manquerait plus que ça !). Mais il existe également
+parfois des fonctions permettant de spécifier en même temps la
+distribution à utiliser. Voyons ça type par type.
 
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Les entiers non signés}
+
+   La fonction de création de base est 
+
+\index{randomGenerator_createUInt}
 \begin{verbatim}
-struct randomGenerator_t * randomGenerator_createDouble(double lambda);
+struct randomGenerator_t * randomGenerator_createUInt();
 \end{verbatim}
 
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Les entiers non signés entre {\tt min} et {\tt max} inclus}
 
+   Ça c'est sympa pour jouer aux dés. On les crée avec 
+
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createUIntRange(unsigned int min,
+						      unsigned int max);
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Une liste d'entiers non signés}
+
+   Pratique pour tirer au hasard des tailles de paquets !
+
+\index{randomGenerator_createUIntDiscrete}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
+							      unsigned int * values);
+\end{verbatim}
+
+   Le premier paramètre donne le nombre de valeurs, et le second est
+un tableau qui contient (au moins) ces valeurs. Son contenu sera
+recopié, donc si tu veux le détruire/modifier ensuite, vis ta vie !
+
+   Comme on se doute bien que dans ce genre de situations on va
+vouloir associer une probabilité à chaque valeur, on peut utiliser la
+version suivante :
+
+\index{randomGenerator_createUIntDiscreteProba}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(
+				int nbValues,
+				unsigned int * values,
+				double * proba);
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Des réels double précision}
+
+\begin{verbatim}
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Des réels double précision entre {\tt min} et {\tt max}}
+
+\begin{verbatim}
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Une liste de réels double précision}
+
+\begin{verbatim}
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Destruction}
 
    On détruit un générateur grâce à la fonction
 

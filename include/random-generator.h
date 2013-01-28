@@ -28,10 +28,13 @@ struct randomGenerator_t;
 #define rGTypeDoubleRange  5
 #define rGTypeUIntEnum     6
 #define rGTypeDoubleEnum   7
+#define rGTypeUIntRange    8
+
 
 /*
  * Available distributions
  */
+#define rGDistNoDist       0
 #define rGDistUniform      1
 #define rGDistExponential  2
 #define rGDistDiscrete     3
@@ -45,26 +48,21 @@ struct randomGenerator_t;
 #define rgSourceUrandom 3
 
 #define rgSourceDefault rGSourceErand48
-/*
- * Creators
- */
 
-struct randomGenerator_t * randomGenerator_createULong(int distribution,
-						       unsigned long min,
-						       unsigned long max);
+/*==========================================================================*/
+/*  Creators                                                                */
+/*==========================================================================*/
 
-struct randomGenerator_t * randomGenerator_createUInt(int distribution,
-                                                      unsigned int min,
+// Des entiers non signés quelconques
+struct randomGenerator_t * randomGenerator_createUInt();
+
+// Des entiers non signés entre min et max  (inclus)
+struct randomGenerator_t * randomGenerator_createUIntRange(unsigned int min,
 						      unsigned int max);
 
-/*
- * Création d'un générateur aléatoire de nombres entiers parmis un
- * ensemble discret.
- */
+// Des entiers non signés listés
 struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
 							      unsigned int * values);
- 
-
 /*
  * Le nombre de valeurs possibles est passé en paramètre ainsi que la
  * liste de ces valeurs puis la liste de leurs probabilité.
@@ -72,16 +70,15 @@ struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
 struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(int nbValues,
                                      unsigned int * values, double * proba);
  
+// Des entiers longs non signés
+struct randomGenerator_t * randomGenerator_createULong(int distribution,
+						       unsigned long min,
+						       unsigned long max);
+// Des réels double précision
+struct randomGenerator_t * randomGenerator_createDouble();
 
-/*
- * R+, default distribution : exponential
- */
-struct randomGenerator_t * randomGenerator_createDouble(double lambda);
-
-/*
- * Change lambda
- */
-void randomGenerator_setLambda(struct randomGenerator_t * rg, double lambda);
+// Des réels double précision, avec une distribution exp de paramètre lambda
+struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda);
 
 /* 
  * A double range [min .. max}, default distribution : uniform
@@ -95,6 +92,8 @@ struct randomGenerator_t * randomGenerator_createDoubleDiscrete(int nbValues,
 struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(int nbValues,
                                      double * values, double * proba);
  
+/*==========================================================================*/
+
 // Use a (previously built) probe to re-run a sequence
 struct randomGenerator_t * randomGenerator_createFromProbe(struct probe_t * p);
 
@@ -105,11 +104,33 @@ void randomGenerator_reset(struct randomGenerator_t * rg);
  */
 void randomGenerator_delete(struct randomGenerator_t * rg);
 
+/*==========================================================================*/
+/*   Select distribution                                                    */
+/*==========================================================================*/
 /*
- * Change distribution/parameters
+ * Choix de la distribution
  */
-void randomGenerator_setUniformDistribution(struct randomGenerator_t * rg);
-void randomGenerator_setUniformMinMaxDouble(struct randomGenerator_t * rg, double min, double max);
+
+// Un nombre discret de probabilités
+void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
+					     int nb,
+                                             double * proba);
+// Choix d'une loi uniforme
+void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
+
+// Choix d'une loi exponentielle
+void randomGenerator_setDistributionExp(struct randomGenerator_t * rg, double lambda);
+
+
+//void randomGenerator_setUniformDistribution(struct randomGenerator_t * rg);
+
+//void randomGenerator_setUniformMinMaxDouble(struct randomGenerator_t * rg, double min, double max);
+
+/*
+ * Change lambda
+ */
+void randomGenerator_setLambda(struct randomGenerator_t * rg, double lambda);
+
 
 /*
  * Prepare for record values in order to replay on each reset
@@ -128,16 +149,5 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
  * d'expériences, on utilisera des sondes.
  */
 double randomGenerator_getExpectation(struct randomGenerator_t * rg);
-
-/*
- * Choix de la distribution
- */
-
-// Un nombre discret de probabilités
-void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
-					     int nb,
-                                             double * proba);
-// Choix d'une loi uniforme
-void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
 
 #endif

@@ -20,6 +20,9 @@
 #include <stdlib.h>  // malloc
 
 
+#define min(a, b) ((a)<(b)?(a):(b))
+#define max(a, b) ((a)>(b)?(a):(b))
+
 typedef double  motSimDate_t;
 
 struct motsim_t;
