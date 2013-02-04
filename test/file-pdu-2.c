@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------*/
-/*   Test de NDES : tests des files de PDU à capacité limitée.          */
+/*   Test de NDES : tests des files de PDU Ã  capacitÃ© limitÃ©e.          */
 /*----------------------------------------------------------------------*/
 
 #include <stdlib.h>    // Malloc, NULL, exit, ...
@@ -26,13 +26,13 @@ int main() {
    filePDU = filePDU_create(NULL, NULL);
    filePDU_setMaxSize(filePDU, 10000);
 
-   /* Création d'un générateur de date */
+   /* CrÃ©ation d'un gÃ©nÃ©rateur de date */
    dateGenExp = dateGenerator_createExp(1.0);
 
    /* La source */
    sourcePDU = PDUSource_create(dateGenExp, filePDU, filePDU_processPDU);
 
-   /* On génère des PDU de taille 1 */
+   /* On gÃ©nÃ¨re des PDU de taille 1 */
    PDUSource_setPDUSizeGenerator(sourcePDU, randomGenerator_createUIntDiscrete(1, &taille, &un));
 
    /* On active la source */

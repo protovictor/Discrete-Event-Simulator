@@ -1,7 +1,7 @@
 /*
  *    Quelques tests simples sur les sondes
  *
- *    probes-3 : Comparaison de résultats entre des sondes exhaustives
+ *    probes-3 : Comparaison de rÃ©sultats entre des sondes exhaustives
  *    et par moyenne
  */
 #include <float.h>
@@ -25,13 +25,13 @@ int main()
    // Initialisation du simulateur
    motSim_create();
 
-   // Création d'une sonde exhaustive
+   // CrÃ©ation d'une sonde exhaustive
    ep = probe_createExhaustive();
 
-   // Création d'une sonde en moyenne
+   // CrÃ©ation d'une sonde en moyenne
    mp = probe_createMean();
 
-   // On les peuple avec NBECH echantillons par unitée
+   // On les peuple avec NBECH echantillons par unitÃ©e
    for (n = -TPMAX; n < TPMAX ; n++){
       for (e = 0 ; e < NBECH; e++) {
          data = (double)n + ((double)rand()/(double)RAND_MAX);
@@ -40,7 +40,7 @@ int main()
       }
    };
 
-   // Comparaison des résultats
+   // Comparaison des rÃ©sultats
    printf("Nombre d'echantillons : %ld / %ld\n", probe_nbSamples(ep), probe_nbSamples(mp));
    printf("Moyenne : %f / %f\n", probe_mean(ep), probe_mean(mp));
    printf("Min : %f / %f\n", probe_min(ep), probe_min(mp));

@@ -11,7 +11,7 @@ struct probe_t * PDU_reuseProbe;
 struct probe_t * PDU_mallocProbe;
 struct probe_t * PDU_freeProbe;
 
-// Pointeur sur une PDU libre (pour accélerer alloc/free)
+// Pointeur sur une PDU libre (pour accÃ©lerer alloc/free)
 struct PDU_t * firstFreePDU = NULL;
 
 int PDU_size(struct PDU_t * PDU){

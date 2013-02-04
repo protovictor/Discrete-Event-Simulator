@@ -67,7 +67,7 @@ struct event_t * eventFile_extract(struct eventFile_t * file)
    if (file->premier) {
       premier = file->premier;
       file->premier = premier->next;
-      // Si c'était le seul
+      // Si c'Ã©tait le seul
       if (file->dernier == premier) {
          assert(premier->next == NULL);
 	 assert(file->nombre == 1);

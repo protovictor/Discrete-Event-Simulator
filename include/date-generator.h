@@ -1,7 +1,7 @@
 /*
- * Les générateurs de dates. Largement fondé sur les générateurs de
- * nombres aléatoires.
- * Toutes les dates sont toujours exprimées en secondes depuis le début de
+ * Les gÃ©nÃ©rateurs de dates. Largement fondÃ© sur les gÃ©nÃ©rateurs de
+ * nombres alÃ©atoires.
+ * Toutes les dates sont toujours exprimÃ©es en secondes depuis le dÃ©but de
  * la simulation.
  */
 
@@ -33,13 +33,13 @@ double dateGenerator_nextDate(struct dateGenerator_t * dateGen,
 struct dateGenerator_t * dateGenerator_createExp(double lambda);
 
 /*
- * Modification du paramètre lambda
+ * Modification du paramÃ¨tre lambda
  */
 void dateGenerator_setLambda(struct dateGenerator_t * dateGen, double lambda);
 
 /*
  * Creation d'une source qui genere des evenements a interrarivee
- * constante. Bref, périodiques !
+ * constante. Bref, pÃ©riodiques !
  */
 struct dateGenerator_t * dateGenerator_createPeriodic(double period);
 

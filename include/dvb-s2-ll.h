@@ -1,8 +1,8 @@
 /*
- * Attention, ici les tailles sont comptées en bits alors que partout
- * ailleurs c'est en octets. Il faudra peut être revoir ça. A titre
- * préventif, cela apparait dans les noms des variables, et des macros
- * permettent d'envisager une modificiation sans conséquences sur le
+ * Attention, ici les tailles sont comptÃ©es en bits alors que partout
+ * ailleurs c'est en octets. Il faudra peut Ãªtre revoir Ã§a. A titre
+ * prÃ©ventif, cela apparait dans les noms des variables, et des macros
+ * permettent d'envisager une modificiation sans consÃ©quences sur le
  * reste.
  */
 
@@ -18,8 +18,8 @@ struct t_modcod;
 struct DVBS2ll_t;
 
 /*
- * Création d'une entité DVB-S2 couche 2. Attention, elle ne contient
- * aucun MODCOD par défaut, il faut en ajouter
+ * CrÃ©ation d'une entitÃ© DVB-S2 couche 2. Attention, elle ne contient
+ * aucun MODCOD par dÃ©faut, il faut en ajouter
  */
 struct DVBS2ll_t * DVBS2ll_create(void * destination,
 				  processPDU_t destProcessPDU,
@@ -29,7 +29,7 @@ struct DVBS2ll_t * DVBS2ll_create(void * destination,
 #define FEC_FRAME_BITSIZE_LARGE 64800
 
 /*
- *Constantes permettant le paramétrage des MODCODs
+ *Constantes permettant le paramÃ©trage des MODCODs
  */
 #define  C14SIZE  16008
 #define  C13SIZE  21408
@@ -50,16 +50,16 @@ struct DVBS2ll_t * DVBS2ll_create(void * destination,
 
 
 /*
- * Ajout d'un MODCOD. Le codage est paramétré par le nombre de bits
+ * Ajout d'un MODCOD. Le codage est paramÃ©trÃ© par le nombre de bits
  * par BBFRAME et la modulation par le nombre de bits par symbole.
- * La valeur retournée est l'indice de ce nouveau MODCOD.
+ * La valeur retournÃ©e est l'indice de ce nouveau MODCOD.
  */
 int DVBS2ll_addModcod(struct DVBS2ll_t * dvbs2ll,
 		      unsigned int bbframeBitLength,
 		      unsigned int bitsPerSymbol);
 
 /*
- * Modification des propriétés du MODCOD n
+ * Modification des propriÃ©tÃ©s du MODCOD n
  */
 void DVBS2ll_setModcod(struct DVBS2ll_t * dvbs2ll,
                        int n,
@@ -70,21 +70,21 @@ void DVBS2ll_setModcod(struct DVBS2ll_t * dvbs2ll,
 /************************************************************************/
 /*
  * Attribution d'une source. Attention c'est obligatoire ici car c'est
- * l'entité DVBS2ll qui va solliciter la source lorsque le support
+ * l'entitÃ© DVBS2ll qui va solliciter la source lorsque le support
  * sera libre
  */
 void DVBS2ll_setSource(struct DVBS2ll_t * dvbs2ll, void * source, getPDU_t getPDU);
 
 /*
- * Une fonction permettant la conformité au modèle d'échange
+ * Une fonction permettant la conformitÃ© au modÃ¨le d'Ã©change
  */
 void DVBS2ll_processPDU(struct DVBS2ll_t * dvbs2ll,
                         getPDU_t getPDU,
                         void * source);
 
 /*
- * Emission d'une PDU au travers d'un MODCOD sélectionné. La PDU doit
- * être d'une taille inférieure ou égale à la taille de charge utile du
+ * Emission d'une PDU au travers d'un MODCOD sÃ©lectionnÃ©. La PDU doit
+ * Ãªtre d'une taille infÃ©rieure ou Ã©gale Ã  la taille de charge utile du
  * MODCOD choisi.
  */
 void DVBS2ll_sendPDU(struct DVBS2ll_t * dvbs2ll, struct PDU_t * pdu);
@@ -93,14 +93,14 @@ void DVBS2ll_sendPDU(struct DVBS2ll_t * dvbs2ll, struct PDU_t * pdu);
 /*    Les sondes                                                        */
 /************************************************************************/
 /*
- * Ajout d'une sonde sur la taille de la charge utile des trames émises
- * sur un MODCOD donné
+ * Ajout d'une sonde sur la taille de la charge utile des trames Ã©mises
+ * sur un MODCOD donnÃ©
  */
 void DVBS2ll_setActualPayloadBitSizeProbe(struct DVBS2ll_t * dvbs2ll, int mc, struct probe_t * pr);
 
 /*
- * Ajout de la probe sur les DUMMY. Elle n'échantillonne aucune
- * valeur, juste les dates d'émission de DUMMY frames.
+ * Ajout de la probe sur les DUMMY. Elle n'Ã©chantillonne aucune
+ * valeur, juste les dates d'Ã©mission de DUMMY frames.
  */
 void DVBS2ll_setDummyFecFrameProbe(struct DVBS2ll_t * dvbs2ll, struct probe_t * pr);
 
@@ -111,7 +111,7 @@ void DVBS2ll_setDummyFecFrameProbe(struct DVBS2ll_t * dvbs2ll, struct probe_t * 
 int DVBS2ll_nbModcod(struct DVBS2ll_t * dvbs2ll);
 
 /*
- * Capacité d'une BBFRAME associée au MODCOD d'indice fourni
+ * CapacitÃ© d'une BBFRAME associÃ©e au MODCOD d'indice fourni
  */ 
 unsigned int DVBS2ll_bbframePayloadBitSize(struct DVBS2ll_t * dvbs2ll, int mcIdx);
 
@@ -121,7 +121,7 @@ unsigned int DVBS2ll_bbframePayloadBitSize(struct DVBS2ll_t * dvbs2ll, int mcIdx
 unsigned int DVBS2ll_bitsPerSymbol(struct DVBS2ll_t * dvbs2ll, int mcIdx);
 
 /*
- * Temps d'émission d'une BBFRAME associée au MODCOD d'indice fourni
+ * Temps d'Ã©mission d'une BBFRAME associÃ©e au MODCOD d'indice fourni
  */ 
 double DVBS2ll_bbframeTransmissionTime(struct DVBS2ll_t * dvbs2ll, int mcIdx);
 

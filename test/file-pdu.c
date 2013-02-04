@@ -29,7 +29,7 @@ int main() {
    /* La file */
    filePDU = filePDU_create(sink, PDUSink_processPDU);
 
-   /* Création d'un générateur de date */
+   /* CrÃ©ation d'un gÃ©nÃ©rateur de date */
    dateGenExp = dateGenerator_createExp(1.0);
 
    /* La source */

@@ -18,7 +18,7 @@ int main() {
    int mc;
    int q, m;
 
-   /* Création de la couche 2 DVB-S2 */
+   /* CrÃ©ation de la couche 2 DVB-S2 */
    dvbs2ll = DVBS2ll_create();
 
    /* Creation des files */
@@ -52,7 +52,7 @@ int main() {
 }
 
 /*
- * Résultat obtenu
+ * RÃ©sultat obtenu
  *
 
 

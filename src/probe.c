@@ -1,9 +1,9 @@
 /*
- * Attention à la structure des sondes exhaustives, le parcours en
- * lecture n'est pas forcément intuitif ...
+ * Attention Ã  la structure des sondes exhaustives, le parcours en
+ * lecture n'est pas forcÃ©ment intuitif ...
  *
- * De plus, lors du reset, on libère la mémoire, ce qui prend du temps
- * et nécessite de les réallouer pour la simulation suivante. On
+ * De plus, lors du reset, on libÃ¨re la mÃ©moire, ce qui prend du temps
+ * et nÃ©cessite de les rÃ©allouer pour la simulation suivante. On
  * pourrait les conserver, non ?
  */
 
@@ -49,30 +49,30 @@ struct graphBar_t {
  * Structure permettant la gestion des sondes de moyenne
  */
 struct mean_t {
-   double valueSum;  // La somme cumulée des échantillons
-   double firstDate; // Date premier événement
-   double lastDate;  // Date dernier événement
+   double valueSum;  // La somme cumulÃ©e des Ã©chantillons
+   double firstDate; // Date premier Ã©vÃ©nement
+   double lastDate;  // Date dernier Ã©vÃ©nement
 };
 
 /*
  * Gestion par tranches temporelles
  */
 struct timeSlice_t {
-   double           valueSum;  // La somme cumulée des échantillons
+   double           valueSum;  // La somme cumulÃ©e des Ã©chantillons
    int              nbSamplesInSlice; // Le nombre d'echantillons dans la tranche
-   struct probe_t * meanProbe;  // Une probe exhaustive sur la moyenne à chaque fin d'intervalle
-   struct probe_t * bwProbe;  // Une probe exhaustive sur le débit à chaque fin d'intervalle
+   struct probe_t * meanProbe;  // Une probe exhaustive sur la moyenne Ã  chaque fin d'intervalle
+   struct probe_t * bwProbe;  // Une probe exhaustive sur le dÃ©bit Ã  chaque fin d'intervalle
 };
 
 /*
- * Pour une sonde périodique
+ * Pour une sonde pÃ©riodique
  */
 struct periodic_t {
-   struct probe_t * data; // Une sonde exhaustive pour stocker un échantillon par période
+   struct probe_t * data; // Une sonde exhaustive pour stocker un Ã©chantillon par pÃ©riode
 };
 
 /*
- * Gestion des sondes à fenêtre.
+ * Gestion des sondes Ã  fenÃªtre.
  */
 struct slidingWindow_t {
    double * samples;
@@ -95,7 +95,7 @@ struct EMA_t {
 };
 
 /*
- * Structure générale d'une sonde
+ * Structure gÃ©nÃ©rale d'une sonde
  */
 struct probe_t {
    enum probeType_t probeType;
@@ -104,7 +104,7 @@ struct probe_t {
    double           min, max;
    double           lastSample;
    double           lastSampleDate;
-   double           period;          // Certaines probes ont des choses à faire 
+   double           period;          // Certaines probes ont des choses Ã  faire 
 
    union probeData_t { 
       struct sampleSet_t     * sampleSet;
@@ -116,30 +116,30 @@ struct probe_t {
       struct periodic_t      * periodic;
 } data;
 
-   // Une sonde persistante n'est jamais réinitialisée
+   // Une sonde persistante n'est jamais rÃ©initialisÃ©e
    int persistent;
 
-   // Les métas sondes
-   struct probe_t * sampleProbe;      // Sur les échantillons
+   // Les mÃ©tas sondes
+   struct probe_t * sampleProbe;      // Sur les Ã©chantillons
    struct probe_t * meanProbe;        // Sur la moyenne
    struct probe_t * throughputProbe ; // 
-				      // Sur le "débit" (cf notes relatives)
-   // Les méthodes de manipulation
+				      // Sur le "dÃ©bit" (cf notes relatives)
+   // Les mÃ©thodes de manipulation
 
-   // On chaîne localement les probes pour échantilloner d'un coup un seul ev
+   // On chaÃ®ne localement les probes pour Ã©chantilloner d'un coup un seul ev
    struct probe_t * nextProbe;
 
-   // On chaîne globalement les probes pour en garder une trace
+   // On chaÃ®ne globalement les probes pour en garder une trace
    struct probe_t * next;
 };
 
 
-// Pointeur sur la chaine de toutes les probes du système
+// Pointeur sur la chaine de toutes les probes du systÃ¨me
 struct probe_t * firstProbe = NULL;
 
 
 /*
- * Une sonde persistante ne sera pas réinitialisée en cas de reset (en
+ * Une sonde persistante ne sera pas rÃ©initialisÃ©e en cas de reset (en
  * fin de simulation)
  */
 void probe_setPersistent(struct probe_t * p)
@@ -148,10 +148,10 @@ void probe_setPersistent(struct probe_t * p)
 }
 
 /*
- * Chaînage des probes p1 et p2, dans cet ordre. Tout échantillon sur
- * p1 sera répercuté sur p2. C'est la seule méthode qui soit
- * répercutée en cascade. Les reset, calcul de moyenne, ... doivent
- * être invoquées sur chaque sonde si nécessaire
+ * ChaÃ®nage des probes p1 et p2, dans cet ordre. Tout Ã©chantillon sur
+ * p1 sera rÃ©percutÃ© sur p2. C'est la seule mÃ©thode qui soit
+ * rÃ©percutÃ©e en cascade. Les reset, calcul de moyenne, ... doivent
+ * Ãªtre invoquÃ©es sur chaque sonde si nÃ©cessaire
  */
 void probe_chain(struct probe_t * p1, struct probe_t * p2)
 {
@@ -208,7 +208,7 @@ void probe_slidingWindowReset(struct probe_t * pr)
 
 void probe_scheduleNextEvent(struct probe_t * tap);
 
-/* WARNING les deux fonctions suivantes sont à fusionner */
+/* WARNING les deux fonctions suivantes sont Ã  fusionner */
 
 void probe_periodicReset(struct probe_t * pr)
 {
@@ -216,7 +216,7 @@ void probe_periodicReset(struct probe_t * pr)
 
    probe_reset(pr->data.periodic->data);
 
-   // On déclanche un échantillon du cumul à 0 + t
+   // On dÃ©clanche un Ã©chantillon du cumul Ã  0 + t
 
    ev = event_create((void (*)(void *))probe_scheduleNextEvent, pr, pr->period);
    printf_debug(DEBUG_PROBE, "premiere moyenne a %f ms pour %s\n", pr->period, pr->name);
@@ -233,16 +233,16 @@ void probe_timeSliceReset(struct probe_t * pr)
    probe_reset(pr->data.timeSlice->meanProbe);
    probe_reset(pr->data.timeSlice->bwProbe);
 
-   // On déclanche un échantillon du cumul à 0 + t
+   // On dÃ©clanche un Ã©chantillon du cumul Ã  0 + t
    ev = event_create((void (*)(void *))probe_scheduleNextEvent, pr, pr->period);
    printf_debug(DEBUG_PROBE, "premiere moyenne a %f ms(ev %p)\n", pr->period, ev);
    motSim_addEvent(ev);
 }
 
 /*
- * Réinitialisation d'une probe (pour permettre de relancer une
- * simulation dans les mêmes conditions). Tout est effacé et doit donc
- * avoir été sauvegardé si besoin.
+ * RÃ©initialisation d'une probe (pour permettre de relancer une
+ * simulation dans les mÃªmes conditions). Tout est effacÃ© et doit donc
+ * avoir Ã©tÃ© sauvegardÃ© si besoin.
  */
 void probe_reset(struct probe_t * probe)
 {
@@ -286,8 +286,8 @@ void probe_reset(struct probe_t * probe)
 }
 
 /*
- * Création générale. Attention, toute création de probe doit passer
- * par là.
+ * CrÃ©ation gÃ©nÃ©rale. Attention, toute crÃ©ation de probe doit passer
+ * par lÃ .
  */
 struct probe_t * probe_createRaw(enum probeType_t probeType)
 {
@@ -306,7 +306,7 @@ struct probe_t * probe_createRaw(enum probeType_t probeType)
    result->nextProbe = NULL;
    result->period = 0.0;
    
-   // Les métas probes
+   // Les mÃ©tas probes
    result->meanProbe = NULL;
    result->throughputProbe = NULL;
    result->sampleProbe = NULL;
@@ -314,7 +314,7 @@ struct probe_t * probe_createRaw(enum probeType_t probeType)
    result->next = firstProbe;
    firstProbe = result;
 
-   // Ajout à la liste des choses à réinitialiser avant une prochaine simu
+   // Ajout Ã  la liste des choses Ã  rÃ©initialiser avant une prochaine simu
    motsim_addToResetList(result, (void (*)(void * data)) probe_reset);
 
    //printf_debug(DEBUG_PROBE, "A \"%s\" has been created\n" probeTypeName(probeType));
@@ -323,7 +323,7 @@ struct probe_t * probe_createRaw(enum probeType_t probeType)
    return result;
 }
 
-// Conserve un échantillon à la fin de chaque tranche temporelle de durée t
+// Conserve un Ã©chantillon Ã  la fin de chaque tranche temporelle de durÃ©e t
 struct probe_t * probe_periodicCreate(double t)
 {
    struct event_t * ev;
@@ -334,7 +334,7 @@ struct probe_t * probe_periodicCreate(double t)
    result->data.periodic->data = probe_createExhaustive();
    result->period = t;
 
-   // On déclanche un échantillon du cumul à 0 + t
+   // On dÃ©clanche un Ã©chantillon du cumul Ã  0 + t
    ev = event_create((void (*)(void *))probe_scheduleNextEvent, result, result->period);
    printf_debug(DEBUG_PROBE, "premiere moyenne a %f ms(ev %p) pour \"%s\"\n", result->period, ev, result->name);
    motSim_addEvent(ev);
@@ -393,22 +393,22 @@ struct probe_t * probe_createExhaustive()
  */
 void probe_timeSliceNextEvent(struct probe_t * tap)
 {
-   // On échantillonne
+   // On Ã©chantillonne
    probe_sample(tap->data.timeSlice->meanProbe,
                 tap->data.timeSlice->valueSum/(tap->data.timeSlice->nbSamplesInSlice?tap->data.timeSlice->nbSamplesInSlice:1.0));
    probe_sample(tap->data.timeSlice->bwProbe,
                 8.0*tap->data.timeSlice->valueSum/tap->period);
 
-   // On repart à zéro
+   // On repart Ã  zÃ©ro
    tap->data.timeSlice->valueSum = 0.0 ;
    tap->data.timeSlice->nbSamplesInSlice = 0;
 
 }
 
 /*
- * Une sonde périodique prélève de façon exhaustive un échantillon par
- * tranche de temps. La tranche de temps s'achève, on stoque donc la
- * dernière valeur prélevée.
+ * Une sonde pÃ©riodique prÃ©lÃ¨ve de faÃ§on exhaustive un Ã©chantillon par
+ * tranche de temps. La tranche de temps s'achÃ¨ve, on stoque donc la
+ * derniÃ¨re valeur prÃ©levÃ©e.
  */
 void probe_sampleExhaustive(struct probe_t * probe, double value);
 void probe_periodicNextEvent(struct probe_t * pr)
@@ -445,7 +445,7 @@ void probe_scheduleNextEvent(struct probe_t * pr)
 
 }
 
-// Conserve une moyenne par tranche temporelle de durée t
+// Conserve une moyenne par tranche temporelle de durÃ©e t
 struct probe_t * probe_createTimeSliceAverage(double t)
 {
    struct event_t * ev;
@@ -462,7 +462,7 @@ struct probe_t * probe_createTimeSliceAverage(double t)
    result->data.timeSlice->meanProbe = probe_createExhaustive();
    result->data.timeSlice->bwProbe = probe_createExhaustive();
 
-   // On déclanche un échantillon du cumul à 0 + t
+   // On dÃ©clanche un Ã©chantillon du cumul Ã  0 + t
    ev = event_create((void (*)(void *))probe_scheduleNextEvent, result, result->period);
    printf_debug(DEBUG_PROBE, "premiere moyenne a %f ms(ev %p)\n", result->period, ev);
    motSim_addEvent(ev);
@@ -470,7 +470,7 @@ struct probe_t * probe_createTimeSliceAverage(double t)
    return result;
 }
 
-// Conserve une moyenne par tranche temporelle de durée t
+// Conserve une moyenne par tranche temporelle de durÃ©e t
 struct probe_t * probe_createTimeSliceThroughput(double t)
 {
    struct probe_t * result = probe_createTimeSliceAverage(t);
@@ -483,7 +483,7 @@ struct probe_t * probe_createTimeSliceThroughput(double t)
 
 
 /*
- * Création d'une sonde qui ne stoque que la moyenne
+ * CrÃ©ation d'une sonde qui ne stoque que la moyenne
  */
 struct probe_t * probe_createMean()
 {
@@ -526,7 +526,7 @@ double probe_IAMeanMean(struct probe_t * pr)
 
 double probe_timeSliceMean(struct probe_t * pr)
 {
-   // On néglige les derniers échantillons WARNING : est-ce raisonable ?
+   // On nÃ©glige les derniers Ã©chantillons WARNING : est-ce raisonable ?
    printf_debug(DEBUG_TBD, "Incomplete average\n");
  
    return 0.0;
@@ -538,9 +538,9 @@ void probe_delete(struct probe_t * p)
 }
 
 /*
- * Réinitialisation de  toutes les probes. A priori cette fonction est
- * inutile ! Chaque probe est enregistrée auprès du simulateur pour
- * une réinitialisation entre deux simulations.
+ * RÃ©initialisation de  toutes les probes. A priori cette fonction est
+ * inutile ! Chaque probe est enregistrÃ©e auprÃ¨s du simulateur pour
+ * une rÃ©initialisation entre deux simulations.
  */
 void probe_resetAllProbes()
 {
@@ -603,12 +603,12 @@ void probe_slidingWindowSample(struct probe_t * pr, double v)
 {
    printf_debug(DEBUG_PROBE_VERB, "v = %f\n", v);
 
-   // On incrémente le pointeur vers le dernier
+   // On incrÃ©mente le pointeur vers le dernier
    pr->data.window->last++;
    if (pr->data.window->last == pr->data.window->capacity) 
       pr->data.window->last = 0;
 
-   // On incrémente la taille
+   // On incrÃ©mente la taille
    pr->data.window->length++;
    if (pr->data.window->length > pr->data.window->capacity) 
       pr->data.window->length = pr->data.window->capacity;
@@ -619,7 +619,7 @@ void probe_slidingWindowSample(struct probe_t * pr, double v)
 }
 
 /*
- * Sur une fenêtre, on fait la moyenne de tous les éléments présents
+ * Sur une fenÃªtre, on fait la moyenne de tous les Ã©lÃ©ments prÃ©sents
  */
 double probe_slidingWindowMean(struct probe_t * p)
 {
@@ -653,7 +653,7 @@ double probe_meanExhaustive(struct probe_t * probe)
 }
 
 /*
- * Moyenne des interarrivées
+ * Moyenne des interarrivÃ©es
  */
 double probe_IAMeanExhaustive(struct probe_t * probe)
 {
@@ -686,14 +686,14 @@ double probe_IAVarianceExhaustive(struct probe_t * probe)
    unsigned long n;
    struct sampleSet_t * currentSet = probe->data.sampleSet;
 
-   // WARNING : probe->nbSamples -1 peut nous ramener dans le set précédent !!!
+   // WARNING : probe->nbSamples -1 peut nous ramener dans le set prÃ©cÃ©dent !!!
 
    double date = currentSet->dates[(probe->nbSamples -1)%PROBE_NB_SAMPLES_MAX];
 
    mean = probe_IAMeanExhaustive(probe);
 
-   // Attention, le calcul date - datePrécédent n'est pas si trivial
-   // car ils peuvent être sur deux set différents !!!
+   // Attention, le calcul date - datePrÃ©cÃ©dent n'est pas si trivial
+   // car ils peuvent Ãªtre sur deux set diffÃ©rents !!!
 
 
    for (n = probe->nbSamples - 2; n >= 0; n--) {
@@ -751,7 +751,7 @@ void probe_sampleGraphBar(struct probe_t * probe, double value)
 }
 
 /*
- * La moyenne est obtenue en prenant la moyenne pondérée des médianes
+ * La moyenne est obtenue en prenant la moyenne pondÃ©rÃ©e des mÃ©dianes
  * de chaque barre.
  */
 double probe_meanGraphBar(struct probe_t * probe)
@@ -772,24 +772,24 @@ void probe_EMASample(struct probe_t * probe, double value)
 {
    assert(probe->probeType == EMAProbeType);
 
-   //ici, cumuler et mémoriser lastValue, ... pas tres beau, mais faut avancer !
+   //ici, cumuler et mÃ©moriser lastValue, ... pas tres beau, mais faut avancer !
 
    // Tant que le temps n'avance pas, on cumule les valeurs
    if (motSim_getCurrentTime() == probe->lastSampleDate) {
       probe->data.ema->value += value;
    } else {
-      // Le temps a avancé, on redémarre le cumul à la date actuelle
+      // Le temps a avancÃ©, on redÃ©marre le cumul Ã  la date actuelle
       probe->data.ema->value = value;
 
-      // On sauvegarde les valeurs finales au temps précédent
+      // On sauvegarde les valeurs finales au temps prÃ©cÃ©dent
       probe->data.ema->previousTime = probe->lastSampleDate;
       probe->data.ema->previousAvg = probe->data.ema->avg;
       probe->data.ema->previousBwAvg = probe->data.ema->bwAvg;
 
 
-      // Le calcul suivant doit pouvoir être fait même si plusieurs
-      // values sont échantillonnées à la même date. C'est pourquoi on
-      // les cumule (sinon, durée nulle => débit infini)
+      // Le calcul suivant doit pouvoir Ãªtre fait mÃªme si plusieurs
+      // values sont Ã©chantillonnÃ©es Ã  la mÃªme date. C'est pourquoi on
+      // les cumule (sinon, durÃ©e nulle => dÃ©bit infini)
       if (probe->data.ema->previousTime == 0.0) {
          probe->data.ema->avg = probe->data.ema->value;
          probe->data.ema->bwAvg =  (motSim_getCurrentTime()-probe->data.ema->previousTime);
@@ -814,7 +814,7 @@ void probe_EMASample(struct probe_t * probe, double value)
 }
 
 /*
- * Par définition !probe->data.ema->
+ * Par dÃ©finition !probe->data.ema->
  */
 double probe_EMAMean(struct probe_t * probe)
 {
@@ -874,8 +874,8 @@ void probe_sample(struct probe_t * probe, double value)
 	probe_EMASample(probe, value);
       break;
       case periodicProbeType :
-        /* On ne fait que sauvegarder la dernière valeur
-         * ce qui va être fait ci-dessous dans le code
+        /* On ne fait que sauvegarder la derniÃ¨re valeur
+         * ce qui va Ãªtre fait ci-dessous dans le code
          * commun */
       break;
       default :
@@ -895,7 +895,7 @@ void probe_sample(struct probe_t * probe, double value)
    }
    probe->nbSamples++;
 
-   // Gestion des méta probes
+   // Gestion des mÃ©ta probes
    if (probe->sampleProbe) {
       probe_sample(probe->sampleProbe, value);
    }
@@ -907,7 +907,7 @@ void probe_sample(struct probe_t * probe, double value)
       probe_sample(probe->throughputProbe, probe_throughput(probe));
    }
 
-   // On chaine si nécessaire 
+   // On chaine si nÃ©cessaire 
    if (probe->nextProbe != NULL){
       printf_debug(DEBUG_PROBE_VERB, "chain sampling ...\n");
       probe_sample(probe->nextProbe, value);
@@ -1060,12 +1060,12 @@ void probe_exhaustiveDumpFd(struct probe_t * ep, int fd, int format)
    // A la recherche du premier set
    for (set = ep->data.sampleSet; set->prev != NULL ; set = set->prev){};
 
-   // On prend tous les échantillons depuis le premier
+   // On prend tous les Ã©chantillons depuis le premier
    for (n = 0 ; n < probe_nbSamples(ep); n++) {
       sprintf(buffer, "%f %f\n", set->dates[n%PROBE_NB_SAMPLES_MAX], set->samples[n%PROBE_NB_SAMPLES_MAX]);
       write(fd, buffer, strlen(buffer));
 
-      // Si on est au bout d'un set, on décale
+      // Si on est au bout d'un set, on dÃ©cale
       if ((n+1) % PROBE_NB_SAMPLES_MAX == 0) {
 	set = set->next;//printf("*** %d -> fin de set\n", n);
       }
@@ -1143,8 +1143,8 @@ double probe_graphBarThroughput(struct probe_t * probe)
 }
 
 /*
- * Le débit est estimé par le volume reçu divisé par la durée de la
- * période
+ * Le dÃ©bit est estimÃ© par le volume reÃ§u divisÃ© par la durÃ©e de la
+ * pÃ©riode
  */
 double probe_timeSliceThroughput(struct probe_t * probe)
 {
@@ -1163,30 +1163,30 @@ double probe_slidingWindowThroughput(struct probe_t * pr)
    int n;
 
    if (pr->data.window->length >= pr->data.window->capacity) {
-      // Volume reçu depuis la première PDU
+      // Volume reÃ§u depuis la premiÃ¨re PDU
       for (n = 0; n < pr->data.window->length; n++) {
          result += pr->data.window->samples[n];
       }
 
-      // On ne prend pas en compte la première (on s'interesse au volume
-      // reçu DEPUIS elle)
+      // On ne prend pas en compte la premiÃ¨re (on s'interesse au volume
+      // reÃ§u DEPUIS elle)
       result -= pr->data.window->samples[(pr->data.window->last +1  - pr->data.window->length + pr->data.window->capacity)%pr->data.window->capacity];
 
-      // On divise par le temps entre la première et la dernière
-      // . la dernière est donnée par last
+      // On divise par le temps entre la premiÃ¨re et la derniÃ¨re
+      // . la derniÃ¨re est donnÃ©e par last
       duree = pr->data.window->dates[pr->data.window->last];
 
-      // . la première est à l'indice 1 si on n'a pas encore rempli, à
+      // . la premiÃ¨re est Ã  l'indice 1 si on n'a pas encore rempli, Ã 
       // last+1 si un tour est fait
       duree = duree - pr->data.window->dates[(pr->data.window->last+1)%pr->data.window->capacity];
       //      printf_debug(DEBUG_ALWAYS, "%f DE %f A %f\n", result, pr->data.window->dates[(pr->data.window->last+1)%pr->data.window->capacity], pr->data.window->dates[pr->data.window->last] );
    } else { // Si on n'a pas encore fait un tour ...
-      // Volume reçu depuis la première PDU (non inclue)
+      // Volume reÃ§u depuis la premiÃ¨re PDU (non inclue)
       for (n = 2; n <= pr->data.window->length; n++) {
          result += pr->data.window->samples[n];
       }
-      // On divise par le temps entre la première et la dernière
-      // . la dernière est donnée par last
+      // On divise par le temps entre la premiÃ¨re et la derniÃ¨re
+      // . la derniÃ¨re est donnÃ©e par last
       duree = pr->data.window->dates[pr->data.window->last];
 
       duree = duree - pr->data.window->dates[1];
@@ -1194,17 +1194,17 @@ double probe_slidingWindowThroughput(struct probe_t * pr)
 
    }
 
-   // Les tailles sont en octets, les durées en secondes
-   // Mais les débits en bit/s !
+   // Les tailles sont en octets, les durÃ©es en secondes
+   // Mais les dÃ©bits en bit/s !
    return 8.0*result/duree;
 }
 
 /*
- * Consultation du débit. On considère ici chaque nouvelle valeur
+ * Consultation du dÃ©bit. On considÃ¨re ici chaque nouvelle valeur
  * comme la taille d'une nouvelle PDU. La fonction suivante permet
- * alors de connaitre le débit qui en  découle. 
- * La méthode de calcul est évidemment dépendante de la nature de la
- * sonde et sa précision est donc variable
+ * alors de connaitre le dÃ©bit qui en  dÃ©coule. 
+ * La mÃ©thode de calcul est Ã©videmment dÃ©pendante de la nature de la
+ * sonde et sa prÃ©cision est donc variable
  */
 double probe_throughput(struct probe_t * probe)
 {
@@ -1299,7 +1299,7 @@ double probe_stdDev(struct probe_t * probe)
 
 
 /*
- * Demi largeur de l'intervalle de confiance à 5%
+ * Demi largeur de l'intervalle de confiance Ã  5%
  */
 double probe_exhaustiveDemiIntervalleConfiance5pc(struct probe_t * p)
 {
@@ -1320,7 +1320,7 @@ double probe_timeSliceAverageDemiIntervalleConfiance5pc(struct probe_t * p)
 }
 
 /*
- * Demi largeur de l'intervalle de confiance à 5%
+ * Demi largeur de l'intervalle de confiance Ã  5%
  */
 double probe_demiIntervalleConfiance5pc(struct probe_t * p)
 {
@@ -1343,8 +1343,8 @@ double probe_demiIntervalleConfiance5pc(struct probe_t * p)
 }
 
 /*
- * Tentative de calcul de l'IC à 5% par la méthode des coupes. C'est
- * très probablement faux ! Combien de blocs de quelle taille par
+ * Tentative de calcul de l'IC Ã  5% par la mÃ©thode des coupes. C'est
+ * trÃ¨s probablement faux ! Combien de blocs de quelle taille par
  * exemple ?
  */
 double probe_demiIntervalleConfiance5pcCoupes(struct probe_t * p)
@@ -1393,8 +1393,8 @@ void probe_exhaustiveToGraphBar(struct probe_t * ep, struct probe_t * gbp)
 
 }
 /*
- * Réduction du nombre d'échantillons d'une sonde exhaustive en
- * remplaçant blockSize échantillons consécutifs par leur moyenne
+ * RÃ©duction du nombre d'Ã©chantillons d'une sonde exhaustive en
+ * remplaÃ§ant blockSize Ã©chantillons consÃ©cutifs par leur moyenne
  */
 void probe_exhaustiveToBlockMean(struct probe_t * ep, struct probe_t * bmp, unsigned long blockSize)
 {
@@ -1416,14 +1416,14 @@ void probe_exhaustiveToBlockMean(struct probe_t * ep, struct probe_t * bmp, unsi
    // A la recherche du premier set
    for (set = ep->data.sampleSet; set->prev != NULL ; set = set->prev){};
 
-   // On prend tous les échantillons depuis le premier
+   // On prend tous les Ã©chantillons depuis le premier
    for (n = 0 ; n < probe_nbSamples(ep); n++) {
       sum += set->samples[n%PROBE_NB_SAMPLES_MAX];
-      // Si on est au bout d'un set, on décale
+      // Si on est au bout d'un set, on dÃ©cale
       if ((n+1) % PROBE_NB_SAMPLES_MAX == 0) {
 	set = set->next;//printf("*** %d -> fin de set\n", n);
       }
-      // Si on a assez d'échantillons, on stoque la moyenne
+      // Si on a assez d'Ã©chantillons, on stoque la moyenne
       if ((n+1) % blockSize == 0) {
 	//printf("*** %d -> On sample\n", n);
          probe_sample(bmp, sum/(double)blockSize);
@@ -1433,8 +1433,8 @@ void probe_exhaustiveToBlockMean(struct probe_t * ep, struct probe_t * bmp, unsi
 }
 
 /*
- * Modification du nom, il est copié depuis le paramètre
- * qui peut donc être détruit ensuite
+ * Modification du nom, il est copiÃ© depuis le paramÃ¨tre
+ * qui peut donc Ãªtre dÃ©truit ensuite
  */
 void probe_setName(struct probe_t * p, char * name)
 {
@@ -1459,7 +1459,7 @@ void probe_setName(struct probe_t * p, char * name)
 
 /*
  * Lecture du nom. C'est un pointeur sur le nom qui
- * est retourné, il doit donc être copié avant toute
+ * est retournÃ©, il doit donc Ãªtre copiÃ© avant toute
  * modification/destruction.
  */
 char * probe_getName(struct probe_t * p)
@@ -1468,7 +1468,7 @@ char * probe_getName(struct probe_t * p)
 }
 
 /*
- * Lecture du nombre min d'échantillons dans un graphBar
+ * Lecture du nombre min d'Ã©chantillons dans un graphBar
   */
 int probe_graphBarGetMinValue(struct probe_t * p)
 {
@@ -1484,7 +1484,7 @@ int probe_graphBarGetMinValue(struct probe_t * p)
 } 
 
 /*
- * Lecture du nombre max d'échantillons dans un graphBar
+ * Lecture du nombre max d'Ã©chantillons dans un graphBar
  */
 int probe_graphBarGetMaxValue(struct probe_t * p)
 {
@@ -1508,10 +1508,10 @@ int probe_graphBarGetValue(struct probe_t * p, int n)
 }
 
 /*
- * Les méta sondes !!
+ * Les mÃ©ta sondes !!
  * 
  * La sonde p2 observe une valeur de la sonde 1. p2 sera typiquement
- * une sonde périodique et p1 une sonde non exhaustive !
+ * une sonde pÃ©riodique et p1 une sonde non exhaustive !
  */
 void probe_addMeanProbe(struct probe_t * p1, struct probe_t * p2)
 {

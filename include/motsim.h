@@ -2,16 +2,16 @@
  *   Le moteur de simulation.
  * 
  *   Puisqu'il n'y aura jamais qu'un seul moteur de simulation et
- * qu'il faut le passer en paramètre à de nombreuses fonctions qui n'en
- * ont pas directement besoin mais qui vont elles mêmes le passer à 
- * d'autres fonctions pour finalement qu'il soit utilisé par les fonctions
- * qui génèrent des événements, ... bref une variable globale est créée
- * ici et sera utilisée lorsque nécessaire. Ce n'est pas très glorieux
- * mais ça simplifie tellement.
+ * qu'il faut le passer en paramÃ¨tre Ã  de nombreuses fonctions qui n'en
+ * ont pas directement besoin mais qui vont elles mÃªmes le passer Ã  
+ * d'autres fonctions pour finalement qu'il soit utilisÃ© par les fonctions
+ * qui gÃ©nÃ¨rent des Ã©vÃ©nements, ... bref une variable globale est crÃ©Ã©e
+ * ici et sera utilisÃ©e lorsque nÃ©cessaire. Ce n'est pas trÃ¨s glorieux
+ * mais Ã§a simplifie tellement.
  *
  *   A voir : rendre tout ca multithreadable !
  *
- *   Attention, il faut tout de même l'initialiser ! 
+ *   Attention, il faut tout de mÃªme l'initialiser ! 
  */
 #ifndef __DEF_MOTSIM
 #define __DEF_MOTSIM
@@ -32,20 +32,20 @@ struct event_t;
 extern struct motsim_t * __motSim;
 
 /*
- * Initialisation du système
+ * Initialisation du systÃ¨me
  */
 void motSim_create(); 
 
 /*
- * A la fin d'une simulation, certains objets ont besoin d'être
- * réinitialiser (pour remettre des compteurs à 0 par exemple). Ces
- * objets doivent s'enregistrer auprès du simulateur par la fonction
+ * A la fin d'une simulation, certains objets ont besoin d'Ãªtre
+ * rÃ©initialiser (pour remettre des compteurs Ã  0 par exemple). Ces
+ * objets doivent s'enregistrer auprÃ¨s du simulateur par la fonction
  * suivante
  */
 void motsim_addToResetList(void * data, void (*resetFunc)(void * data));
 
 /*
- * Réinitialisation pour une nouvelle exécution
+ * RÃ©initialisation pour une nouvelle exÃ©cution
  */
 void motSim_reset();
 
@@ -62,23 +62,23 @@ void motSim_insertNewEvent(void (*run)(void *data), void * data, double date);
 void motSim_runNevents(int nbEvents);
 
 /* 
- * Obtention de la date courante, exprimée en secondes
+ * Obtention de la date courante, exprimÃ©e en secondes
  */
 motSimDate_t motSim_getCurrentTime();
 
 /*
- * Lancement d'une simulation d'une durée max de date
+ * Lancement d'une simulation d'une durÃ©e max de date
  */
 void motSim_runUntil(double date);
 
 /*
- * Un petit affichage de l'état actuel de la simulation
+ * Un petit affichage de l'Ã©tat actuel de la simulation
  */
 void motSim_printStatus();
 
 /*
- * Lancement de nbSimu simulations, chacune d'une durée inférieures ou
- * égale à date.
+ * Lancement de nbSimu simulations, chacune d'une durÃ©e infÃ©rieures ou
+ * Ã©gale Ã  date.
  */
 void motSim_runNSimu(double date, int nbSimu);
 
@@ -125,9 +125,9 @@ void motSim_exit(int retValue);
 #define DEBUG_ALWAYS   0xFFFFFFFF
 
 static unsigned long debug_mask = 0x00000000
-  //     | DEBUG_EVENT     // Les événements (lourd !)
+  //     | DEBUG_EVENT     // Les Ã©vÃ©nements (lourd !)
   //       | DEBUG_MOTSIM    // Le moteur
-  //     | DEBUG_GENE      // Les générateurs de nombre/date/...
+  //     | DEBUG_GENE      // Les gÃ©nÃ©rateurs de nombre/date/...
   //     | DEBUG_SRV       // Le serveur
   //     | DEBUG_SRC       // La source
   //      | DEBUG_FILE      // La gestion des files
@@ -138,11 +138,11 @@ static unsigned long debug_mask = 0x00000000
   //     | DEBUG_DVB       // Les outils DVB
   //      | DEBUG_KS        // L'algorithme Knapsack
   //   | DEBUG_KS_VERB   // L'algorithme Knapsack verbeux
-  //     | DEBUG_WARN      // Des infos qui peuvent aider à debuger la SIMU
+  //     | DEBUG_WARN      // Des infos qui peuvent aider Ã  debuger la SIMU
   //       | DEBUG_ACM
   //       | DEBUG_SCHED
   //     | DEBUG_MALLOC    // L'utilisation de malloc
-       | DEBUG_TBD       // Le code pas implanté
+       | DEBUG_TBD       // Le code pas implantÃ©
   //     | DEBUG_ALWAYS
   ;
 

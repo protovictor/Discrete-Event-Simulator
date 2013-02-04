@@ -1,7 +1,7 @@
 /*
  *    Quelques tests simples sur les sondes
  *
- *    probes-1 : quelques tests élémentaires sur les sondes
+ *    probes-1 : quelques tests Ã©lÃ©mentaires sur les sondes
  *    exhaustives
  */
 #include <float.h>
@@ -20,11 +20,11 @@ int testerExhaustive(unsigned long nbEl)
    unsigned long l;
    double meanE, meanGB, data;
 
-   // Création d'une sonde exhaustive
+   // CrÃ©ation d'une sonde exhaustive
    ep = probe_createExhaustive();
 
    //   printf("[PROBE-1] Insertion de %ld elements\n", nbEl);
-   // On la peuple avec des valeurs séquentielles
+   // On la peuple avec des valeurs sÃ©quentielles
    for (l = 0; l < nbEl; l++){
       probe_sample(ep, (double)l);
    }
@@ -40,7 +40,7 @@ int testerExhaustive(unsigned long nbEl)
       }
    }
 
-   // Vérification de quelques résultats (min, max, moyenne, ...)
+   // VÃ©rification de quelques rÃ©sultats (min, max, moyenne, ...)
    if (probe_min(ep) != 0.0) {
       printf("[PROBE-1] ERREUR : min incorrect\n");
       result = 1;

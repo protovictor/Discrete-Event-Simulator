@@ -22,13 +22,13 @@ static struct schedACM_func_t schedKS_func = {
 };
 
 /*
- * Les caractéristiques d'un tel ordonnanceur
+ * Les caractÃ©ristiques d'un tel ordonnanceur
  */
 struct sched_kse_t {
    struct schedACM_t * schedACM;
 
    // La chose suivante est une variable de l'algo. Je sais que c'est crade de
-   // la mettre là, mais   elle est lourde à initialiser dynamiquement !
+   // la mettre lÃ , mais   elle est lourde Ã  initialiser dynamiquement !
    t_remplissage remplissage[NB_SOUS_CAS_MAX];
 
    // Cherche-t-on vraiment tous les cas ?
@@ -37,11 +37,11 @@ struct sched_kse_t {
 };
 
 /*
- * Création d'un scheduler avec sa "destination". Cette dernière doit
- * être de type struct DVBS2ll_t  et avoir déjà été complêtement
- * construite (tous les MODCODS créés).
- * Le nombre de files de QoS différentes par MODCOD est également
- * passé en paramètre.
+ * CrÃ©ation d'un scheduler avec sa "destination". Cette derniÃ¨re doit
+ * Ãªtre de type struct DVBS2ll_t  et avoir dÃ©jÃ  Ã©tÃ© complÃªtement
+ * construite (tous les MODCODS crÃ©Ã©s).
+ * Le nombre de files de QoS diffÃ©rentes par MODCOD est Ã©galement
+ * passÃ© en paramÃ¨tre.
  */
 struct schedACM_t * sched_kse_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int declOK, int exhaustif)
 {
@@ -63,12 +63,12 @@ struct schedACM_t * sched_kse_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int 
 }
 
 /*
- * Calcul de l'impact sur la fonction d'utilité de l'émission d'un
+ * Calcul de l'impact sur la fonction d'utilitÃ© de l'Ã©mission d'un
  * paquet de taille 'taillePaquet' de la file de QoS 'qos' et de modcod
- * 'mcFile' dans une BBFRAME associée au MODCOD 'mc'.
- * 'taillePrecedente' est le volume des autres paquets (de la même
- * file, mais antérieurs) qui doivent être émis dans la même BBFRAME.
- * 2012-02-27 : Cette valeur n'est plus utilisée dans la nouvelle version
+ * 'mcFile' dans une BBFRAME associÃ©e au MODCOD 'mc'.
+ * 'taillePrecedente' est le volume des autres paquets (de la mÃªme
+ * file, mais antÃ©rieurs) qui doivent Ãªtre Ã©mis dans la mÃªme BBFRAME.
+ * 2012-02-27 : Cette valeur n'est plus utilisÃ©e dans la nouvelle version
  */
 double gainUtilite(t_qosMgt * qos, int taillePaquet, int mcBBFRAME, struct DVBS2ll_t * dvbs2ll)
 {
@@ -81,8 +81,8 @@ double gainUtilite(t_qosMgt * qos, int taillePaquet, int mcBBFRAME, struct DVBS2
 }
 
 /*
- * Affichage de l'état du système des files d'attente avec l'interet de
- * chaque paquet étant donné le MODCOD envisagé 'mc'.
+ * Affichage de l'Ã©tat du systÃ¨me des files d'attente avec l'interet de
+ * chaque paquet Ã©tant donnÃ© le MODCOD envisagÃ© 'mc'.
  */
 void afficherFiles(struct sched_kse_t * sched, int mc)
 {
@@ -106,8 +106,8 @@ void afficherFiles(struct sched_kse_t * sched, int mc)
 }
 
 /*
- * Resolution exhaustive du problème du sac à dos avec une BBFRAME dont le modcod est
- * passé en paramètre
+ * Resolution exhaustive du problÃ¨me du sac Ã  dos avec une BBFRAME dont le modcod est
+ * passÃ© en paramÃ¨tre
  */
 void knapsackParModCod(int mc, struct sched_kse_t * sched)
 {
@@ -120,8 +120,8 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
    double interet;
    int volume;
    int fini;
-   int choice; // Pour tirer au hasard en cas d'égalité
-   int mt, qt, doublon; // Pour la recherche de doublon dans la démarche exhaustive
+   int choice; // Pour tirer au hasard en cas d'Ã©galitÃ©
+   int mt, qt, doublon; // Pour la recherche de doublon dans la dÃ©marche exhaustive
 
    do { // Pour chaque taille de BBFRAME
       printf_debug(DEBUG_KS_VERB, "       ---< Solution %d en cours d'analyse (volume %d / interet %5.2e) >---\n",
@@ -135,7 +135,7 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
       printf_debug(DEBUG_KS_VERB, "------------------------------\n");
 
       // Recherche de tous les sched->remplissages atteignables 
-      // Pour chaque file d'attente du MODCOD mc ou d'un MODCOD permettant le déclassement ...
+      // Pour chaque file d'attente du MODCOD mc ou d'un MODCOD permettant le dÃ©classement ...
       for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)); m++) {
          qb = random()%nbQoS(sched->schedACM);
          for (qa = 0; qa < nbQoS(sched->schedACM); qa++) {
@@ -155,10 +155,10 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
 	       printf_debug(DEBUG_KS_VERB, "      Oui\n");
                tp = filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), sched->remplissage[rCourant].nbrePaquets[m][q]+1);
                printf_debug(DEBUG_KS_VERB, "         (taille %d)\n", tp);
-               // ... quelle influence a ce remplissage sur l'utilité ?
+               // ... quelle influence a ce remplissage sur l'utilitÃ© ?
                interet = sched->remplissage[rCourant].interet + gainUtilite(schedACM_getQoS(sched->schedACM, m, q), tp, mc, schedACM_getACMLink(sched->schedACM));
                printf_debug(DEBUG_KS_VERB, "         (interet %5.2e)\n", interet);
-               // ... et à quel volume total cela nous conduit ?
+               // ... et Ã  quel volume total cela nous conduit ?
                volume = sched->remplissage[rCourant].volumeTotal + tp;
                printf_debug(DEBUG_KS_VERB, "         vers volume %d\n", volume);
 
@@ -168,12 +168,12 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
                   while ((rDispo < NB_SOUS_CAS_MAX) && (sched->remplissage[rDispo].volumeTotal != 0)) {
                      rDispo++;
 	          }
-                  // Cherchons si la meme configuration existait déjà
+                  // Cherchons si la meme configuration existait dÃ©jÃ 
                   rS =  1;
                   doublon = 0;
                   while ((!doublon) &&(rS < NB_SOUS_CAS_MAX) && (sched->remplissage[rS].volumeTotal != 0)) {
 		     if (sched->remplissage[rS].volumeTotal == volume) {
-                       doublon = 1; // C'est la même jusqu'à preuve du contraire
+                       doublon = 1; // C'est la mÃªme jusqu'Ã  preuve du contraire
                        // On compare file par file 
 		       for (mt = 0; mt < nbModCod(sched->schedACM); mt++) {
                           for (qt = 0; qt < nbQoS(sched->schedACM); qt++) {
@@ -194,7 +194,7 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
 		     }
                      rS++;
 	          }
-                  // Sinon, il faut sauver ce nouveau résultat
+                  // Sinon, il faut sauver ce nouveau rÃ©sultat
 	          if (!doublon) {
                      if (rDispo < NB_SOUS_CAS_MAX)  {
                         schedACM_tryingNewSolution(sched->schedACM);
@@ -231,27 +231,27 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
 
 	       } else { // Recherche non totalement exhaustive !!
                   // Nous avons donc une remplissage pour le knapsack de taille 'volume' !
-                  // Cherchons s'il en existait déjà une ...
+                  // Cherchons s'il en existait dÃ©jÃ  une ...
                   rS = rCourant + 1;
                   assert(rS < NB_SOUS_CAS_MAX);
                   rDispo = NB_SOUS_CAS_MAX; // On va en profiter pour chercher une place !
                   while ((sched->remplissage[rS].volumeTotal != volume) && (rS < NB_SOUS_CAS_MAX)) {
                      if ((sched->remplissage[rS].volumeTotal == 0) && (rDispo == NB_SOUS_CAS_MAX)) {
-                        rDispo = rS; // On note la première place libre
+                        rDispo = rS; // On note la premiÃ¨re place libre
 	             }
                      rS++;
 	          }
                   // S'il en existait une, ...
                   if ((rS < NB_SOUS_CAS_MAX) && (sched->remplissage[rS].volumeTotal == volume)) {
    		     printf_debug(DEBUG_KS_VERB, "         Etat %d (interet %f, %d choix)\n", rS, sched->remplissage[rS].interet, sched->remplissage[rS].nbChoix);
-		     // En cas d'égalité (est-ce possible ?), on va tirer au sort
+		     // En cas d'Ã©galitÃ© (est-ce possible ?), on va tirer au sort
                      if (sched->remplissage[rS].interet == interet) {
-                        sched->remplissage[rS].nbChoix++;  // Une de plus qui mène ici
+                        sched->remplissage[rS].nbChoix++;  // Une de plus qui mÃ¨ne ici
 		        //                     choice = (int)((random()/(RAND_MAX + 1.0))*sched->remplissage[rS].nbChoix);
 		        //     		     printf("%d/%d\n", choice, sched->remplissage[rS].nbChoix);
 		     }
                      // ... fait-on mieux ?
-                     if  (    (sched->remplissage[rS].interet < interet)  // 2012-03-08 pas mieux si égalité
+                     if  (    (sched->remplissage[rS].interet < interet)  // 2012-03-08 pas mieux si Ã©galitÃ©
 		  	   //		       || ((sched->remplissage[rS].interet == interet) && (choice == 1))
 		          ){
                         printf_debug(DEBUG_KS_VERB, "            Mieux que %5.2f\n", sched->remplissage[rS].interet);
@@ -263,7 +263,7 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
     		     } else {
                         printf_debug(DEBUG_KS_VERB, "           Pas mieux que %5.2f\n", sched->remplissage[rS].interet);
 		     }
-                  // Sinon, il faut sauver ce nouveau résultat
+                  // Sinon, il faut sauver ce nouveau rÃ©sultat
 	          } else if (rDispo < NB_SOUS_CAS_MAX)  {
                      schedACM_tryingNewSolution(sched->schedACM);
                      printf_debug(DEBUG_KS_VERB, "             Nouvel etat cree [id %d, taille %d]\n", rDispo, volume);
@@ -284,8 +284,8 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
 
       sched->remplissage[rCourant].casTraite = 1; // C'est boucle pour ce cas !
       // rCourant avance vers le plus petit prochain (ie plus gros que le courant)
-      //  knapsack résolu s'il existe (il peut ne plus y avoir de paquet !)
-      // On en profite pour chercher la meilleure solution trouvée pour le moment
+      //  knapsack rÃ©solu s'il existe (il peut ne plus y avoir de paquet !)
+      // On en profite pour chercher la meilleure solution trouvÃ©e pour le moment
       // parce que si c'est fini, il faut la donner
       volume = sched->remplissage[rCourant].volumeTotal;
       rProchain = 0;
@@ -295,7 +295,7 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
          // Si c'est un plus gros snapsack que le courant ...
 	//	if (sched->remplissage[rS].volumeTotal > volume) {
 	if (!sched->remplissage[rS].casTraite) {
-            // ... et le plus petit trouvé ...
+            // ... et le plus petit trouvÃ© ...
             if ((sched->remplissage[rS].volumeTotal < sched->remplissage[rProchain].volumeTotal) || (rProchain == 0)) {
                // ... alors c'est le prochain !
                rProchain = rS;
@@ -308,7 +308,7 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
          rS++;
       }
 
-      // Si on a trouvé un nouveau cas (non plein), on y va !
+      // Si on a trouvÃ© un nouveau cas (non plein), on y va !
       if ((rProchain != 0) && (8*sched->remplissage[rProchain].volumeTotal < DVBS2ll_bbframePayloadBitSize(dvbs2ll, mc))) {
          printf_debug(DEBUG_KS_VERB, "Passons au cas %d (t %d, i %5.2e)\n", rProchain, sched->remplissage[rProchain].volumeTotal, sched->remplissage[rProchain].interet);
          rCourant = rProchain;
@@ -320,8 +320,8 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
       }
    } while (!fini);
 
-   // On sauvegarde la meilleure solution touvée ici
-   // (on écrase le cas échéant la précédente)
+   // On sauvegarde la meilleure solution touvÃ©e ici
+   // (on Ã©crase le cas Ã©chÃ©ant la prÃ©cÃ©dente)
 
    if (sched->remplissage[rMeilleur].interet > schedACM_getSolution(sched->schedACM)->interet) {
       remplissage_copy(&(sched->remplissage[rMeilleur]), schedACM_getSolution(sched->schedACM),
@@ -334,7 +334,7 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
 }
 
 /*
- * bestSolution (out) ordonnancement choisi (doit être initialisé
+ * bestSolution (out) ordonnancement choisi (doit Ãªtre initialisÃ©
  * avant appel de cette fonction).
  */
 void scheduler_knapsack_exhaustif(struct sched_kse_t * sched)
@@ -357,7 +357,7 @@ void scheduler_knapsack_exhaustif(struct sched_kse_t * sched)
       knapsackParModCod(mc, sched);
 
       printf_debug(DEBUG_KS, "-------====< Ordonnancement choisi mc=%d >====-------\n", schedACM_getSolution(sched->schedACM)->modcod);
-      printf_debug(DEBUG_KS, "Nombre de solutions testées : %d\n", schedACM_getNbSolutions(sched->schedACM));
+      printf_debug(DEBUG_KS, "Nombre de solutions testÃ©es : %d\n", schedACM_getNbSolutions(sched->schedACM));
       for (m = 0; m < nbModCod(sched->schedACM); m++) {
          printf_debug(DEBUG_KS, "  MODCOD %d\n", m);
          for (q = 0; q < nbQoS(sched->schedACM); q++) {

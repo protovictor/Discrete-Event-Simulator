@@ -7,14 +7,14 @@
 struct probe_t;
 
 enum probeType_t {
-   exhaustiveProbeType,           // Conserve tous les échantillons
+   exhaustiveProbeType,           // Conserve tous les Ã©chantillons
    meanProbeType,                 // Conserve la moyenne
    timeSliceAverageProbeType,     // Conserve des moyennes temporelles
-   timeSliceThroughputProbeType,  // Conserve le débit moyen par tranche de temps
+   timeSliceThroughputProbeType,  // Conserve le dÃ©bit moyen par tranche de temps
    graphBarProbeType,             // Conserve un histogramme
    EMAProbeType,                  // Exponential Moving Average AFAIRE
-   slidingWindowProbeType,        // Conserve une fenêtre de valeurs AFAIRE
-   periodicProbeType              // Enregistre périodiquement une valeur
+   slidingWindowProbeType,        // Conserve une fenÃªtre de valeurs AFAIRE
+   periodicProbeType              // Enregistre pÃ©riodiquement une valeur
 };
 
 
@@ -29,24 +29,24 @@ enum probeType_t {
 (t == slidingWindowProbeType)?"slidingWindow":"???"))))))) 
 
 /*
- * Pour le moment, c'est forcément des doubles
+ * Pour le moment, c'est forcÃ©ment des doubles
  */
-// Conserve tous les échantillons
+// Conserve tous les Ã©chantillons
 struct probe_t * probe_createExhaustive();  
 
-// Conserve des échantillons sur une fenêtre
+// Conserve des Ã©chantillons sur une fenÃªtre
 struct probe_t * probe_slidingWindowCreate(int windowLength);
 
-// Ne conserve aucun échantillon, juste la somme et le nombre
+// Ne conserve aucun Ã©chantillon, juste la somme et le nombre
 struct probe_t * probe_createMean();
 
-// Conserve une moyenne sur chaque tranche temporelle de durée t
+// Conserve une moyenne sur chaque tranche temporelle de durÃ©e t
 struct probe_t * probe_createTimeSliceAverage(double t);
 
-// Conserve un débit moyen par tranche temporelle de durée t
+// Conserve un dÃ©bit moyen par tranche temporelle de durÃ©e t
 struct probe_t * probe_createTimeSliceThroughput(double t);
 
-// Conserve un échantillon à la fin de chaque tranche temporelle de durée t
+// Conserve un Ã©chantillon Ã  la fin de chaque tranche temporelle de durÃ©e t
 struct probe_t * probe_periodicCreate(double t);
 
 // Conserve une moyenne mobile M <- a.M + (1-a).sample
@@ -63,22 +63,22 @@ struct probe_t * probe_createGraphBar(double min, double max, unsigned long nbIn
 void probe_delete(struct probe_t * p);
 
 /*
- * Chaînage des probes p1 et p2, dans cet ordre. Tout échantillon sur
- * p1 sera répercuté sur p2. C'est la seule méthode qui soit
- * réperecutée en cascade. Les reset, calcul de moyenne, ... doivent
- * être invoquées sur chaque sonde si nécessaire
+ * ChaÃ®nage des probes p1 et p2, dans cet ordre. Tout Ã©chantillon sur
+ * p1 sera rÃ©percutÃ© sur p2. C'est la seule mÃ©thode qui soit
+ * rÃ©perecutÃ©e en cascade. Les reset, calcul de moyenne, ... doivent
+ * Ãªtre invoquÃ©es sur chaque sonde si nÃ©cessaire
  */
 void probe_chain(struct probe_t * p1, struct probe_t * p2);
 
 /*
- * Réinitialisation d'une probe (pour permettre de relancer une
- * simulation dans les mêmes conditions). Tout est effacé et doit donc
- * avoir été sauvegardé si besoin.
+ * RÃ©initialisation d'une probe (pour permettre de relancer une
+ * simulation dans les mÃªmes conditions). Tout est effacÃ© et doit donc
+ * avoir Ã©tÃ© sauvegardÃ© si besoin.
  */
 void probe_reset(struct probe_t * probe);
 
 /*
- * Une sonde persistante ne sera pas réinitialisée en cas de reset (en
+ * Une sonde persistante ne sera pas rÃ©initialisÃ©e en cas de reset (en
  * fin de simulation)
  */
 void probe_setPersistent(struct probe_t * p);
@@ -86,14 +86,14 @@ void probe_setPersistent(struct probe_t * p);
 void probe_resetAllProbes();
 
 /*
- * Modification du nom, il est copié depuis le paramètre
- * qui peut donc être détruit ensuite
+ * Modification du nom, il est copiÃ© depuis le paramÃ¨tre
+ * qui peut donc Ãªtre dÃ©truit ensuite
  */
 void probe_setName(struct probe_t * p, char * name);
 
 /*
  * Lecture du nom. C'est un pointeur sur le nom qui
- * est retourné, il doit donc être copié avent toute
+ * est retournÃ©, il doit donc Ãªtre copiÃ© avent toute
  * modification/destruction.
  */
 char * probe_getName(struct probe_t * p);
@@ -122,45 +122,45 @@ double probe_max(struct probe_t * probe);
 double probe_min(struct probe_t * probe);
 
 /*
- * Valeur moyenne, variance, écart type, ... empriques !
+ * Valeur moyenne, variance, Ã©cart type, ... empriques !
  */
 double probe_mean(struct probe_t * probe);
 double probe_variance(struct probe_t * probe);
 double probe_stdDev(struct probe_t * probe);
 
 /*
- * Demi largeur de l'intervalle de confiance à 5%
+ * Demi largeur de l'intervalle de confiance Ã  5%
  */
 double probe_demiIntervalleConfiance5pc(struct probe_t * p);
 /*
- * Tentative de calcul de l'IC à 5% par la méthode des coupes. C'est
- * très probablement faux ! Combien de blocs de quelle taille par
+ * Tentative de calcul de l'IC Ã  5% par la mÃ©thode des coupes. C'est
+ * trÃ¨s probablement faux ! Combien de blocs de quelle taille par
  * exemple ?
  */
 double probe_demiIntervalleConfiance5pcCoupes(struct probe_t * p);
 
 /*
- * Les moments de la loi d'inter-arrivée des événements de sondage
+ * Les moments de la loi d'inter-arrivÃ©e des Ã©vÃ©nements de sondage
  */
 double probe_IAMean(struct probe_t * probe);
 double probe_IAVariance(struct probe_t * probe);
 double probe_IAStdDev(struct probe_t * probe);
 
 /*
- * Consultation du débit. On considère ici chaque nouvelle valeur
+ * Consultation du dÃ©bit. On considÃ¨re ici chaque nouvelle valeur
  * comme la taille d'une nouvelle PDU. La fonction suivante permet
- * alors de connaitre le débit qui en  découle. 
+ * alors de connaitre le dÃ©bit qui en  dÃ©coule. 
  *
- * Il s'agit d'une valeur "instantanée"
+ * Il s'agit d'une valeur "instantanÃ©e"
  *
- * La méthode de calcul est évidemment dépendante de la nature de la
- * sonde et sa précision est donc variable
+ * La mÃ©thode de calcul est Ã©videmment dÃ©pendante de la nature de la
+ * sonde et sa prÃ©cision est donc variable
  *
- * - Fenêtre glissante : le débit est, à tout moment, le rapport entre
- * la taille cumulée reçue et la durée depuis la première PDU reçue
+ * - FenÃªtre glissante : le dÃ©bit est, Ã  tout moment, le rapport entre
+ * la taille cumulÃ©e reÃ§ue et la durÃ©e depuis la premiÃ¨re PDU reÃ§ue
  * non inclue pour la taille).
- * - Fenêtre temporelle : rapport entre la taille reçue durant la
- * dernière  fenêtre révolue et sa durée
+ * - FenÃªtre temporelle : rapport entre la taille reÃ§ue durant la
+ * derniÃ¨re  fenÃªtre rÃ©volue et sa durÃ©e
  */
 double probe_throughput(struct probe_t * p);
 
@@ -175,8 +175,8 @@ double probe_exhaustiveGetSampleN(struct probe_t * probe, int n);
 void probe_exhaustiveToGraphBar(struct probe_t * ep, struct probe_t * gbp);
 
 /*
- * Réduction du nombre d'échantillons d'une sonde exhaustive en
- * remplaçant blockSize échantillons consécutifs par leur moyenne
+ * RÃ©duction du nombre d'Ã©chantillons d'une sonde exhaustive en
+ * remplaÃ§ant blockSize Ã©chantillons consÃ©cutifs par leur moyenne
  */
 void probe_exhaustiveToBlockMean(struct probe_t * ep, struct probe_t * bmp, unsigned long blockSize);
 
@@ -197,31 +197,31 @@ int probe_graphBarGetMaxValue(struct probe_t * probe);
 int probe_graphBarGetValue(struct probe_t * probe, int n);
 
 /*
- * Chaîner la nouvelle probe p2 dans une liste débutant par p1 qui
- * peut être nul 
+ * ChaÃ®ner la nouvelle probe p2 dans une liste dÃ©butant par p1 qui
+ * peut Ãªtre nul 
  * 
  *   p1 <- p2 suivi de p1
  */
 #define addProbe(p1, p2) {assert(p2 != NULL) ; p2->nextProbe = p1;p1 = p2;}
 
 /*
- * Les méta sondes !!
+ * Les mÃ©ta sondes !!
  * 
  * La sonde p2 observe une valeur de la sonde 1. p2 sera typiquement
- * une sonde périodique et p1 une sonde non exhaustive !
+ * une sonde pÃ©riodique et p1 une sonde non exhaustive !
  */
-// Une sonde systématique. Ceci peut être utile lorsque p2 collecte
-// les échantillons de plusieurs sondes
+// Une sonde systÃ©matique. Ceci peut Ãªtre utile lorsque p2 collecte
+// les Ã©chantillons de plusieurs sondes
 void probe_addSampleProbe(struct probe_t * p1, struct probe_t * p2);
 
 // Une sonde sur la moyenne
 void probe_addMeanProbe(struct probe_t * p1, struct probe_t * p2);
 
-// Une sonde sur le débit
+// Une sonde sur le dÃ©bit
 void probe_addThroughputProbe(struct probe_t * p1, struct probe_t * p2);
 
 /*
- * Nombre maximal d'echantillons dans un set. Ca n'a pas lieu d'être
+ * Nombre maximal d'echantillons dans un set. Ca n'a pas lieu d'Ãªtre
  * public a priori, mais c'est pratique pour certains tests de debogage
  */
 #define PROBE_NB_SAMPLES_MAX 32768

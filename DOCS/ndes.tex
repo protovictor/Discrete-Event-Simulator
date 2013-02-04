@@ -410,7 +410,8 @@ Temps de service moyen = 0.100176 (1/mu     = 0.100000)
  $
 \end{verbatim}
 
-
+%------------------------------------------------------------------------
+%
 %------------------------------------------------------------------------
 \subsection{Ma deuxiéme simulation : super, encore une file M/M/1 !}
 
@@ -553,7 +554,7 @@ cette chose !
 de produire ou transférer des PDU doit exister une fonction de la forme
 
 \begin{verbatim}
- struct PDU_t * getPDU(void * source);
+   struct PDU_t * getPDU(void * source);
 \end{verbatim}
 
    Le paramètre est un pointeur vers des "données privées" permettant
@@ -717,11 +718,121 @@ trouve rien, il retourne un pointeur \lstinline!NULL! à l'entité aval
 {\sc pdu} dans une file par l'invocation de son \lstinline!processPDU!
 qui invoquera celui de l'ordonnanceur, \ldots
 
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Plusieurs émetteurs vers le même destinataire}
+
+   Comment faire lorsque plusieurs entités sont en amont d'une même
+entitée aval ? Par exemple plusieurs sources qui envoient des clients
+vers un unique serveur.
+
+   En fait, ce n'est pas fondamentalement un problème en soit, dans la
+mesure ou l'entité aval n'a en général pas à connaître l'entité
+amont. Du coup, s'il y en a deux ou plus, elle s'en moque. Oui, sauf
+que non ! Imagine une entité qui n'est pas toujours disposée à traiter
+une {\sc pdu} entrante. En général, elle va stocker quelque part une
+information qui lui permettra de venir chercher la {\sc pdu} quand
+elle le voudra bien. Si ce phénomène se produit plusieurs fois avant
+que l'entité soit disposée à enfin traiter les {\sc pdu}s en attente,
+seule la dernière risque d'avoir été mémorisée !
+
+   Du coup, on pourrait être tenté de faire une liste chaînée de ces 
+événements, de sorte à n'en rater aucun. Malheureusement, cela met
+nécessairement en place une politique {\sc fcfs}, alors qu'on peut
+souhaiter implanter autre chose.
+
+%========================================================================
+%
+%========================================================================
+\section{Extension du simulateur}
+\label{section:extension}
+
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Réalisation d'un ordonnanceur}
+
+
+
 %========================================================================
 %
 %========================================================================
 \section{Le moteur de simulation}
 \label{section:motsim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Gestion mémoire}
+
+   L'allocation de mémoire peut s'avérer problématique, aussi la
+fonction suivante a été ajoutée
+
+\index{sim\_malloc}
+\begin{verbatim}
+void * sim_malloc(int l);
+\end{verbatim}
+
+   Elle présente l'avantage de vérifier le résultat de {\tt malloc}
+(si les assertions sont activées) et de comptabiliser les appels afins
+de détecter une fuite mémoire.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Message de débogage}
+
+   La fonction suivante est proposée 
+
+\index{printf\_debug}
+\begin{verbatim}
+   void printf_debug(int lvl, char * format, ...);
+\end{verbatim}
+
+   Elle s'utilise comme {\tt printf} avec en plus un niveau de
+débogage (le premier paramètre). Un certain nombre de valeurs sont
+définies dans {\tt motsim.h} parmi lesquelles
+
+\index{DEBUG\_ALWAYS}
+\begin{verbatim}
+#define DEBUG_ALWAYS   0xFFFFFFFF
+\end{verbatim}
+
+   qui permet d'assurer que le message sera toujours affiché.
+
+   Les mécanismes de débogage sont activés par la définition de la
+macro {\tt DEBUG\_NDES}.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Gestion des événements}
+
+   Elle est décrite dans {\tt event.h} et codée dans {\tt event.c}.
+ 
+   On peut créer un événement avec la fonction suivante 
+
+\index{event\_create}
+\begin{verbatim}
+struct event_t * event_create(void (*run)(void *data),
+			      void * data,
+			      double date);
+\end{verbatim}
+
+   Attention, l'événement ne sera exécuté que si il est placé dans la
+file d'attente du simulateur.
+
+   On peut créer un événement et l'insérer immédiatement dans cette
+file grâce à la fonction
+
+\index{event\_add}
+\begin{verbatim}
+void event_add(void (*run)(void *data),
+	       void * data,
+	       double date);
+\end{verbatim}
 
 %========================================================================
 %
@@ -890,12 +1001,41 @@ simulé), et des données privées (un pointeur).
 %------------------------------------------------------------------------
 %
 %------------------------------------------------------------------------
+\subsection{Création/destruction}
+
+   On la crée avec la fonction
+
+\index{PDU\_create}
+\begin{verbatim}
+struct PDU_t * PDU_create(int size, void * private);
+\end{verbatim}
+
+   Le paramètre {\tt size} est évidemment la taille en octets, et {\tt
+private} peut être un pointeur vers des données privées associées à
+cette {\sc pdu} (il peut être {\tt NULL}, personnellement, je m'en
+fiche).
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Les caractéristiques de base}
+
+   La taille d'une {\sc pdu} est donnée par
+
+\index{PDU\_size}
+\begin{verbatim}
+int PDU_size(struct PDU_t * PDU);
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
 \subsection{Les données privées}
 
 %========================================================================
 %
 %========================================================================
-\section{Les files}
+\section{Les files de {\sc pdu}}
 \label{section:file}
 
    C'est l'outil de base pour stocker des objets selon une stratégie
@@ -912,6 +1052,7 @@ privées. Il est donc simple de construire des files de n'importe quoi !
 
    Une file est créée de la façon suivante 
 
+\index{filePDU\_create}
 \begin{verbatim}
 struct filePDU_t * filePDU_create(void * destination,
 			    processPDU_t destProcessPDU);
@@ -922,6 +1063,11 @@ vers lequel sont transmis les objets présents dans la file. Dés qu'un
 objet est inséré dans la file, si la destination est disponible, il
 lui est envoyé au travers de la fonction \lstinline!destProcessPDU!
 passée en paramètre.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Insertion}
 
 %------------------------------------------------------------------------
 %
@@ -1266,6 +1412,9 @@ permettre ainsi à établir des valeurs inter-simulation, par exemple
 des intervalles de confiance.
 
 
+%========================================================================
+%
+%========================================================================
 \section{Des exemples}
 
 \subsection{Utilisation des sondes}
@@ -1286,6 +1435,26 @@ toute la transmission, alors une sonde mesurant la moyenne sera parfaitement
 suffisante :
 
 \paragraph{Débit ``instantanté''}
+
+%========================================================================
+%
+%========================================================================
+\section{La librairie}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Un lien unidirectionnel}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Un lien {\sc dvb-s2}}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Un ordonnanceur {\sc acm}}
 
 %========================================================================
 %

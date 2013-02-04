@@ -1,9 +1,9 @@
 /*----------------------------------------------------------------------*/
 /*      Implantation de la couche liaison DVB-S2.                       */
 /*                                                                      */
-/*  ATENTION : propagation à voir !!! Ce qui est fait dans endPropag    */
+/*  ATENTION : propagation Ã  voir !!! Ce qui est fait dans endPropag    */
 /*  devrait entre dans end transmission et un autre object (genre file) */
-/*  pourrait alors gérer la progpatation                                */
+/*  pourrait alors gÃ©rer la progpatation                                */
 /*----------------------------------------------------------------------*/
 #include <stdlib.h>    // Malloc, NULL, exit...
 #include <assert.h>
@@ -14,7 +14,7 @@
 #include <dvb-s2-ll.h>
 
 /*
- * Caractérisation d'un MODCOD
+ * CaractÃ©risation d'un MODCOD
  */
 struct t_modcod {
    unsigned int      bitLength;      // (codage) Taille de la charge utile
@@ -24,8 +24,8 @@ struct t_modcod {
 
 
 /*
- * Les MODCODs seront classés dans l'ordre croissant de la capacité
- * donc dans l'ordre décroissant de la robustesse. On peut donc déclasser
+ * Les MODCODs seront classÃ©s dans l'ordre croissant de la capacitÃ©
+ * donc dans l'ordre dÃ©croissant de la robustesse. On peut donc dÃ©classer
  * un paquet de j vers i si i < j
  */
 struct DVBS2ll_t {
@@ -36,12 +36,12 @@ struct DVBS2ll_t {
    int               available; // Le support est-il libre ?
 
    // Description de la destination
-   void * destination; // L'objet auquel sont destinées les PDUs
+   void * destination; // L'objet auquel sont destinÃ©es les PDUs
    processPDU_t send;  // La fonction permettant d'envoyer la PDU
 
    // Description de la source
    void * source;      // L'objet en question
-   getPDU_t getPDU;    // La méthode de récupération des PDU
+   getPDU_t getPDU;    // La mÃ©thode de rÃ©cupÃ©ration des PDU
 
    struct PDU_t   *  currentPDU; // La PDU en cours d'emission
 
@@ -50,7 +50,7 @@ struct DVBS2ll_t {
 };
 
 /*
- * Réinitalisation. On se remet dans un état connu
+ * RÃ©initalisation. On se remet dans un Ã©tat connu
  */
 void DVBS2ll_reset(struct DVBS2ll_t * dvbs2ll)
 {
@@ -61,10 +61,10 @@ void DVBS2ll_reset(struct DVBS2ll_t * dvbs2ll)
 }
 
 /*
- * Création d'une entité DVB-S2 couche 2. Attention, elle ne contient
- * aucun MODCOD par défaut, il faut en ajouter.
+ * CrÃ©ation d'une entitÃ© DVB-S2 couche 2. Attention, elle ne contient
+ * aucun MODCOD par dÃ©faut, il faut en ajouter.
  * 
- * Le débit est donnée en symboles/seconde
+ * Le dÃ©bit est donnÃ©e en symboles/seconde
  */
 struct DVBS2ll_t * DVBS2ll_create(void * destination,
 				  processPDU_t destProcessPDU,
@@ -83,7 +83,7 @@ struct DVBS2ll_t * DVBS2ll_create(void * destination,
    result->dummyFecFrameProbe = NULL;
    result->available = 1;
 
-   // Ajout à la liste des choses à réinitialiser avant une prochaine simu
+   // Ajout Ã  la liste des choses Ã  rÃ©initialiser avant une prochaine simu
    motsim_addToResetList(result, (void (*)(void *))DVBS2ll_reset);
 
    printf_debug(DEBUG_DVB, "%p created\n", result);
@@ -93,7 +93,7 @@ struct DVBS2ll_t * DVBS2ll_create(void * destination,
 
 /*
  * Attribution d'une source. Attention c'est obligatoire ici car c'est
- * l'entité DVBS2ll qui va solliciter la source lorsque le support
+ * l'entitÃ© DVBS2ll qui va solliciter la source lorsque le support
  * sera libre
  */
 void DVBS2ll_setSource(struct DVBS2ll_t * dvbs2ll, void * source, getPDU_t getPDU)
@@ -103,9 +103,9 @@ void DVBS2ll_setSource(struct DVBS2ll_t * dvbs2ll, void * source, getPDU_t getPD
 }
 
 /*
- * Ajout d'un MODCOD. Le codage est paramétré par le nombre de bits
+ * Ajout d'un MODCOD. Le codage est paramÃ©trÃ© par le nombre de bits
  * par BBFRAME et la modulation par le nombre de bits par symbole.
- * La valeur retournée est l'indice de ce nouveau MODCOD.
+ * La valeur retournÃ©e est l'indice de ce nouveau MODCOD.
  * 
  * WARNING  il serait bon de cacher la taille et de ne montrer que le codage
  */
@@ -124,7 +124,7 @@ int DVBS2ll_addModcod(struct DVBS2ll_t * dvbs2ll, unsigned int bbframeBitLength,
 }
 
 /*
- * Modification des propriétés du MODCOD n
+ * Modification des propriÃ©tÃ©s du MODCOD n
  */
 void DVBS2ll_setModcod(struct DVBS2ll_t * dvbs2ll,
                        int n,
@@ -134,8 +134,8 @@ void DVBS2ll_setModcod(struct DVBS2ll_t * dvbs2ll,
    assert(n>=0);
    assert(n<dvbs2ll->nbModCods);
 
-   // Les MODCODs doivent être "ordonnés" (pour le scheduler avec
-   // déclassement, pas génial, il vaudrait mieux que l'algo vérifie
+   // Les MODCODs doivent Ãªtre "ordonnÃ©s" (pour le scheduler avec
+   // dÃ©classement, pas gÃ©nial, il vaudrait mieux que l'algo vÃ©rifie
    // mais ce serait plus lourd !)
    if (n>0) {
      assert(bbframeBitLength >= dvbs2ll->modcod[n-1].bitLength);
@@ -163,7 +163,7 @@ int DVBS2ll_nbModcod(struct DVBS2ll_t * dvbs2ll)
 }
 
 /*
- * Capacité d'une BBFRAME associée au MODCOD d'indice fourni
+ * CapacitÃ© d'une BBFRAME associÃ©e au MODCOD d'indice fourni
  */ 
 unsigned int DVBS2ll_bbframePayloadBitSize(struct DVBS2ll_t * dvbs2ll, int mcIdx)
 {
@@ -179,9 +179,9 @@ unsigned int DVBS2ll_bitsPerSymbol(struct DVBS2ll_t * dvbs2ll, int mcIdx)
 }
 
 /*
- * Temps d'émission d'une BBFRAME associée au MODCOD d'indice fourni
- * Si l'indice n'est pas celui d'un MODCOD géré, le temps donné sera
- * celui de l'émission d'une DUMMY PLFRAME
+ * Temps d'Ã©mission d'une BBFRAME associÃ©e au MODCOD d'indice fourni
+ * Si l'indice n'est pas celui d'un MODCOD gÃ©rÃ©, le temps donnÃ© sera
+ * celui de l'Ã©mission d'une DUMMY PLFRAME
  */ 
 double DVBS2ll_bbframeTransmissionTime(struct DVBS2ll_t * dvbs2ll, int mcIdx)
 {
@@ -193,8 +193,8 @@ double DVBS2ll_bbframeTransmissionTime(struct DVBS2ll_t * dvbs2ll, int mcIdx)
 }
 
 /*
- * Ajout d'une sonde sur la taille de la charge utile des trames émises
- * sur un MODCOD donné
+ * Ajout d'une sonde sur la taille de la charge utile des trames Ã©mises
+ * sur un MODCOD donnÃ©
  */
 void DVBS2ll_setActualPayloadBitSizeProbe(struct DVBS2ll_t * dvbs2ll, int mc, struct probe_t * pr)
 {
@@ -235,18 +235,18 @@ void DVBS2ll_endTransmission(struct DVBS2ll_t * dvbs2ll)
    printf_debug(DEBUG_DVB, "t=%f\n",
 		motSim_getCurrentTime());
 
-   // Si PDU != NULL, on passe la PDU à la destination
+   // Si PDU != NULL, on passe la PDU Ã  la destination
    if (dvbs2ll->currentPDU) {
       dvbs2ll->send(dvbs2ll->destination, (getPDU_t)DVBS2ll_getPDU, dvbs2ll);
    }//  (sinon c'est une DUMMY, on n'en fait rien)
 
-   // On est pret à remettre le couvert ...
+   // On est pret Ã  remettre le couvert ...
    dvbs2ll->available = 1;
-   // On demande une BBFRAME à la source ...
+   // On demande une BBFRAME Ã  la source ...
    pdu = dvbs2ll->getPDU(dvbs2ll->source);
 
    // ... et on la transmet (s'il n'y en a pas, pdu == NULL et c'est
-   // une DUMMY qui est émise).
+   // une DUMMY qui est Ã©mise).
    DVBS2ll_sendPDU(dvbs2ll, pdu);
 }
 
@@ -261,8 +261,8 @@ void  DVBS2ll_endPropagation(struct DVBS2ll_t * dvbs2ll)
 }
 
 /*
- * Emission d'une PDU au travers d'un MODCOD sélectionné. La PDU doit
- * être d'une taille inférieure ou égale à la taille de charge utile du
+ * Emission d'une PDU au travers d'un MODCOD sÃ©lectionnÃ©. La PDU doit
+ * Ãªtre d'une taille infÃ©rieure ou Ã©gale Ã  la taille de charge utile du
  * MODCOD choisi.
  * 
  * L'indice du MODCOD a utiliser est passe dans le champ prive de la PDU
@@ -272,15 +272,15 @@ void DVBS2ll_sendPDU(struct DVBS2ll_t * dvbs2ll, struct PDU_t * pdu)
    double transmissionTime;
    double propagationTime = 0.0; // WARNING on ne peut pas mettre plus, on ne sait pas garder plus d'une PDU !!!
 
-   int mc = dvbs2ll->nbModCods; // Représente une DUMMY PLFRAME
+   int mc = dvbs2ll->nbModCods; // ReprÃ©sente une DUMMY PLFRAME
    unsigned int bitLength;
    unsigned int bitsPerSymbol;
 
-   // On doit être dispo
+   // On doit Ãªtre dispo
    assert(dvbs2ll->available);
 
-   // Le cas pdu == NULL est toléré et correspond à une
-   // demande d'émission d'une trame de bourage (DUMMY PLFRAME)
+   // Le cas pdu == NULL est tolÃ©rÃ© et correspond Ã  une
+   // demande d'Ã©mission d'une trame de bourage (DUMMY PLFRAME)
    if (pdu) {
       mc  = (int)PDU_private(pdu);
   
@@ -293,8 +293,8 @@ void DVBS2ll_sendPDU(struct DVBS2ll_t * dvbs2ll, struct PDU_t * pdu)
       if (dvbs2ll->modcod[mc].actualPayloadBitSizeProbe) {
          probe_sample(dvbs2ll->modcod[mc].actualPayloadBitSizeProbe, 8.0*(double)PDU_size(pdu));
       }
-   } else { // On insère une DUMMY 
-      mc = dvbs2ll->nbModCods; // Représente une DUMMY PLFRAME,
+   } else { // On insÃ¨re une DUMMY 
+      mc = dvbs2ll->nbModCods; // ReprÃ©sente une DUMMY PLFRAME,
       if( dvbs2ll->dummyFecFrameProbe) {
 	 probe_sampleEvent(dvbs2ll->dummyFecFrameProbe);
       }
@@ -312,11 +312,11 @@ void DVBS2ll_sendPDU(struct DVBS2ll_t * dvbs2ll, struct PDU_t * pdu)
    printf_debug(DEBUG_DVB, "t=%f : size %u/%u (BYTES) Modcod %d, tt = %f ms\n",
 		motSim_getCurrentTime(), pdu?PDU_size(pdu):0, bitLength/8, mc, transmissionTime * 1000.0);
 
-   /* Au bout d'un temps d'émission, le support est libre */
+   /* Au bout d'un temps d'Ã©mission, le support est libre */
    motSim_insertNewEvent((eventAction_t)DVBS2ll_endTransmission, dvbs2ll,
 			 motSim_getCurrentTime() + transmissionTime);
 
-   /* Au bout d'un temps d'émission plus propagation, le récepteur reçoit */
+   /* Au bout d'un temps d'Ã©mission plus propagation, le rÃ©cepteur reÃ§oit */
    //   motSim_insertNewEvent((eventAction_t)DVBS2ll_endPropagation, dvbs2ll,
    //			 motSim_getCurrentTime() + propagationTime);
 }
@@ -331,7 +331,7 @@ int DVBS2ll_available(struct DVBS2ll_t * dvbs2ll)
 }
 
 /*
- * Fonction invoquée pour fournir une nouvelle PDU
+ * Fonction invoquÃ©e pour fournir une nouvelle PDU
  */
 void DVBS2ll_processPDU(struct DVBS2ll_t * dvbs2ll,
                         getPDU_t getPDU,
@@ -340,7 +340,7 @@ void DVBS2ll_processPDU(struct DVBS2ll_t * dvbs2ll,
    struct PDU_t * pdu;
  
    // Si on n'est pas dispo, on ne fait rien !
-   // On reviendra voir plus tard (à la fin de la transmission) et
+   // On reviendra voir plus tard (Ã  la fin de la transmission) et
    // tant pis si on ne trouve plus rien !!!
    if (DVBS2ll_available(dvbs2ll)) {
       assert(getPDU != NULL);

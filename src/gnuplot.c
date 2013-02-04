@@ -120,7 +120,7 @@ void on_exitGnuplot(int exitStatus, void * gP)
    }
    assert(n == gnuplotProcess->nbPlot);
 
-   // Libération de la mémoire
+   // LibÃ©ration de la mÃ©moire
    for (n=0,term = gnuplotProcess->lastTerminal; term != NULL; n++) {
       prev = term->prev;
       free(term);
@@ -205,10 +205,10 @@ int gnuplotProcessCreate()
  * Affichage dans une fenetre d'une sonde
  *
  * On passe par un fichier dont le nom est de la forme %d.%d-%s.gp
- * avec, dans l'ordre, le numéro de processus, le numéro de terminal
+ * avec, dans l'ordre, le numÃ©ro de processus, le numÃ©ro de terminal
  * et le titre.
  * 
- * Le nom de fichier est sauvé pour effacer le fichier à la fin du
+ * Le nom de fichier est sauvÃ© pour effacer le fichier Ã  la fin du
  * programme (par un on_exitGnuplot)
  */
 #define BUFFER_LENGTH 4096
@@ -226,7 +226,7 @@ int gnuplot_displayProbe(struct gnuplot_t * gp, int with, struct probe_t * probe
       gnuplot_setTitle(gp, probe_getName(probe));
    }
 
-   // Création d'un fichier contenant le dump
+   // CrÃ©ation d'un fichier contenant le dump
    sprintf(fileName, "%d.%d-%s.gp", getpid(), gp->id, gp->title);
    if ((fd = open(fileName, O_CREAT|O_WRONLY, 0644)) == -1) {
       perror("open");
@@ -281,7 +281,7 @@ int gnuplot_displayProbes(struct gnuplot_t * gp, int with, ...)
          gnuplot_setTitle(gp, probe_getName(probe));
       }
 
-      // Création d'un fichier contenant le dump
+      // CrÃ©ation d'un fichier contenant le dump
       sprintf(fileName, "%d.%d-%s-%d.gp", getpid(), gp->id, gp->title, n);
       if ((fd = open(fileName, O_CREAT|O_WRONLY, 0644)) == -1) {
          perror("open");
@@ -316,7 +316,7 @@ struct gnuplot_t * gnuplot_create()
    struct gnuplot_t * result = (struct gnuplot_t *)sim_malloc(sizeof(struct gnuplot_t));
 
 
-   // Création du process
+   // CrÃ©ation du process
    if (!gnuplotProcess) {
       gnuplotProcessCreate();
    }

@@ -5,7 +5,7 @@
 
 struct event_t {
    int    type;
-   double period;  // Pour les événements périodiques
+   double period;  // Pour les Ã©vÃ©nements pÃ©riodiques
    double date;
    void * data;
    void (*run)(void * data);
@@ -18,7 +18,7 @@ struct event_t {
 #define EVENT_PERIODIC 0x00000001
 
 /*
- * Les mesures suivantes pourraient être faites par des sondes
+ * Les mesures suivantes pourraient Ãªtre faites par des sondes
  */
 extern unsigned long event_nbCreate;
 extern unsigned long event_nbMalloc;
@@ -28,25 +28,29 @@ extern unsigned long event_nbFree;
 typedef void (*eventAction_t)(void *);
 
 /*
- * Création d'un événement qui devra être exécuté à la date passée en
- * paramètre. A cette date, la fonction 'run' sera invoquée avec le
- * paramêtre 'data' en paramètre.
- * ATTENTION, il faut l'insérer dans la liste du simulateur
+ * CrÃ©ation d'un Ã©vÃ©nement qui devra Ãªtre exÃ©cutÃ© Ã  la date passÃ©e en
+ * paramÃ¨tre. A cette date, la fonction 'run' sera invoquÃ©e avec le
+ * paramÃªtre 'data' en paramÃ¨tre.
+ * ATTENTION, il faut l'insÃ©rer dans la liste du simulateur
  */
-struct event_t * event_create(void (*run)(void *data), void * data, double date);
+struct event_t * event_create(void (*run)(void *data),
+			      void * data,
+			      double date);
 
 /*
- * La même, avec insersion dans le simulateur
+ * La mÃªme, avec insersion dans le simulateur
  */
-void event_add(void (*run)(void *data), void * data, double date);
+void event_add(void (*run)(void *data),
+	       void * data,
+	       double date);
 
 /*
- * Création d'un événement périodique
+ * CrÃ©ation d'un Ã©vÃ©nement pÃ©riodique
  */
 struct event_t * event_periodicCreate(void (*run)(void *data), void * data, double date, double period);
 
 /*
- * La même, avec insersion dans le simulateur
+ * La mÃªme, avec insersion dans le simulateur
  */
 void event_periodicAdd(void (*run)(void *data), void * data, double date, double period);
 

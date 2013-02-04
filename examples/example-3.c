@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------*/
-/*   Un troisième exemple simple.                                       */
+/*   Un troisiÃ¨me exemple simple.                                       */
 /*----------------------------------------------------------------------*/
 
 #include <stdlib.h>    // Malloc, NULL, exit, ...
@@ -24,7 +24,7 @@ int main() {
    /* Creation du simulateur */
    motSim_create();
 
-   /* Création d'un générateur de date */
+   /* CrÃ©ation d'un gÃ©nÃ©rateur de date */
    dateGenExp = dateGenerator_createExp(10.0);
 
    /* Le puits */

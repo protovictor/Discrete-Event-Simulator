@@ -37,10 +37,10 @@ int main()
    // Initialisation du simulateur
    motSim_create();
 
-   // Création d'une sonde exhaustive
+   // CrÃ©ation d'une sonde exhaustive
    ep = probe_createExhaustive();
 
-   // On la peuple avec NBECH echantillons par unitée
+   // On la peuple avec NBECH echantillons par unitÃ©e
    for (n = -TPMAX; n < TPMAX ; n++){
       for (e = 0 ; e < NBECH; e++) {
          data = (double)n + ((double)rand()/(double)RAND_MAX);
@@ -48,7 +48,7 @@ int main()
       }
    };
 
-   // On cré un graphbar avec une barre par unité
+   // On crÃ© un graphbar avec une barre par unitÃ©
    gbp = probe_createGraphBar(-(double)TPMAX , (double)TPMAX, 2 * TPMAX );
    probe_exhaustiveToGraphBar(ep, gbp);
 

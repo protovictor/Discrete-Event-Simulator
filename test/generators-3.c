@@ -1,10 +1,10 @@
 /*
- * Test des générateurs discrets.
+ * Test des gÃ©nÃ©rateurs discrets.
  * 
- * On simule un grand nombre de lancers d'un dé à six faces.
+ * On simule un grand nombre de lancers d'un dÃ© Ã  six faces.
  *
- * WARNING les résultats théoriques sont en durs, donc indépendants
- * des paramètres.
+ * WARNING les rÃ©sultats thÃ©oriques sont en durs, donc indÃ©pendants
+ * des paramÃ¨tres.
  */
 #include <stdio.h>     // printf, ...
 #include <math.h>      // fabs
@@ -30,7 +30,7 @@ int main() {
 
    motSim_create();
 
-   rp = probe_createExhaustive();  // Les sondes datent les échantillons
+   rp = probe_createExhaustive();  // Les sondes datent les Ã©chantillons
 
    rg = randomGenerator_createUIntDiscreteProba(6, facesDe, probaDe);
 
@@ -41,17 +41,17 @@ int main() {
    }
    printf("\n");
 
-   // Résultats pour un tirage de dé non pipé
+   // RÃ©sultats pour un tirage de dÃ© non pipÃ©
    m = probe_mean(rp);
    e = 3.5;  // WARNING
    var = probe_variance(rp);
    t =  35.0/12.0; // WARNING
 
-   printf("%d lancers de dé à six faces (non pipé) :\n", NBECH);
+   printf("%d lancers de dÃ© Ã  six faces (non pipÃ©) :\n", NBECH);
    printf("Moyenne    = %f\n", m);
-   printf("Espérance  = %f\n", e);
+   printf("EspÃ©rance  = %f\n", e);
    printf("Variance   = %f\n", var);
-   printf("(théorique)= %f\n", t);
+   printf("(thÃ©orique)= %f\n", t);
    printf("Ecart type = %f\n", probe_stdDev(rp));
 
 

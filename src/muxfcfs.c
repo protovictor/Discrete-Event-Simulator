@@ -1,9 +1,9 @@
 /*
- * Un "multiplexeur FCFS" permet d'associer une destination unique à
+ * Un "multiplexeur FCFS" permet d'associer une destination unique Ã 
  * un nombre quelconque de sources.
  * 
- * Les PDUs soumises par les sources sont transmises immédiatement à
- * la destination dans l'ordre où elles arrivent.
+ * Les PDUs soumises par les sources sont transmises immÃ©diatement Ã 
+ * la destination dans l'ordre oÃ¹ elles arrivent.
  */
 
 #include <stdlib.h>    // Malloc, NULL, exit...
@@ -13,17 +13,17 @@
 
 struct muxfcfs_t {
 
-   // Sauvegarde de l'origine de la dernière soumission
+   // Sauvegarde de l'origine de la derniÃ¨re soumission
    void * source;
    getPDU_t source_getPDU;
 
-   void * destination;          // L'objet auquel sont destinées les PDUs
+   void * destination;          // L'objet auquel sont destinÃ©es les PDUs
    processPDU_t destProcessPDU; // La fonction permettant d'envoyer la PDU
 };
 
 
 /*
- * Création d'un multiplexeur
+ * CrÃ©ation d'un multiplexeur
  */
 struct muxfcfs_t * muxfcfs_create(void * destination,
 			    processPDU_t destProcessPDU)
@@ -57,7 +57,7 @@ struct PDU_t * muxfcfs_getPDU(void * vm)
       return NULL;
    }
 
-   // On récupère
+   // On rÃ©cupÃ¨re
    pdu = mux->source_getPDU(mux->source);
 
    // On oublie
@@ -82,7 +82,7 @@ void muxfcfs_processPDU(void * vm,
 
    printf_debug(DEBUG_MUX, "IN\n");
 
-   // Si la précédente n'a pas été consommée, elle est détruite
+   // Si la prÃ©cÃ©dente n'a pas Ã©tÃ© consommÃ©e, elle est dÃ©truite
    pdu = muxfcfs_getPDU(vm);
 
    printf_debug(DEBUG_MUX, "on note la source\n");
@@ -92,7 +92,7 @@ void muxfcfs_processPDU(void * vm,
    mux->source_getPDU = getPDU;
 
 
-   // On prévient la destination
+   // On prÃ©vient la destination
    if (mux->destProcessPDU && mux->destination) {
       printf_debug(DEBUG_MUX, "on previent la destination\n");
       mux->destProcessPDU(mux->destination, muxfcfs_getPDU, mux);

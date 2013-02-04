@@ -1,10 +1,10 @@
 /*
- *   Ordonnancement par un algorithme de résolution du sac à dos.
+ *   Ordonnancement par un algorithme de rÃ©solution du sac Ã  dos.
  *
- *   Cet ordonnanceur est associé à une liaison de type DVB-S2 caractérisée
- * par un certain nombre de MODCOD. Il consomme des paquets placés dans des
- * files. Un ensemble de files est associé à un MODCOD. Chaque file est
- * ensuite caractérisée par une fonction d'utilité.
+ *   Cet ordonnanceur est associÃ© Ã  une liaison de type DVB-S2 caractÃ©risÃ©e
+ * par un certain nombre de MODCOD. Il consomme des paquets placÃ©s dans des
+ * files. Un ensemble de files est associÃ© Ã  un MODCOD. Chaque file est
+ * ensuite caractÃ©risÃ©e par une fonction d'utilitÃ©.
  */
 #ifndef __SCHED_BACKSACK
 #define __SCHED_BACKSACK
@@ -16,13 +16,13 @@
 struct sched_kse_t;
 
 /*
- * Création d'un scheduler avec sa "destination". Cette dernière doit
- * être de type struct DVBS2ll_t  et avoir déjà été complêtement
- * construite (tous les MODCODS créés).
- * Le nombre de files de QoS différentes par MODCOD est également
- * passé en paramètre.
+ * CrÃ©ation d'un scheduler avec sa "destination". Cette derniÃ¨re doit
+ * Ãªtre de type struct DVBS2ll_t  et avoir dÃ©jÃ  Ã©tÃ© complÃªtement
+ * construite (tous les MODCODS crÃ©Ã©s).
+ * Le nombre de files de QoS diffÃ©rentes par MODCOD est Ã©galement
+ * passÃ© en paramÃ¨tre.
  * Si exhaustif == 1 alors tous les cas sont envisages, ce qui peut
- * faire beaucoup. Sinon, pour une taille donnée, on ne poursuit que
+ * faire beaucoup. Sinon, pour une taille donnÃ©e, on ne poursuit que
  * la meilleure piste.
  */
 struct schedACM_t * sched_kse_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int declOK, int exhaustif);

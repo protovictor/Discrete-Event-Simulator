@@ -12,7 +12,7 @@ struct PDUSink_t * PDUSink_create();
  */
 void PDUSink_processPDU(struct PDUSink_t * pduSink, getPDU_t getPDU, void * source);
 
-// WARNING faudrait voir à pouvoir faire ça :
+// WARNING faudrait voir Ã  pouvoir faire Ã§a :
 //processPDU_t PDUSink_processPDU;
 
 /*

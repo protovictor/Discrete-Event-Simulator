@@ -13,24 +13,24 @@ struct filePDU_t_elt {
 */
 struct filePDU_t {
    int           nombre;
-   unsigned long size;       // Le volume réel
-   int           nbOverflow; // Nombre de pertes par dépassement
+   unsigned long size;       // Le volume rÃ©el
+   int           nbOverflow; // Nombre de pertes par dÃ©passement
 
    enum filePDU_dropStrategy dropStrategy;
 
-   int           maxLength;  // Nombre maximal d'éléments
+   int           maxLength;  // Nombre maximal d'Ã©lÃ©ments
    int           maxSize ;   // Le volume maximal
 
    /* Gestion de la file */
    struct PDU_t * premier;
    struct PDU_t * dernier;
 
-   /* Mesure des débits d'entrée et sortie */
+   /* Mesure des dÃ©bits d'entrÃ©e et sortie */
    struct probe_t * throuhputIn;
    struct probe_t * throuhputOut;
 
    /* Gestion de la sortie */
-   void * destination; // L'objet auquel sont destinées les PDUs
+   void * destination; // L'objet auquel sont destinÃ©es les PDUs
    processPDU_t destProcessPDU; // La fonction permettant d'envoyer la PDU
 
    /* Les sondes */
@@ -41,8 +41,8 @@ struct filePDU_t {
 };
 
 /*
- * Un affichage un peu moche de la file. Peut être utile dans des
- * phases de débogage.
+ * Un affichage un peu moche de la file. Peut Ãªtre utile dans des
+ * phases de dÃ©bogage.
  */
 void filePDU_dump(struct filePDU_t * file)
 {
@@ -56,11 +56,11 @@ void filePDU_dump(struct filePDU_t * file)
 }
 
 /*
- * Extraction du premier élément de la file.
+ * Extraction du premier Ã©lÃ©ment de la file.
  *
  * Retour
- *   pointeur sur la PDU qui vient d'être extraite
- *   NULL si la file était vide
+ *   pointeur sur la PDU qui vient d'Ãªtre extraite
+ *   NULL si la file Ã©tait vide
  */
 struct PDU_t * filePDU_extract(struct filePDU_t * file)
 {
@@ -74,7 +74,7 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file)
       PDU = file->premier->data;
       premier = file->premier;
       file->premier = premier->next;
-      // Si c'était le seul
+      // Si c'Ã©tait le seul
       if (file->dernier == premier) {
          assert(premier->next == NULL);
 	 assert(file->nombre == 1);
@@ -105,7 +105,7 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file)
 }
 
 /*
- * Définition d'une capacité maximale en octets. Une valeur nulle
+ * DÃ©finition d'une capacitÃ© maximale en octets. Une valeur nulle
  * signifie pas de limite.
  */
 void filePDU_setMaxSize(struct filePDU_t * file, unsigned long maxSize)
@@ -125,10 +125,10 @@ void filePDU_setMaxLength(struct filePDU_t * file, unsigned long maxLength)
 }
 
 /*
- * Choix de la stratégie de perte en cas d'insersion dans une file
- * pleine. Attention, insérer une PDU de taille t dans une file de
- * capacité max < t n'est pas une erreur, mais engendre simplement un
- * événement d'overflow.
+ * Choix de la stratÃ©gie de perte en cas d'insersion dans une file
+ * pleine. Attention, insÃ©rer une PDU de taille t dans une file de
+ * capacitÃ© max < t n'est pas une erreur, mais engendre simplement un
+ * Ã©vÃ©nement d'overflow.
  */
 void filePDU_setDropStrategy(struct filePDU_t * file, enum filePDU_dropStrategy dropStrategy)
 {
@@ -136,8 +136,8 @@ void filePDU_setDropStrategy(struct filePDU_t * file, enum filePDU_dropStrategy 
 }
 
 /*
- * Réinitialisation dans un état permettant de lancer une nouvelle
- * simulation. Ici il suffit de vider la file de tous ses éléments.
+ * RÃ©initialisation dans un Ã©tat permettant de lancer une nouvelle
+ * simulation. Ici il suffit de vider la file de tous ses Ã©lÃ©ments.
  */
 void filePDU_reset(struct filePDU_t * file)
 {
@@ -187,7 +187,7 @@ struct filePDU_t * filePDU_create(void * destination,
    result->extractProbe = NULL;
    result->sejournProbe = NULL;
 
-   // Ajout à la liste des choses à réinitialiser avant une prochaine simu
+   // Ajout Ã  la liste des choses Ã  rÃ©initialiser avant une prochaine simu
    motsim_addToResetList(result, (void (*)(void *))filePDU_reset);
 
    printf_debug(DEBUG_FILE, "out\n");
@@ -267,7 +267,7 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
 }
 
 /*
- * Une fonction permettant la conformité au modèle d'échange
+ * Une fonction permettant la conformitÃ© au modÃ¨le d'Ã©change
  */
 void filePDU_processPDU(struct filePDU_t * file,
                         getPDU_t getPDU,
@@ -391,7 +391,7 @@ void filePDU_addExtractSizeProbe(struct filePDU_t * file, struct probe_t * extra
 
 
 /*
- * Ajoût d'une sonde sur la taille des PDU jetées
+ * AjoÃ»t d'une sonde sur la taille des PDU jetÃ©es
  */
 void filePDU_addDropSizeProbe(struct filePDU_t * file, struct probe_t * dropProbe)
 {
@@ -400,7 +400,7 @@ void filePDU_addDropSizeProbe(struct filePDU_t * file, struct probe_t * dropProb
 }
 
 /*
- * Affectation d'une sonde sur le temps de séjour
+ * Affectation d'une sonde sur le temps de sÃ©jour
  */
 void filePDU_addSejournProbe(struct filePDU_t * file, struct probe_t * sejournProbe)
 {
@@ -409,22 +409,22 @@ void filePDU_addSejournProbe(struct filePDU_t * file, struct probe_t * sejournPr
 }
 
 /*
- * Mesure du débit d'entrée sur les n-1 dernières PDUs, où n est le
- * nombre de PDUs présentes. Le débit est alors obtenu en divisant la
- * somme des tailles des n-1 dernières PDUs par la durée entre les
- * dates d'arrivée de la première et la dernière.
- * S'il n'y a pas assez de PDUs, le résultat est nul
+ * Mesure du dÃ©bit d'entrÃ©e sur les n-1 derniÃ¨res PDUs, oÃ¹ n est le
+ * nombre de PDUs prÃ©sentes. Le dÃ©bit est alors obtenu en divisant la
+ * somme des tailles des n-1 derniÃ¨res PDUs par la durÃ©e entre les
+ * dates d'arrivÃ©e de la premiÃ¨re et la derniÃ¨re.
+ * S'il n'y a pas assez de PDUs, le rÃ©sultat est nul
  */
 double filePDU_getInputThroughput(struct filePDU_t * file)
 {
    double result = 0.0;
 
    if (file->nombre > 1) {
-      // Volume reçu depuis la première PDU
+      // Volume reÃ§u depuis la premiÃ¨re PDU
       result = filePDU_size_n_PDU(file, filePDU_length(file)) - PDU_size(file->premier->data);
       printf_debug(DEBUG_ALWAYS, "%f de %f a %f\n", result, file->premier->creationDate, file->dernier->creationDate);
 
-      // On divise par le temps entre la première et la dernière
+      // On divise par le temps entre la premiÃ¨re et la derniÃ¨re
       result = result/(file->dernier->creationDate - file->premier->creationDate);
    }
 

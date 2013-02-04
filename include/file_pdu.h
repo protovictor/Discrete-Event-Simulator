@@ -1,5 +1,5 @@
 /*
- * Gestion des files de PDUs. Capacite non limitee par défaut.
+ * Gestion des files de PDUs. Capacite non limitee par dÃ©faut.
  */
 #ifndef __DEF_LISTE_PDU
 #define __DEF_LISTE_PDU
@@ -10,25 +10,25 @@
 struct filePDU_t;
 
 /*
- * Type de la stratégie de perte en cas d'insersion dans une file
- * pleine. Attention, insérer une PDU de taille t dans une file de
- * capacité max < t n'est pas une erreur, mais engendre simplement un
- * événement d'overflow.
+ * Type de la stratÃ©gie de perte en cas d'insersion dans une file
+ * pleine. Attention, insÃ©rer une PDU de taille t dans une file de
+ * capacitÃ© max < t n'est pas une erreur, mais engendre simplement un
+ * Ã©vÃ©nement d'overflow.
  */
 enum filePDU_dropStrategy {
   filePDU_dropHead,
-  filePDU_dropTail // Stratégie par défaut
+  filePDU_dropTail // StratÃ©gie par dÃ©faut
 };
 
 /*
- * Une file doit être associée à une destination, à laquelle elle
- * transmet chaque paquet reçu par la fonction send().
+ * Une file doit Ãªtre associÃ©e Ã  une destination, Ã  laquelle elle
+ * transmet chaque paquet reÃ§u par la fonction send().
  */
 struct filePDU_t * filePDU_create(void * destination,
 			    processPDU_t destProcessPDU);
 
 /*
- * Définition d'une capacité maximale en octets. Une valeur nulle
+ * DÃ©finition d'une capacitÃ© maximale en octets. Une valeur nulle
  * signifie pas de limite.
  */
 void filePDU_setMaxSize(struct filePDU_t * file, unsigned long maxSize);
@@ -38,20 +38,21 @@ void filePDU_setMaxLength(struct filePDU_t * file, unsigned long maxLength);
 
 
 /*
- * Choix de la stratégie de perte en cas d'insersion dans une file
- * pleine. Attention, insérer une PDU de taille t dans une file de
- * capacité max < t n'est pas une erreur, mais engendre simplement un
- * événement d'overflow.
+ * Choix de la stratÃ©gie de perte en cas d'insersion dans une file
+ * pleine. Attention, insÃ©rer une PDU de taille t dans une file de
+ * capacitÃ© max < t n'est pas une erreur, mais engendre simplement un
+ * Ã©vÃ©nement d'overflow.
  */
 void filePDU_setDropStrategy(struct filePDU_t * file, enum filePDU_dropStrategy dropStrategy);
 
 /*
  * Insertion d'une PDU dans la file
  */
-void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU);
+void filePDU_insert(struct filePDU_t * file,
+		    struct PDU_t * PDU);
 
 /*
- * Une fonction permettant la conformité au modèle d'échange
+ * Une fonction permettant la conformitÃ© au modÃ¨le d'Ã©change
  */
 void filePDU_processPDU(struct filePDU_t * file,
                         getPDU_t getPDU,
@@ -59,7 +60,7 @@ void filePDU_processPDU(struct filePDU_t * file,
 
 /*
  * Extraction d'une PDU depuis la file. Ici la signature est
- * directement compatible avec le modèle.
+ * directement compatible avec le modÃ¨le.
  */
 struct PDU_t * filePDU_extract(struct filePDU_t * file);
 
@@ -71,7 +72,7 @@ int filePDU_length(struct filePDU_t * file);
 int filePDU_size(struct filePDU_t * file);
 
 /*
- * Taille cumulée des n premières PDUs
+ * Taille cumulÃ©e des n premiÃ¨res PDUs
  */
 
 int filePDU_size_n_PDU(struct filePDU_t * file, int n);
@@ -83,31 +84,31 @@ int filePDU_size_PDU_n(struct filePDU_t * file, int n);
 int filePDU_id_PDU_n(struct filePDU_t * file, int n);
 
 /*
- * Affectation d'une sonde sur la taille des PDUs insérées.
+ * Affectation d'une sonde sur la taille des PDUs insÃ©rÃ©es.
  */
 void filePDU_addInsertSizeProbe(struct filePDU_t * file, struct probe_t * insertProbe);
 
 /*
- * Ajoût d'une sonde sur la taille des PDU sortantes
+ * AjoÃ»t d'une sonde sur la taille des PDU sortantes
  */
 void filePDU_addExtractSizeProbe(struct filePDU_t * file, struct probe_t * extractProbe);
 
 /*
- * Ajoût d'une sonde sur la taille des PDU jetées
+ * AjoÃ»t d'une sonde sur la taille des PDU jetÃ©es
  */
 void filePDU_addDropSizeProbe(struct filePDU_t * file, struct probe_t * dropProbe);
 
 /*
- * Affectation d'une sonde sur le temps de séjour
+ * Affectation d'une sonde sur le temps de sÃ©jour
  */
 void filePDU_addSejournProbe(struct filePDU_t * file, struct probe_t * sejournProbe);
 
 /*
- * Mesure du débit d'entrée sur les n-1 dernières PDUs, où n est le
- * nombre de PDUs présentes. Le débit est alors obtenu en divisant la
- * somme des tailles des n-1 dernières PDUs par la durée entre les
- * dates d'arrivée de la première et la dernière.
- * S'il n'y a pas assez de PDUs, le résultat est nul
+ * Mesure du dÃ©bit d'entrÃ©e sur les n-1 derniÃ¨res PDUs, oÃ¹ n est le
+ * nombre de PDUs prÃ©sentes. Le dÃ©bit est alors obtenu en divisant la
+ * somme des tailles des n-1 derniÃ¨res PDUs par la durÃ©e entre les
+ * dates d'arrivÃ©e de la premiÃ¨re et la derniÃ¨re.
+ * S'il n'y a pas assez de PDUs, le rÃ©sultat est nul
  *
  * WARNING, a virer, non ?
  */
@@ -120,14 +121,14 @@ void filePDU_setThroughputInMode();
 
 
 /*
- * Un affichage un peu moche de la file. Peut être utile dans des
- * phases de débogage.
+ * Un affichage un peu moche de la file. Peut Ãªtre utile dans des
+ * phases de dÃ©bogage.
  */
 void filePDU_dump(struct filePDU_t * file);
 
 /*
- * Réinitialisation dans un état permettant de lancer une nouvelle
- * simulation. Ici il suffit de vider la file de tous ses éléments.
+ * RÃ©initialisation dans un Ã©tat permettant de lancer une nouvelle
+ * simulation. Ici il suffit de vider la file de tous ses Ã©lÃ©ments.
  */
 void filePDU_reset(struct filePDU_t * file);
 

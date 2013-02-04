@@ -56,7 +56,7 @@ void * extraireFile(struct t_file * file)
       data = file->premier->data;
       premier = file->premier;
       file->premier = premier->suivant;
-      // Si c'était le seul
+      // Si c'Ã©tait le seul
       if (file->dernier == premier) {
          assert(premier->suivant == NULL);
 	 assert(file->nombre == 1);

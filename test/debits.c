@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------*/
-/*   Test de NDES : différentes méthodes d'évaluation d'un débit.       */
+/*   Test de NDES : diffÃ©rentes mÃ©thodes d'Ã©valuation d'un dÃ©bit.       */
 /*----------------------------------------------------------------------*/
 
 #include <stdlib.h>    // Malloc, NULL, exit, ...
@@ -23,8 +23,8 @@ int main() {
    struct randomGenerator_t * sizeGen;
    struct filePDU_t         * filePDU;
    struct probe_t           * srcOutputProbe,  // Sortie de la source
-                            * sopBw;           // Débit correspondant
-   struct probe_t           * fileInputProbe;  // Entrée de la file
+                            * sopBw;           // DÃ©bit correspondant
+   struct probe_t           * fileInputProbe;  // EntrÃ©e de la file
    struct gnuplot_t         * gp;
 
    int n;
@@ -44,31 +44,31 @@ int main() {
    filePDU_setMaxLength(filePDU, NBMAX);
    filePDU_setDropStrategy(filePDU, filePDU_dropHead);
 
-   /* Création d'un générateur de dates */
+   /* CrÃ©ation d'un gÃ©nÃ©rateur de dates */
    dateGenExp = dateGenerator_createExp(1.0);
 
-   /* Création d'un générateur de tailles */
+   /* CrÃ©ation d'un gÃ©nÃ©rateur de tailles */
    sizeGen = randomGenerator_createUIntDiscrete(nbTailles, tailles, probas);
 
    /* La source */
    sourcePDU = PDUSource_create(dateGenExp, filePDU, filePDU_processPDU);
    PDUSource_setPDUSizeGenerator(sourcePDU, sizeGen);
 
-   /* On va utiliser une sonde de type fenêtre glissante pour mesurer
-      le débit de sortie  de la source
+   /* On va utiliser une sonde de type fenÃªtre glissante pour mesurer
+      le dÃ©bit de sortie  de la source
    */
    srcOutputProbe = probe_slidingWindowCreate(NBMAX);
    PDUSource_addPDUGenerationSizeProbe(sourcePDU, srcOutputProbe);
    sopBw = probe_createExhaustive();
 
-   /* Idem en entrée de file */
+   /* Idem en entrÃ©e de file */
    fileInputProbe = probe_slidingWindowCreate(NBMAX);
    filePDU_addInsertSizeProbe(filePDU, fileInputProbe);
 
    /* On active la source */
    PDUSource_start(sourcePDU);
 
-   /* On mesure régulièrement le débit d'entrée de la file sur NBMAX PDUs */
+   /* On mesure rÃ©guliÃ¨rement le dÃ©bit d'entrÃ©e de la file sur NBMAX PDUs */
    for (n = 1; n <= NBBOUCLE; n++) {
       motSim_runUntil(n*500.0);
       probe_sample(sopBw, filePDU_getInputThroughput(filePDU));
@@ -77,7 +77,7 @@ int main() {
       }
    };
 
-   /* Tracé gnuplot */
+   /* TracÃ© gnuplot */
    gp = gnuplot_create();
    gnuplot_displayProbe(gp, WITH_BOXES, sopBw);
    printf("*** ^C pour finir ;-)\n");

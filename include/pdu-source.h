@@ -8,8 +8,8 @@
 struct PDUSource_t;
 
 /*
- * A chaque source est attribuée une destination et une 
- * fonction permettant de soumettre à cette destination
+ * A chaque source est attribuÃ©e une destination et une 
+ * fonction permettant de soumettre Ã  cette destination
  * les PDU produites
  */
 struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
@@ -17,22 +17,22 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
 				      processPDU_t destProcessPDU);
 
 /*
- * Spécification du générateur de taille de PDU associé. En l'absence
- * d'un tel générateur, les PDUs générées sont de taille nulle.
+ * SpÃ©cification du gÃ©nÃ©rateur de taille de PDU associÃ©. En l'absence
+ * d'un tel gÃ©nÃ©rateur, les PDUs gÃ©nÃ©rÃ©es sont de taille nulle.
  */
 void PDUSource_setPDUSizeGenerator(struct PDUSource_t * src,
 				   struct randomGenerator_t * rg);
 
 /*
  * Positionnement d'une sonde sur la taille des PDUs produites. Toutes
- * les PDUs créées sont concernées, même si elles ne sont pas
- * récupérées par la destination.
+ * les PDUs crÃ©Ã©es sont concernÃ©es, mÃªme si elles ne sont pas
+ * rÃ©cupÃ©rÃ©es par la destination.
  */
 void PDUSource_addPDUGenerationSizeProbe(struct PDUSource_t * src,
 					 struct probe_t *  PDUGenerationSizeProbe);
 
 /*
- * Démarrage d'une source dans le cadre d'un simulateur.
+ * DÃ©marrage d'une source dans le cadre d'un simulateur.
  * A partir de cet instant, elle peut produire des PDUs.
  */
 void PDUSource_start(struct PDUSource_t * source);

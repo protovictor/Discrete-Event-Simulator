@@ -24,19 +24,19 @@ struct srvGen_t {
 
    // Dealing with service time
    // C'est un peu de la merde parceque mes dates ne savent pas 
-   // gÈrer un dÈbit, ...
+   // g√©rer un d√©bit, ...
    struct dateGenerator_t * dateGenerator;
    enum serviceTime_t       serviceTime;
    double                   serviceTimeParameter;
 
    // Gestion du destinataire
-   void * destination;          // L'objet auquel sont destinÈes les PDUs
+   void * destination;          // L'objet auquel sont destin√©es les PDUs
    processPDU_t destProcessPDU; // La fonction permettant d'envoyer la PDU   
 
    // WARNING : les attributs suivants ne nous permettent pas de
-   // prÈparer la rÈception de plusieurs PDU !!
+   // pr√©parer la r√©ception de plusieurs PDU !!
    void * source ;  // L'objet susceptible de nous fournir une PDU
-   getPDU_t getPDU; // La mÈthode d'obtention  de cette PDU
+   getPDU_t getPDU; // La m√©thode d'obtention  de cette PDU
 
    // Les sondes
    struct probe_t * serviceProbe;
@@ -57,7 +57,7 @@ struct srvGen_t * srvGen_create(void * destination,
    result->destination = destination;
    result->destProcessPDU = destProcessPDU;
 
-   // Le mode de calcul du temps de traitement (par dÈfaut dÈbit unitaire)
+   // Le mode de calcul du temps de traitement (par d√©faut d√©bit unitaire)
    result->dateGenerator = NULL;
    result->serviceTime = serviceTimeProp;
    result->serviceTimeParameter = 1.0;
@@ -73,7 +73,7 @@ struct srvGen_t * srvGen_create(void * destination,
 
 void srvGen_terminateProcess(struct srvGen_t * srv);
 /*
- * DÈbut de traitement d'une PDU
+ * D√©but de traitement d'une PDU
  */
 void srvGen_startService(struct srvGen_t * srv, struct PDU_t * pdu)
 {
@@ -82,7 +82,7 @@ void srvGen_startService(struct srvGen_t * srv, struct PDU_t * pdu)
 
    assert(pdu != NULL);
 
-   // Si le destinataire n'a pas rÈcupÈrÈ la prÈcÈdente, trop tard !
+   // Si le destinataire n'a pas r√©cup√©r√© la pr√©c√©dente, trop tard !
    if (srv->currentPDU != NULL) {
       PDU_free(srv->currentPDU);
    }
@@ -91,7 +91,7 @@ void srvGen_startService(struct srvGen_t * srv, struct PDU_t * pdu)
    srv->serviceStartTime = motSim_getCurrentTime();
    srv->currentPDU = pdu;
 
-   //DÈterminer une date de fin en fonction du temps de traitement
+   //D√©terminer une date de fin en fonction du temps de traitement
    if (srv->serviceTime == serviceTimeProp){
       date = motSim_getCurrentTime() + PDU_size(pdu) * srv->serviceTimeParameter;
    } else {
@@ -101,10 +101,10 @@ void srvGen_startService(struct srvGen_t * srv, struct PDU_t * pdu)
 
    printf_debug(DEBUG_SRV, " PDU %d from %6.3f to %6.3f\n", PDU_id(pdu), motSim_getCurrentTime(), date);
 
-   // On crÈe un ÈvÈnement pour cette date
+   // On cr√©e un √©v√©nement pour cette date
    event = event_create((eventAction_t)srvGen_terminateProcess, srv, date);
 
-   // On ajoute cet ÈvÈnement au simulateur
+   // On ajoute cet √©v√©nement au simulateur
    motSim_addEvent(event);
 }
 
@@ -131,7 +131,7 @@ void srvGen_terminateProcess(struct srvGen_t * srv)
       probe_sample(srv->serviceProbe, motSim_getCurrentTime() - srv->serviceStartTime);
    }
 
-   // On propose la PDU ‡ la destination
+   // On propose la PDU √† la destination
    srv->destProcessPDU(srv->destination, srvGen_getPDU, srv);
 
    // On va chercher la prochaine s'il y en a une
@@ -149,7 +149,7 @@ void srvGen_terminateProcess(struct srvGen_t * srv)
 }
 
 /*
- * Notification de la prÈsence d'une PDU
+ * Notification de la pr√©sence d'une PDU
  */
 void srvGen_processPDU(struct srvGen_t * server,
                        getPDU_t getPDU, void * source)
@@ -162,7 +162,7 @@ void srvGen_processPDU(struct srvGen_t * server,
    if (server->srvState == srvStateIdle){
       printf_debug(DEBUG_SRV, " server will serve PDU\n");
 
-      // On va chercher une PDU puisqu'il y en a une de prÍte
+      // On va chercher une PDU puisqu'il y en a une de pr√™te
       pdu = getPDU(source);
       srvGen_startService(server, pdu);
 
@@ -182,7 +182,7 @@ void srvGen_processPDU(struct srvGen_t * server,
 }
 
 /*
- * Obtention de la derniËre PDU servie (Èventuellement NULL si trop tard !)
+ * Obtention de la derni√®re PDU servie (√©ventuellement NULL si trop tard !)
  */
 struct PDU_t * srvGen_getPDU(struct srvGen_t * srv)
 {
@@ -208,7 +208,7 @@ void srvGen_setServiceTime(struct srvGen_t * srv,
          srv->dateGenerator = dateGenerator_createExp(parameter);
       break ;
       case serviceTimeProp :
-         srv->dateGenerator = NULL; // WARNING pas gÈnial de gÈrer Áa ainsi
+         srv->dateGenerator = NULL; // WARNING pas g√©nial de g√©rer √ßa ainsi
       break ;
       default :
          motSim_error(MS_FATAL, "Unknown service time strategy");

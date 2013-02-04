@@ -1,5 +1,5 @@
 /*
- * Programme d'un générateur exponentiel
+ * Programme d'un gÃ©nÃ©rateur exponentiel
  */
 #include <stdlib.h>    // Malloc, NULL, exit, ...
 #include <assert.h>

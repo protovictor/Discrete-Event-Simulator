@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------*/
-/*    NDES : différentes méthodes d'évaluation d'un débit.              */
+/*    NDES : diffÃ©rentes mÃ©thodes d'Ã©valuation d'un dÃ©bit.              */
 /*                                                                      */
-/*   Nous allons rejouer plusieurs fois le même scénario (trivial) avec */
-/* différentes techniques de mesure de débit puis les afficher ensemble */
+/*   Nous allons rejouer plusieurs fois le mÃªme scÃ©nario (trivial) avec */
+/* diffÃ©rentes techniques de mesure de dÃ©bit puis les afficher ensemble */
 /*----------------------------------------------------------------------*/
 
 #include <stdlib.h>    // Malloc, NULL, exit, ...
@@ -17,10 +17,10 @@
 #include <date-generator.h>
 #include <gnuplot.h>
 
-// Taille de la fenêtre glissante en echantillons
+// Taille de la fenÃªtre glissante en echantillons
 #define NBMAX 2500
 
-// Nombre d'écantillons sur la durée de la simu
+// Nombre d'Ã©cantillons sur la durÃ©e de la simu
 #define NBECH 200   
 
 int main() {
@@ -33,7 +33,7 @@ int main() {
    struct gnuplot_t         * swGp, * emaGp, * taGp;
 
    double                    c;
-   double                    duree  = 10000.0; // Durée de la simu en secondes
+   double                    duree  = 10000.0; // DurÃ©e de la simu en secondes
    double                    alpha  = 0.99;
    double                    lambda = 50.0; // Nombre moyen de paquets/seconde
    int n;
@@ -50,11 +50,11 @@ int main() {
    /* Creation du simulateur */
    motSim_create();
 
-   /* Création d'un générateur de dates */
+   /* CrÃ©ation d'un gÃ©nÃ©rateur de dates */
    //dateGenExp = dateGenerator_createPeriodic(1.0/lambda);
      dateGenExp = dateGenerator_createExp(lambda);
 
-   /* Création d'un générateur de tailles */
+   /* CrÃ©ation d'un gÃ©nÃ©rateur de tailles */
    sizeGen = randomGenerator_createUIntDiscrete(nbTailles, tailles, probas);
 
    /* La source */
@@ -62,26 +62,26 @@ int main() {
    PDUSource_setPDUSizeGenerator(sourcePDU, sizeGen);
 
 /*------------------*/
-/* Première méthode */
+/* PremiÃ¨re mÃ©thode */
 /*------------------*/
 
-   /* On va utiliser une sonde de type fenêtre glissante pour mesurer
-      le débit de sortie  de la source
+   /* On va utiliser une sonde de type fenÃªtre glissante pour mesurer
+      le dÃ©bit de sortie  de la source
    */
    swP = probe_slidingWindowCreate(NBMAX);
    probe_setName(swP, "Sliding Window");
    PDUSource_addPDUGenerationSizeProbe(sourcePDU, swP);
 
    /*
-    * On va prélever NBECH echantillons de cette sonde grâce à une sonde
-    * périodique.
+    * On va prÃ©lever NBECH echantillons de cette sonde grÃ¢ce Ã  une sonde
+    * pÃ©riodique.
     */
    perSwP = probe_periodicCreate(duree/NBECH);
    probe_setName(perSwP, "(periodic) Sliding Window");
    probe_addThroughputProbe(swP, perSwP);
 
 /*------------------*/
-/* Deuxième méthode */
+/* DeuxiÃ¨me mÃ©thode */
 /*------------------*/
    /* On va utiliser une moyenne mobile */
    emaP = probe_EMACreate(alpha);
@@ -89,15 +89,15 @@ int main() {
    PDUSource_addPDUGenerationSizeProbe(sourcePDU, emaP);
 
    /*
-    * On va prélever NBECH echantillons de cette sonde grâce à une sonde
-    * périodique.
+    * On va prÃ©lever NBECH echantillons de cette sonde grÃ¢ce Ã  une sonde
+    * pÃ©riodique.
     */
    perEmaP = probe_periodicCreate(duree/NBECH);
    probe_setName(perEmaP, "(periodic) EMA");
    probe_addThroughputProbe(emaP, perEmaP);
 
 /*-------------------*/
-/* Troisième méthode */
+/* TroisiÃ¨me mÃ©thode */
 /*-------------------*/
    /* On va utiliser une moyenne temporelle */
    taP = probe_createTimeSliceThroughput(duree/NBECH);
@@ -112,7 +112,7 @@ int main() {
    motSim_runUntil(duree);
 
 /*---------------*/
-/* Tracé gnuplot */
+/* TracÃ© gnuplot */
 /*---------------*/
 
 //   swGp = gnuplot_create();
@@ -131,9 +131,9 @@ int main() {
      c+= tailles[n]*probas[n];
    };
 
-   // Les tailles sont en octets et les durées en secondes
+   // Les tailles sont en octets et les durÃ©es en secondes
    c = c*8.0*lambda;
-   printf("Débit moyen théorique : %lf bits/s\n", c);
+   printf("DÃ©bit moyen thÃ©orique : %lf bits/s\n", c);
 
    printf("*** ^C pour finir ;-)\n");
    pause();

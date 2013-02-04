@@ -1,9 +1,9 @@
 /*
- *   Source générique de PDU.
+ *   Source gÃ©nÃ©rique de PDU.
  *
- *   Lorsqu'une PDU est produite, elle est fourni immédiatement à la
+ *   Lorsqu'une PDU est produite, elle est fourni immÃ©diatement Ã  la
  *   destination. Si celle-ci ne la consomme pas, elle RESTE
- *   DISPONIBLE jusqu'à la production de la suivante.
+ *   DISPONIBLE jusqu'Ã  la production de la suivante.
  *
  */
 #include <stdlib.h>    // Malloc, NULL, exit...
@@ -12,14 +12,14 @@
 #include <pdu-source.h>
 
 struct PDUSource_t {
-   // Le générateur de date de départ
+   // Le gÃ©nÃ©rateur de date de dÃ©part
    struct dateGenerator_t * dateGen;
 
-   // Le générateur de taille
+   // Le gÃ©nÃ©rateur de taille
    struct randomGenerator_t * sizeGen;
 
-   void * destination; // L'objet auquel sont destinées les PDUs
-   processPDU_t destProcessPDU; // La fonction permettant de signaler la présence de la PDU
+   void * destination; // L'objet auquel sont destinÃ©es les PDUs
+   processPDU_t destProcessPDU; // La fonction permettant de signaler la prÃ©sence de la PDU
 
    // Une sonde sur la taille des PDU produites
    struct probe_t *  PDUGenerationSizeProbe;
@@ -40,7 +40,7 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
    result->sizeGen = NULL;
    result->PDUGenerationSizeProbe = NULL;
 
-   // Ajout à la liste des choses à réinitialiser avant une prochaine simu
+   // Ajout Ã  la liste des choses Ã  rÃ©initialiser avant une prochaine simu
    motsim_addToResetList(result, PDUSource_start);
    
    return result;
@@ -48,8 +48,8 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
 
 /*
  * Positionnement d'une sonde sur la taille des PDUs produites. Toutes
- * les PDUs créées sont concernées, même si elles ne sont pas
- * récupérées par la destination.
+ * les PDUs crÃ©Ã©es sont concernÃ©es, mÃªme si elles ne sont pas
+ * rÃ©cupÃ©rÃ©es par la destination.
  */
 void PDUSource_addPDUGenerationSizeProbe(struct PDUSource_t * src, struct probe_t *  newProbe)
 {
@@ -58,7 +58,7 @@ void PDUSource_addPDUGenerationSizeProbe(struct PDUSource_t * src, struct probe_
 }
 
 /*
- * Spécification du générateur de taille de PDU associé
+ * SpÃ©cification du gÃ©nÃ©rateur de taille de PDU associÃ©
  */
 void PDUSource_setPDUSizeGenerator(struct PDUSource_t * src, struct randomGenerator_t * rg)
 {
@@ -73,13 +73,13 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
 
    printf_debug(DEBUG_SRC, " building new PDU\n");
 
-   // Suppression de la PDU précédente si pas consommée
+   // Suppression de la PDU prÃ©cÃ©dente si pas consommÃ©e
    if (source->pdu) {
      //      printf("PDUSource_buildNewPDU : Destruction de %d\n", PDU_id(source->pdu));
       PDU_free(source->pdu);
    }
 
-   // Création de la PDU
+   // CrÃ©ation de la PDU
    size = source->sizeGen?randomGenerator_getNextUInt(source->sizeGen):0;
    source->pdu = PDU_create(size, NULL); 
 
@@ -95,15 +95,15 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
    if ((source->destProcessPDU) && (source->destination)) {
       source->destProcessPDU(source->destination, PDUSource_getPDU, source);
    }
-   // On détermine la date de prochaine transmission
+   // On dÃ©termine la date de prochaine transmission
    date = dateGenerator_nextDate(source->dateGen, motSim_getCurrentTime());
 
    printf_debug(DEBUG_SRC, " next PDU at %f\n", date);
 
-   // On crée un événement pour cette date
+   // On crÃ©e un Ã©vÃ©nement pour cette date
    event = event_create((eventAction_t)PDUSource_buildNewPDU, source, date);
 
-   // On ajoute cet événement au simulateur
+   // On ajoute cet Ã©vÃ©nement au simulateur
    motSim_addEvent(event);
 }
 
@@ -133,15 +133,15 @@ void PDUSource_start(struct PDUSource_t * source)
       source->pdu = NULL;
    }
 
-   // On détermine la date de prochaine transmission
+   // On dÃ©termine la date de prochaine transmission
    date = dateGenerator_nextDate(source->dateGen, motSim_getCurrentTime());
 
    printf_debug(DEBUG_SRC, " First PDU at %f\n", date);
 
-   // On crée un événement pour cette date
+   // On crÃ©e un Ã©vÃ©nement pour cette date
    event = event_create((eventAction_t)PDUSource_buildNewPDU, source, date);
 
-   // On ajoute cet événement au simulateur
+   // On ajoute cet Ã©vÃ©nement au simulateur
    motSim_addEvent(event);
 }
 

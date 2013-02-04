@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------
    Un premier exemple de base.                                        
 
-   Nous allons créer une source qui est rythmée par un générateur de 
-   dates aléatoires et qui transmet des PDU vers un puits.
+   Nous allons crÃ©er une source qui est rythmÃ©e par un gÃ©nÃ©rateur de 
+   dates alÃ©atoires et qui transmet des PDU vers un puits.
 
   ----------------------------------------------------------------------*/
 
@@ -24,7 +24,7 @@ int main() {
    /* Creation du simulateur */
    motSim_create();
 
-   /* Création d'un générateur de date */
+   /* CrÃ©ation d'un gÃ©nÃ©rateur de date */
    dateGenExp = dateGenerator_createExp(10.0);
 
    /* Le puits */

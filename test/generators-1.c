@@ -1,5 +1,5 @@
 /*
- * Programme de test des divers générateurs
+ * Programme de test des divers gÃ©nÃ©rateurs
  *
  * generators-1
  *
@@ -29,10 +29,10 @@ int main() {
    int                        n, res;
    double                     lambda = 3.0;
 
-   motSim_create(); // Les sondes datent les échantillons
+   motSim_create(); // Les sondes datent les Ã©chantillons
 
 /*----------------------------------------------------------------------*/
-/*     Vérification des moments d'une loi uniforme                      */
+/*     VÃ©rification des moments d'une loi uniforme                      */
 /*----------------------------------------------------------------------*/
    rp = probe_createExhaustive();
 
@@ -54,7 +54,7 @@ int main() {
    randomGenerator_delete(rg);
 
 /*----------------------------------------------------------------------*/
-/*     Vérification des moments d'une loi exponentielle                 */
+/*     VÃ©rification des moments d'une loi exponentielle                 */
 /*----------------------------------------------------------------------*/
    rp = probe_createExhaustive();
 

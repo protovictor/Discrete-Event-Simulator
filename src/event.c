@@ -6,7 +6,7 @@
 #include <motsim.h>
 
 /*
- * Une file d'événements libres
+ * Une file d'Ã©vÃ©nements libres
  */
 struct event_t * freeEvent = NULL;
 
@@ -44,7 +44,7 @@ struct event_t * event_create(void (*run)(void *data), void * data, double date)
 }
 
 /*
- * La même, avec insersion dans le simulateur
+ * La mÃªme, avec insersion dans le simulateur
  */
 void event_add(void (*run)(void *data), void * data, double date)
 {
@@ -65,7 +65,7 @@ struct event_t * event_periodicCreate(void (*run)(void *data), void * data, doub
 }
 
 /*
- * La même, avec insersion dans le simulateur
+ * La mÃªme, avec insersion dans le simulateur
  */
 void event_periodicAdd(void (*run)(void *data), void * data, double date, double period)
 {

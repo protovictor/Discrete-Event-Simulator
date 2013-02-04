@@ -1,4 +1,4 @@
-/*     Un serveur générique */
+/*     Un serveur gÃ©nÃ©rique */
 
 #include <pdu.h>
 #include <motsim.h>
@@ -9,7 +9,7 @@ struct srvGen_t * srvGen_create(void * destination,
                                 processPDU_t destProcessPDU);
 
 /*
- * La fonction utilisée par le destinataire pour prendre une PDU servie
+ * La fonction utilisÃ©e par le destinataire pour prendre une PDU servie
  */
 struct PDU_t * srvGen_getPDU(struct srvGen_t * srv);
 
@@ -20,7 +20,7 @@ void srvGen_processPDU(struct srvGen_t * srv,
 		       getPDU_t getPDU, void * source);
 
 /*
- * Obtention de la dernière PDU servie (éventuellement NULL si trop tard !)
+ * Obtention de la derniÃ¨re PDU servie (Ã©ventuellement NULL si trop tard !)
  */
 struct PDU_t * srvGen_getPDU(struct srvGen_t * srv);
 

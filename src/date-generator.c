@@ -15,7 +15,7 @@ struct dateGenerator_t {
 };
 
 /*-------------------------------------------------------------------------*/
-/*   Les fonctions générales                                               */
+/*   Les fonctions gÃ©nÃ©rales                                               */
 /*-------------------------------------------------------------------------*/
 double dateGenerator_nextDate(struct dateGenerator_t * dateGen, double currentTime)
 {
@@ -68,7 +68,7 @@ double loi_expo(struct dateGenerator_t * dateGen, double currentTime)
 */
 
 /*
- * Création d'une loi avec interarrivé exponentielle
+ * CrÃ©ation d'une loi avec interarrivÃ© exponentielle
  */
 struct dateGenerator_t * dateGenerator_createExp(double lambda)
 {
@@ -82,7 +82,7 @@ struct dateGenerator_t * dateGenerator_createExp(double lambda)
 }
 
 /*
- * Modification du paramètre lambda
+ * Modification du paramÃ¨tre lambda
  */
 void dateGenerator_setLambda(struct dateGenerator_t * dateGen, double lambda)
 {
@@ -90,7 +90,7 @@ void dateGenerator_setLambda(struct dateGenerator_t * dateGen, double lambda)
 }
 
 /*
- * Création d'une loi avec interarrivé constante
+ * CrÃ©ation d'une loi avec interarrivÃ© constante
  */
 struct dateGenerator_t * dateGenerator_createPeriodic(double period)
 {

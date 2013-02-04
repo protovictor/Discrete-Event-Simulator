@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------*/
 /*      Algorithme d'ordonnancement de flots de paquets sur un lien     */
-/*   DVB-S2. Cet algorithme est fondé sur des fonctions d'utilité.      */
+/*   DVB-S2. Cet algorithme est fondÃ© sur des fonctions d'utilitÃ©.      */
 /*----------------------------------------------------------------------*/
 #include <stdlib.h>    // Malloc, NULL, exit...
 #include <strings.h>   // bzero, bcopy, ...
@@ -13,7 +13,7 @@
 #include <schedUtility.h>
 
 /*
- * Les caractéristiques d'un tel ordonnanceur
+ * Les caractÃ©ristiques d'un tel ordonnanceur
  */
 struct schedUtility_t {
    struct schedACM_t * schedACM;
@@ -29,11 +29,11 @@ static struct schedACM_func_t schedUtility_func = {
 };
 
 /*
- * Création d'un scheduler avec sa "destination". Cette dernière doit
- * être de type struct DVBS2ll_t  et avoir déjà été complêtement
- * construite (tous les MODCODS créés).
- * Le nombre de files de QoS différentes par MODCOD est également
- * passé en paramètre.
+ * CrÃ©ation d'un scheduler avec sa "destination". Cette derniÃ¨re doit
+ * Ãªtre de type struct DVBS2ll_t  et avoir dÃ©jÃ  Ã©tÃ© complÃªtement
+ * construite (tous les MODCODS crÃ©Ã©s).
+ * Le nombre de files de QoS diffÃ©rentes par MODCOD est Ã©galement
+ * passÃ© en paramÃ¨tre.
  */
 struct schedACM_t * schedUtility_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int declOK)
 {
@@ -49,7 +49,7 @@ struct schedACM_t * schedUtility_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, i
 }
 
 /*
- * La fonction d'ordonnancement appliquée au ModCod donné
+ * La fonction d'ordonnancement appliquÃ©e au ModCod donnÃ©
  */
 void schedulerUtilityMC(struct schedUtility_t * sched, int mc, t_remplissage * remplissage)
 {
@@ -60,21 +60,21 @@ void schedulerUtilityMC(struct schedUtility_t * sched, int mc, t_remplissage * r
    int m, qa, qb, q; // Indices des boucles
 
    printf_debug(DEBUG_SCHED, "--------- recherche sur le MC %d ---------\n", mc);
-   // Tant qu'on n'a pas trouvé de quoi remplir la BBFRAME et qu'il
+   // Tant qu'on n'a pas trouvÃ© de quoi remplir la BBFRAME et qu'il
    // reste des choses
    do {
       paquetDispo = 0; // On va voir si on en trouve
       // 1. On cherche dans les files non (potentiellement) vides celle qui a
-      // la meilleure dérivé de sa fonction d'utilité
+      // la meilleure dÃ©rivÃ© de sa fonction d'utilitÃ©
       for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)); m++) {
 
-         // On démarre la boucle aléatoirement pour éviter un biais en
-         // cas d'égalité
+         // On dÃ©marre la boucle alÃ©atoirement pour Ã©viter un biais en
+         // cas d'Ã©galitÃ©
          qb = random()%nbQoS(sched->schedACM);
          for (qa = 0; qa < nbQoS(sched->schedACM); qa++) {
             q = (qa + qb)%nbQoS(sched->schedACM);
 
-/*	    printf_debug(DEBUG_ALWAYS, "Etudions [%d][%d](type %d, beta %f) - (déjà %d paquets) reste %d pq, bw %f util %f\n",
+/*	    printf_debug(DEBUG_ALWAYS, "Etudions [%d][%d](type %d, beta %f) - (dÃ©jÃ  %d paquets) reste %d pq, bw %f util %f\n",
 			 m, q,
 			 schedACM_getQoS(sched->schedACM, m, q)->typeQoS,
 			 schedACM_getQoS(sched->schedACM, m, q)->beta,
@@ -86,13 +86,13 @@ void schedulerUtilityMC(struct schedUtility_t * sched, int mc, t_remplissage * r
 					schedACM_getACMLink(sched->schedACM)));
 */
             // Cette file peut-elle fournir au moins un paquet
-            // (première clause) qui tienne (deuxième) ?
+            // (premiÃ¨re clause) qui tienne (deuxiÃ¨me) ?
             if ((remplissage->nbrePaquets[m][q] < filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q))) // Il en reste un
 		&& (remplissage->volumeTotal + filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+1)
                     <= (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8))) {
                schedACM_tryingNewSolution(sched->schedACM);
-	       // Si oui, est-elle la première ou, sinon, plus intéressante que la plus
-	       // intéressante ?
+	       // Si oui, est-elle la premiÃ¨re ou, sinon, plus intÃ©ressante que la plus
+	       // intÃ©ressante ?
 	       if ((paquetDispo == 0)
                 || (remplissage->interet < utiliteDerivee(schedACM_getQoS(sched->schedACM, m, q),
 						  schedACM_getQoS(sched->schedACM, m, q)->debit,
@@ -156,7 +156,7 @@ void schedulerUtility(struct schedUtility_t * sched)
          // C'est mieux si au moins une des affirmations suivantes est vraie
          //    on n'avait rien pour le moment (volumeTotal nul)
          //    l'interet de la nouvelle proposition est meilleur
-	 //    l'interet est le même, mais avec un plus gros volume
+	 //    l'interet est le mÃªme, mais avec un plus gros volume
          if (   (schedACM_getSolution(sched->schedACM)->volumeTotal == 0)
 	       || (remplissage.interet > schedACM_getSolution(sched->schedACM)->interet)
 	       || (   (remplissage.interet == schedACM_getSolution(sched->schedACM)->interet)

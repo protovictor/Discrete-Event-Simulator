@@ -1,5 +1,5 @@
 /*
- *   Ordonnancement par un algorithme simple fondé sur des fnctions d'utilité 
+ *   Ordonnancement par un algorithme simple fondÃ© sur des fnctions d'utilitÃ© 
  *
  */
 #ifndef __SCHED_UTILITY
@@ -8,11 +8,11 @@
 #include <schedACM.h>
 
 /*
- * Création d'un scheduler avec sa "destination". Cette dernière doit
- * être de type struct DVBS2ll_t  et avoir déjà été complêtement
- * construite (tous les MODCODS créés).
- * Le nombre de files de QoS différentes par MODCOD est également
- * passé en paramètre.
+ * CrÃ©ation d'un scheduler avec sa "destination". Cette derniÃ¨re doit
+ * Ãªtre de type struct DVBS2ll_t  et avoir dÃ©jÃ  Ã©tÃ© complÃªtement
+ * construite (tous les MODCODS crÃ©Ã©s).
+ * Le nombre de files de QoS diffÃ©rentes par MODCOD est Ã©galement
+ * passÃ© en paramÃ¨tre.
  */
 struct schedACM_t * schedUtility_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int declOK);
 

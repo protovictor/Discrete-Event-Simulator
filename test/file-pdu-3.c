@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------*/
-/*   Test de NDES : tests des files de PDU à longueur limitée.          */
-/*   On insère 2*NBMAX PDU dans une file de capacité NBMAX. D'abord avec*/
+/*   Test de NDES : tests des files de PDU Ã  longueur limitÃ©e.          */
+/*   On insÃ¨re 2*NBMAX PDU dans une file de capacitÃ© NBMAX. D'abord avec*/
 /* une politique drop tail, puis avec une politique drop head.          */
 /*----------------------------------------------------------------------*/
 

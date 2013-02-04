@@ -17,18 +17,18 @@ struct resetClient_t {
 };
 
 /*
- * La quantité de données demandée à malloc
+ * La quantitÃ© de donnÃ©es demandÃ©e Ã  malloc
  */
 unsigned long __totalMallocSize = 0;
 
 /*
- * Caractéristiques d'une instance du simulateur (à voir : ne
- * seraient-ce pas les caractéristiques d'une simulation ?)
+ * CaractÃ©ristiques d'une instance du simulateur (Ã  voir : ne
+ * seraient-ce pas les caractÃ©ristiques d'une simulation ?)
  */
 struct motsim_t {
    time_t               actualStartTime;
    double               currentTime;
-   double               finishTime; // Heure simulée de fin prévue
+   double               finishTime; // Heure simulÃ©e de fin prÃ©vue
    struct eventFile_t * events;
    int                  nbInsertedEvents;
    int                  nbRanEvents;
@@ -40,17 +40,17 @@ struct motsim_t {
 struct motsim_t * __motSim;
 
 /*
- * Caractéristiques d'une campagne de simulation. Une campagne sert à
- * instancier à plusieurs reprises une même simulation.
+ * CaractÃ©ristiques d'une campagne de simulation. Une campagne sert Ã 
+ * instancier Ã  plusieurs reprises une mÃªme simulation.
  */
 struct motSimCampaign_t {
-   int nbSimulations;   // Nombre d'instances de la simulation à
-			// répliquer
+   int nbSimulations;   // Nombre d'instances de la simulation Ã 
+			// rÃ©pliquer
 
-   // La liste des sondes de moyenne (permettant d'établir des
+   // La liste des sondes de moyenne (permettant d'Ã©tablir des
    // intervalles de confiance sur des sondes de la simulation)
 
-   // La liste des clients à ré-initialiser en début de campagne
+   // La liste des clients Ã  rÃ©-initialiser en dÃ©but de campagne
    struct resetClient_t * resetClient;
 };
 
@@ -92,8 +92,8 @@ void motSim_exit(int retValue)
 }
 
 /*
- * Création d'une instance du simulateur au sein de laquelle on pourra
- * lancer plusieurs simulations consécutives
+ * CrÃ©ation d'une instance du simulateur au sein de laquelle on pourra
+ * lancer plusieurs simulations consÃ©cutives
  */
 void motSim_create()
 {
@@ -124,7 +124,7 @@ void motSim_create()
    sigaction(SIGALRM, &act,NULL);
 
    printf_debug(DEBUG_MOTSIM, "creation des sondes systeme\n");
-   // Calcul de la durée moyenne des simulations
+   // Calcul de la durÃ©e moyenne des simulations
    __motSim->dureeSimulation = probe_createExhaustive();
    probe_setPersistent(__motSim->dureeSimulation);
 
@@ -179,17 +179,17 @@ void motSim_runNevents(int nbEvents)
 }
 
 /*
- * Lancement de plusieurs simulations consécutives de même durée
+ * Lancement de plusieurs simulations consÃ©cutives de mÃªme durÃ©e
  *
- * L'état final (celui des sondes en particulier) est celui
- * correspondant à la fin de la dernière simulation.
+ * L'Ã©tat final (celui des sondes en particulier) est celui
+ * correspondant Ã  la fin de la derniÃ¨re simulation.
  */
 void motSim_runNSimu(double date, int nbSimu)
 {
    int n;
 
    for (n = 0 ; n < nbSimu; n++) {
-      // On réinitialise  tous les éléments (et on démarre les
+      // On rÃ©initialise  tous les Ã©lÃ©ments (et on dÃ©marre les
       // sources)
       motSim_reset();
 
@@ -221,17 +221,17 @@ void motSim_runUntil(double date)
       __motSim->nbRanEvents ++;
       /*
 afficher le message toutes les 
-      n secondes de temps réel
+      n secondes de temps rÃ©el
  ou x % du temps simule passe
 
-   Bof : moins on en rajoute à chaque event, mieux c'est !
+   Bof : moins on en rajoute Ã  chaque event, mieux c'est !
       */
       event = eventFile_nextEvent(__motSim->events);
    }
 }
 
 /*
- * On vide la liste des événements 
+ * On vide la liste des Ã©vÃ©nements 
  */
 void motSim_purge()
 {
@@ -259,9 +259,9 @@ void motSim_purge()
 }
 
 /*
- * A la fin d'une simulation, certains objets ont besoin d'être
- * réinitialiser (pour remettre des compteurs à 0 par exemple). Ces
- * objets doivent s'enregistrer auprès du simulateur par la fonction
+ * A la fin d'une simulation, certains objets ont besoin d'Ãªtre
+ * rÃ©initialiser (pour remettre des compteurs Ã  0 par exemple). Ces
+ * objets doivent s'enregistrer auprÃ¨s du simulateur par la fonction
  * suivante
  */
 void motsim_addToResetList(void * data, void (*resetFunc)(void * data))
@@ -279,31 +279,31 @@ void motsim_addToResetList(void * data, void (*resetFunc)(void * data))
 
 
 /*
- * Réinitialisation du simulateur pour une nouvelle
- * simulation. Attention, il serait préférable d'invoquer une liste de
- * sous-programmes enregistrés par autant de modules concernés.
+ * RÃ©initialisation du simulateur pour une nouvelle
+ * simulation. Attention, il serait prÃ©fÃ©rable d'invoquer une liste de
+ * sous-programmes enregistrÃ©s par autant de modules concernÃ©s.
  */
 void motSim_reset()
 {
    struct resetClient_t * resetClient;
 
-   // Les événements
+   // Les Ã©vÃ©nements
    motSim_purge();
 
-   // Le simulateur lui-même
+   // Le simulateur lui-mÃªme
    printf_debug(DEBUG_MOTSIM, "ho yes, once again !\n");
    __motSim->currentTime = 0.0;
    __motSim->nbInsertedEvents = 0;
    __motSim->nbRanEvents = 0;
 
-   // Les clients identifiés (probes et autres)
-   // Attention, ils vont éventuellement insérer de nouveaux événements
+   // Les clients identifiÃ©s (probes et autres)
+   // Attention, ils vont Ã©ventuellement insÃ©rer de nouveaux Ã©vÃ©nements
    printf_debug(DEBUG_MOTSIM, "about to reset clients\n");
    for (resetClient = __motSim->resetClient; resetClient; resetClient = resetClient->next) {
       resetClient->resetFunc(resetClient->data);
    }
 
-   // La simulation est considérée finie
+   // La simulation est considÃ©rÃ©e finie
    probe_sample(__motSim->dureeSimulation , time(NULL) - __motSim->actualStartTime);
 }
 
@@ -348,9 +348,9 @@ void motSim_campaignRun(struct motSimCampaign_t * c)
    struct resetClient_t * resetClient;
 
    for (n = 0 ; n < c->nbSimulations; n++){
-      // On réinitialise  tous les éléments liés à la campagne dans sa
-      // globalité. A priori il ne s'agit que des sondes
-      // inter-simulation utilisées pour les intervalles de confiance
+      // On rÃ©initialise  tous les Ã©lÃ©ments liÃ©s Ã  la campagne dans sa
+      // globalitÃ©. A priori il ne s'agit que des sondes
+      // inter-simulation utilisÃ©es pour les intervalles de confiance
 
 
       for (resetClient = c->resetClient; resetClient; resetClient = resetClient->next) {
@@ -360,7 +360,7 @@ void motSim_campaignRun(struct motSimCampaign_t * c)
 
       // On lance l'instance de simulation
  
-      // On échantillonne les mesures inter-simu
+      // On Ã©chantillonne les mesures inter-simu
    }
 }
 

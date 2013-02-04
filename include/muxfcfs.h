@@ -7,7 +7,7 @@
 struct muxfcfs_t ;
 
 /*
- * Création d'un multiplexeur
+ * CrÃ©ation d'un multiplexeur
  */
 struct muxfcfs_t * muxfcfs_create(void * destination,
 				  processPDU_t destProcessPDU);

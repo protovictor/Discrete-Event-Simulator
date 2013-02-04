@@ -16,7 +16,7 @@ int main()
 
    motSim_create();
 
-   // Un petit test tout bête de la moyenne  sur un graphBar
+   // Un petit test tout bÃªte de la moyenne  sur un graphBar
    gbp = probe_createGraphBar(-10.5, 10.5, 21);
    for (n = -10; n < 16; n++){
       data = (double)n + 0.5*((double)rand()/(double)RAND_MAX);

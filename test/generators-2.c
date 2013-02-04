@@ -1,5 +1,5 @@
 /*
- * Programme de test des divers générateurs
+ * Programme de test des divers gÃ©nÃ©rateurs
  *
  * generators-1
  *

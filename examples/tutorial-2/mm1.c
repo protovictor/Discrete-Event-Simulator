@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------*/
-/*   Test de NDES : simulation d'un système M/M/1                       */
+/*   Test de NDES : simulation d'un systÃ¨me M/M/1                       */
 /*----------------------------------------------------------------------*/
 
 #include <stdlib.h>    // Malloc, NULL, exit, ...
@@ -19,7 +19,7 @@
 
 /*
  * Affichage (via gnuplot) de la probre pr
- * elle sera affichée comme un graphbar de nbBar barres
+ * elle sera affichÃ©e comme un graphbar de nbBar barres
  * avec le nom name
  */
 void tracer(struct probe_t * pr, char * name, int nbBar)
@@ -27,10 +27,10 @@ void tracer(struct probe_t * pr, char * name, int nbBar)
    struct probe_t   * gb;
    struct gnuplot_t * gp;
 
-   /* On crée une sonde de type GraphBar */
+   /* On crÃ©e une sonde de type GraphBar */
    gb = probe_createGraphBar(probe_min(pr), probe_max(pr), nbBar);
 
-   /* On convertit la sonde passée en paramètre en GraphBar */
+   /* On convertit la sonde passÃ©e en paramÃ¨tre en GraphBar */
    probe_exhaustiveToGraphBar(pr, gb);
 
    /* On la baptise */
@@ -48,11 +48,11 @@ void tracer(struct probe_t * pr, char * name, int nbBar)
 
 int main() {
    struct PDUSource_t       * sourcePDU;  // Une source
-   struct dateGenerator_t   * dateGenExp; // Un générateur de dates
-   struct randomGenerator_t * sizeGen; // Un générateur de tailles
-   struct filePDU_t         * filePDU; // Déclaration de notre file
-   struct srvGen_t          * serveur; // Déclaration d'un serveur générique
-   struct PDUSink_t         * sink;    // Déclaration d'un puits
+   struct dateGenerator_t   * dateGenExp; // Un gÃ©nÃ©rateur de dates
+   struct randomGenerator_t * sizeGen; // Un gÃ©nÃ©rateur de tailles
+   struct filePDU_t         * filePDU; // DÃ©claration de notre file
+   struct srvGen_t          * serveur; // DÃ©claration d'un serveur gÃ©nÃ©rique
+   struct PDUSink_t         * sink;    // DÃ©claration d'un puits
 
    struct probe_t           * sejProbe, * iaProbe, * srvProbe, *szProbe; // Les sondes
 
@@ -63,27 +63,27 @@ int main() {
    /* Creation du simulateur */
    motSim_create();
 
-   /* Crétion du puits */
+   /* CrÃ©tion du puits */
    sink = PDUSink_create();
 
-   /* Création du serveur */
+   /* CrÃ©ation du serveur */
    serveur = srvGen_create(sink, (processPDU_t)PDUSink_processPDU);
 
-   /* Paramétrage du serveur */
+   /* ParamÃ©trage du serveur */
    srvGen_setServiceTime(serveur, serviceTimeProp, 1.0/debit);
 
-   /* Création de la file */
+   /* CrÃ©ation de la file */
    filePDU = filePDU_create(serveur, (processPDU_t)srvGen_processPDU);
 
-   /* Création d'un générateur de date */
+   /* CrÃ©ation d'un gÃ©nÃ©rateur de date */
    dateGenExp = dateGenerator_createExp(frequencePaquets);
 
-   /* Création de la source */
+   /* CrÃ©ation de la source */
    sourcePDU = PDUSource_create(dateGenExp, 
 				filePDU,
 				(processPDU_t)filePDU_processPDU);
 
-   /* Création d'un générateur de taille (tailles non bornées) */
+   /* CrÃ©ation d'un gÃ©nÃ©rateur de taille (tailles non bornÃ©es) */
    sizeGen = randomGenerator_createUInt();
    randomGenerator_setDistributionExp(sizeGen, 1.0/tailleMoyenne);
 
@@ -91,14 +91,14 @@ int main() {
    szProbe = probe_createExhaustive();
    randomGenerator_setValueProbe(sizeGen, szProbe);
 
-   /* Affectation à la source */
+   /* Affectation Ã  la source */
    PDUSource_setPDUSizeGenerator(sourcePDU, sizeGen);
 
-   /* Une sonde sur les interarrivées */
+   /* Une sonde sur les interarrivÃ©es */
    iaProbe = probe_createExhaustive();
    dateGenerator_setInterArrivalProbe(dateGenExp, iaProbe);
 
-   /* Une sonde sur les temps de séjour */
+   /* Une sonde sur les temps de sÃ©jour */
    sejProbe = probe_createExhaustive();
    filePDU_addSejournProbe(filePDU, sejProbe);
 
@@ -109,12 +109,12 @@ int main() {
    /* On active la source */
    PDUSource_start(sourcePDU);
 
-   /* C'est parti pour 100 000 millisecondes de temps simulé */
+   /* C'est parti pour 100 000 millisecondes de temps simulÃ© */
    motSim_runUntil(100000.0);
 
    motSim_printStatus();
 
-   /* Affichage de quelques résultats scalaires */
+   /* Affichage de quelques rÃ©sultats scalaires */
    printf("%d paquets restant dans  la file\n",
 	  filePDU_length(filePDU));
    printf("Temps moyen de sejour dans la file = %f\n",
@@ -125,7 +125,7 @@ int main() {
 	  probe_mean(srvProbe), tailleMoyenne/debit);
 
    tracer(iaProbe, "Interarrivee", 100);
-   tracer(sejProbe, "Temps de séjour", 100);
+   tracer(sejProbe, "Temps de sÃ©jour", 100);
    tracer(szProbe, "Taille des paquets", 100);
 
    printf("*** ^C pour finir ;-)\n");

@@ -1,5 +1,5 @@
 /*
- * Test du rejeu des générateurs
+ * Test du rejeu des gÃ©nÃ©rateurs
  */
 #include <motsim.h>
 #include <random-generator.h>
@@ -17,7 +17,7 @@ int main() {
    int n;
    double v ;
 
-   motSim_create(); // Les sondes datent les échantillons
+   motSim_create(); // Les sondes datent les Ã©chantillons
 
    pr1 = probe_createExhaustive();
    probe_setPersistent(pr1);  // On va utiliser un motSim_reset
@@ -26,7 +26,7 @@ int main() {
    pr3 = probe_createExhaustive();
    probe_setPersistent(pr3);
 
-   // On crée un générateur de réels (loi exp par défaut)
+   // On crÃ©e un gÃ©nÃ©rateur de rÃ©els (loi exp par dÃ©faut)
    rg = randomGenerator_createDoubleExp(1.0);
 
    // On lui fait faire un premier tour
@@ -37,14 +37,14 @@ int main() {
    // On demande maintenant d'enregistrer
    randomGenerator_recordThenReplay(rg);
 
-   // Un deuxième tour
+   // Un deuxiÃ¨me tour
    for (n = 0 ; n < NBECH;n++){
       v = randomGenerator_getNextDouble(rg);
       //      printf("pr2[%d] <- %f\n", n, v);
       probe_sample(pr2, v);
    }
 
-   // Le troisième tour sera un rejeu 
+   // Le troisiÃ¨me tour sera un rejeu 
    motSim_reset();
 
    // Un troisieme tour
@@ -54,7 +54,7 @@ int main() {
       probe_sample(pr3, v);
    }
 
-   // Comparaison des résultats
+   // Comparaison des rÃ©sultats
    for (n = 0 ; n < NBECH;n++){
      //          printf("%f != %f = %f\n", probe_exhaustiveGetSampleN(pr1, n),
      //	    probe_exhaustiveGetSampleN(pr2, n),probe_exhaustiveGetSampleN(pr3, n));

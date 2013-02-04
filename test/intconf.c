@@ -17,7 +17,7 @@ int main() {
    unsigned int facesDe[] = {1, 2, 3, 4, 5, 6};
    double probaDe[] = {1.0/6.0, 1.0/6.0, 1.0/6.0, 1.0/6.0, 1.0/6.0, 1.0/6.0};
 
-   motSim_create(); // Les sondes datent les échantillons
+   motSim_create(); // Les sondes datent les Ã©chantillons
 
    rp = probe_createExhaustive();
 
@@ -25,12 +25,12 @@ int main() {
 
    // Sur une sonde exhaustive
    for (nbEch = 10485760; nbEch >= 10; nbEch /= 4) {
-      printf("%d lancers de dé à six faces (non pipé) :\n", nbEch);
+      printf("%d lancers de dÃ© Ã  six faces (non pipÃ©) :\n", nbEch);
       for (n = 0 ; n < nbEch;n++){
          probe_sample(rp, (double)randomGenerator_getNextUInt(rg));
       }
 
-      // Résultats pour un tirage de dé non pipé
+      // RÃ©sultats pour un tirage de dÃ© non pipÃ©
       printf("Moyenne    = %f\n", probe_mean(rp));
       printf("Ecart type = %f\n", probe_stdDev(rp));
       printf("Intervalle = +/- %f\n", probe_demiIntervalleConfiance5pc(rp));
