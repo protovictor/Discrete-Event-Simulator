@@ -3,5 +3,8 @@ Instructions
 
    cd DOCS
    pdflatex ndes
+   makeindex ndes
+   pdflatex ndes
+   pdflatex ndes
    okular ndes.pdf
    Ouah !

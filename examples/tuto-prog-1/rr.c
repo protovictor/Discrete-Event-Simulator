@@ -21,13 +21,13 @@
 
 struct rrSched_t {
    // La destination (typiquement un lien)
-   void * destination;
-   processPDU_t destProcessPDU;
+   void         * destination;
+   processPDU_t   destProcessPDU;
 
    // Les sources (files d'entrée)
-   int nbSources;
-   void * sources[SCHED_RR_NB_INPUT_MAX];
-   getPDU_t srcGetPDU[SCHED_RR_NB_INPUT_MAX];
+   int        nbSources;
+   void     * sources[SCHED_RR_NB_INPUT_MAX];
+   getPDU_t   srcGetPDU[SCHED_RR_NB_INPUT_MAX];
 
    // La dernière source servie par le tourniquet
    int lastServed;
@@ -189,10 +189,10 @@ int main()
    }
 
    /* C'est parti pour 100 000 millisecondes de temps simulÃ© */
-   motSim_runUntil(2000.0);
+   motSim_runUntil(1000.0);
 
-   motSim_printStatus();
-
+   // On va juste se contenter de compter le nombre de paquets servis
+   // dans chaque file et le débit obtenu par chacune.
    for (n=0; n< NB_SOURCES; n++){
      printf("[%d] %ld %f\n", n, probe_nbSamples(filesOutProbe[n]), probe_mean(filesOutProbe[n]));
    }
