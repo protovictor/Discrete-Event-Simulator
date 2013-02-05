@@ -29,6 +29,7 @@ struct randomGenerator_t;
 #define rGTypeUIntEnum     6
 #define rGTypeDoubleEnum   7
 #define rGTypeUIntRange    8
+#define rGTypeUIntConstant 9
 
 
 /*
@@ -59,6 +60,9 @@ struct randomGenerator_t * randomGenerator_createUInt();
 // Des entiers non signés entre min et max  (inclus)
 struct randomGenerator_t * randomGenerator_createUIntRange(unsigned int min,
 						      unsigned int max);
+
+// Des entiers non signés tous �gaux !
+struct randomGenerator_t * randomGenerator_createUIntConstant(unsigned int v);
 
 // Des entiers non signés listés
 struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,

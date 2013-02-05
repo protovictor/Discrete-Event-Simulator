@@ -67,7 +67,7 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file)
    void * PDU = NULL;
    struct PDU_t * premier;
 
-   printf_debug(DEBUG_FILE, " extracting PDU (out of %d) at %6.3f\n", file->nombre, motSim_getCurrentTime());
+   printf_debug(DEBUG_FILE, " file %p extracting PDU (out of %d) at %6.3f\n", file, file->nombre, motSim_getCurrentTime());
    //  filePDU_dump(file);
 
    if (file->premier) {
@@ -99,9 +99,13 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file)
       }
       PDU_free(premier);
    }
-   printf_debug(DEBUG_FILE, "Apres :\n");
+   printf_debug(DEBUG_FILE, "out (pdu id %d)\n", PDU?PDU_id(PDU):-1);
    //   filePDU_dump(file);
    return PDU;
+}
+struct PDU_t * filePDU_getPDU(void * file)
+{
+   return filePDU_extract((struct filePDU_t *) file);
 }
 
 /*
@@ -199,8 +203,8 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
 {
    struct PDU_t * pq;
  
-   printf_debug(DEBUG_FILE, " insert PDU %d size %d at %6.3f (Length = %d/%d, size = %lu/%d, strat %d)\n",
-                PDU_id(PDU), PDU_size(PDU), motSim_getCurrentTime(),
+   printf_debug(DEBUG_FILE, " file %p insert PDU %d size %d (Length = %d/%d, size = %lu/%d, strat %d)\n",
+                file, PDU_id(PDU), PDU_size(PDU),
                 file->nombre, file->maxLength, file->size, file->maxSize, file->dropStrategy );
 
    //   filePDU_dump(file);
@@ -226,7 +230,7 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
    // S'il s'agit d'une drop tail
    if (((file->maxSize == 0)||(file->size + PDU_size(PDU) <= file->maxSize))
        && ((file->maxLength == 0)||(file->nombre + 1 <= file->maxLength))) {
-      pq = PDU_create(0, PDU);
+      pq = PDU_create(0, PDU);// Oui, les PDUs servent de chainons de liste !
 
       pq->next = NULL;
       pq->prev = file->dernier;
@@ -249,12 +253,16 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
 
       /* WARNING : on le fait toujours ou pour le premier ? */
       if (file->destProcessPDU && file->destination) {
-         file->destProcessPDU(file->destination, (getPDU_t)filePDU_extract, file);
+ 	 printf_debug(DEBUG_FILE, " on passe la PDU (Length = %d/%d, size = %lu/%d, strat %d)\n",
+		      file->nombre, file->maxLength, file->size, file->maxSize, file->dropStrategy );
+
+
+	 (void)file->destProcessPDU(file->destination, (getPDU_t)filePDU_extract, file);
       }
       //printf_debug(DEBUG_FILE, "Apres :\n");
       //   filePDU_dump(file);
    } else {
-      printf_debug(DEBUG_FILE, "need some room, tail droping ...\n");
+     printf_debug(DEBUG_FILE, "need some room, tail droping ...\n");
 
       /* Gestion des sondes */
       if (file->dropProbe) {
@@ -264,17 +272,28 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
       PDU_free(PDU); 
       file->nbOverflow++;
    }
+
+   printf_debug(DEBUG_FILE, " END insterting PDU (Length = %d/%d, size = %lu/%d, strat %d)\n",
+		file->nombre, file->maxLength, file->size, file->maxSize, file->dropStrategy );
+
 }
 
 /*
  * Une fonction permettant la conformité au modèle d'échange
  */
-void filePDU_processPDU(struct filePDU_t * file,
-                        getPDU_t getPDU,
-                        void * source)
+int filePDU_processPDU(void * f,
+		       getPDU_t getPDU,
+		       void * source)
 {
+   struct filePDU_t * file = (struct filePDU_t *)f;
    struct PDU_t * pdu;
- 
+
+   // Si c'est juste pour tester si je suis pret
+   if ((getPDU == NULL) || (source == NULL)) {
+      return 1; // WARNING Une file est toujours prete quitte � perdre !
+   }
+
+
    assert(getPDU != NULL);
    assert(source != NULL);
 
@@ -283,8 +302,12 @@ void filePDU_processPDU(struct filePDU_t * file,
    printf_debug(DEBUG_FILE, "got PDU %d (size %d)\n",
                 PDU_id(pdu), PDU_size(pdu));
 
-   if (pdu)
+   if (pdu) {
       filePDU_insert(file, pdu);
+      return 1;
+   }
+
+   return 0;
 }
 
 int filePDU_length(struct filePDU_t * file)

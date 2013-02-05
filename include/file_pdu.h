@@ -54,15 +54,16 @@ void filePDU_insert(struct filePDU_t * file,
 /*
  * Une fonction permettant la conformité au modèle d'échange
  */
-void filePDU_processPDU(struct filePDU_t * file,
-                        getPDU_t getPDU,
-                        void * source);
+int filePDU_processPDU(void * file,
+		       getPDU_t getPDU,
+		       void * source);
 
 /*
  * Extraction d'une PDU depuis la file. Ici la signature est
  * directement compatible avec le modèle.
  */
 struct PDU_t * filePDU_extract(struct filePDU_t * file);
+struct PDU_t * filePDU_getPDU(void * file);
 
 /*
  * Nombre de PDU dans la file

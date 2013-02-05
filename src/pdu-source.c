@@ -93,7 +93,7 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
 
    // On passe la PDU au suivant  
    if ((source->destProcessPDU) && (source->destination)) {
-      source->destProcessPDU(source->destination, PDUSource_getPDU, source);
+     (void)source->destProcessPDU(source->destination, PDUSource_getPDU, source);
    }
    // On détermine la date de prochaine transmission
    date = dateGenerator_nextDate(source->dateGen, motSim_getCurrentTime());

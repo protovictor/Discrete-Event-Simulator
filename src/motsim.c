@@ -147,7 +147,7 @@ void motSim_create()
 void motSim_addEvent(struct event_t * event)
 {
  
-   printf_debug(DEBUG_EVENT, "New event at %6.3f (%d ev)\n", event_getDate(event), __motSim->nbInsertedEvents);
+  printf_debug(DEBUG_EVENT, "New event (%p) at %6.3f (%d ev)\n", event, event_getDate(event), __motSim->nbInsertedEvents);
    assert(__motSim->currentTime <= event_getDate(event));
 
    eventFile_insert(__motSim->events, event);
@@ -166,7 +166,7 @@ void motSim_runNevents(int nbEvents)
       event = eventFile_extract(__motSim->events);
       if (event) {
          nbEvents--;
-         printf_debug(DEBUG_EVENT, "next event at %f\n", event_getDate(event));
+         printf_debug(DEBUG_EVENT, "next event (%p) at %f\n", event, event_getDate(event));
          assert(__motSim->currentTime <= event_getDate(event));
          __motSim->currentTime = event_getDate(event);
          event_run(event);

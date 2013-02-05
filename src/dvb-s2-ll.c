@@ -333,12 +333,17 @@ int DVBS2ll_available(struct DVBS2ll_t * dvbs2ll)
 /*
  * Fonction invoquée pour fournir une nouvelle PDU
  */
-void DVBS2ll_processPDU(struct DVBS2ll_t * dvbs2ll,
+int DVBS2ll_processPDU(struct DVBS2ll_t * dvbs2ll,
                         getPDU_t getPDU,
                         void * source)
 {
    struct PDU_t * pdu;
- 
+
+   // Si c'est juste pour tester si je suis pret
+   if ((getPDU == NULL) || (source == NULL)) {
+      return DVBS2ll_available(dvbs2ll); // WARNING il vaudrait mieux un DVBS2ll_processPDU
+   }
+
    // Si on n'est pas dispo, on ne fait rien !
    // On reviendra voir plus tard (à la fin de la transmission) et
    // tant pis si on ne trouve plus rien !!!

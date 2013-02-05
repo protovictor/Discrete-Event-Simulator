@@ -20,9 +20,9 @@ struct PDU_t * muxfcfs_getPDU(void * vm);
 /*
  * Soumission d'une PDU par une source
  */
-void muxfcfs_processPDU(void * vm,
-                        getPDU_t getPDU,
-			void * source);
+int muxfcfs_processPDU(void * vm,
+		       getPDU_t getPDU,
+		       void * source);
 
 #endif
 

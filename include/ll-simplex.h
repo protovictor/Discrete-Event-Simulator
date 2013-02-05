@@ -23,14 +23,14 @@ void llSimplex_delete(struct llSimplex_t * lls);
 /*
  * Gestion d'une PDU soumise par l'amont
  */
-int DVBS2ll_processPDU(struct DVBS2ll_t * dvbs2ll,
+int llSimplex_processPDU(void * lls,
                         getPDU_t getPDU,
                         void * source);
 
 /*
  * Fourniture d'une PDU en aval
  */
-struct PDU_t * DVBS2ll_getPDU(struct DVBS2ll_t * dvbs2l);
+struct PDU_t * llSimplex_getPDU(void * lls);
 
 
 #endif

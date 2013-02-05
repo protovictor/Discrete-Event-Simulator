@@ -441,14 +441,21 @@ struct PDU_t * schedACM_buildBBFRAME(struct schedACM_t * sched)
  * En fait, ici on ne fait rien. L'activitÃ©e sera dictÃ©e par la
  * disponibilitÃ© du support. C'est uniquement sur des Ã©vÃ©nements
  * de l'aval que l'on agit, ...
+ * WARNING c'est pas génial, à revoir !
  */
-void schedACM_processPDUGeneric(struct schedACM_t * sched,
+int schedACM_processPDUGeneric(struct schedACM_t * sched,
                                 getPDU_t getPDU, void * source)
 {
    struct PDU_t * pdu;
 
+   // Si c'est juste pour tester si je suis pret
+   if ((getPDU == NULL) || (source == NULL)) {
+      return 1; // On fait comme si on était pret puisque on gère nous même
+   }
+
    printf_debug(DEBUG_ACM, "Un paquet dispo pour %p\n", sched);
-      sched->paquetsEnAttente = 1;    //WARNING, pourquoi uniquement dans ce cas !?
+
+   sched->paquetsEnAttente = 1;    //WARNING, pourquoi uniquement dans ce cas !?
 
    // Si par hasard le support est dispo, il faut prendre l'initiative
    if (DVBS2ll_available(schedACM_getACMLink(sched))) {
@@ -501,15 +508,15 @@ struct PDU_t * schedACM_getPDU(struct schedACM_t * sched)
  * disponibilitÃ© du support. C'est uniquement sur des Ã©vÃ©nements
  * de l'aval que l'on agit, ...
  */
-void schedACM_processPDU(struct schedACM_t * sched,
+int schedACM_processPDU(struct schedACM_t * sched,
                          getPDU_t getPDU, void * source)
 {
    if (sched->func && sched->func->processPDU) {
       printf_debug(DEBUG_ACM, "calling dedicated facility ...\n");
-      sched->func->processPDU(sched->private, getPDU, source);
+      return sched->func->processPDU(sched->private, getPDU, source);
    } else {
       printf_debug(DEBUG_ACM, "calling generic facility ...\n");
-      schedACM_processPDUGeneric(sched, getPDU, source);
+      return schedACM_processPDUGeneric(sched, getPDU, source);
    }
 }
 

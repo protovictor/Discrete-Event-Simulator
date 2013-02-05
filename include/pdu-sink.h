@@ -10,7 +10,7 @@ struct PDUSink_t * PDUSink_create();
 /*
  * La fonction de consommation d'une PDU
  */
-void PDUSink_processPDU(struct PDUSink_t * pduSink, getPDU_t getPDU, void * source);
+int PDUSink_processPDU(void * pduSink, getPDU_t getPDU, void * source);
 
 // WARNING faudrait voir à pouvoir faire ça :
 //processPDU_t PDUSink_processPDU;

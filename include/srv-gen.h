@@ -16,7 +16,7 @@ struct PDU_t * srvGen_getPDU(struct srvGen_t * srv);
 /*
  * La fonction de consommation d'une PDU
  */
-void srvGen_processPDU(struct srvGen_t * srv,
+int srvGen_processPDU(struct srvGen_t * srv,
 		       getPDU_t getPDU, void * source);
 
 /*

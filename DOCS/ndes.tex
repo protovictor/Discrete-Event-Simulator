@@ -1069,10 +1069,34 @@ passée en paramètre.
 %------------------------------------------------------------------------
 \subsection{Insertion}
 
+\index{filePDU\_insert}
+\begin{verbatim}
+void filePDU_insert(struct filePDU_t * file,
+		    struct PDU_t * PDU);
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Extraction}
+\index{filePDU\_extract}
+\begin{verbatim}
+struct PDU_t * filePDU_extract(struct filePDU_t * file);
+\end{verbatim}
+
 %------------------------------------------------------------------------
 %
 %------------------------------------------------------------------------
 \subsection{Gestion de la taille}
+
+\index{filePDU\_length}
+\begin{verbatim}
+int filePDU_length(struct filePDU_t * file);
+\end{verbatim}
+
+\index{filePDU\_}
+\begin{verbatim}
+\end{verbatim}
 
 %------------------------------------------------------------------------
 %

@@ -65,7 +65,7 @@ typedef struct {
  */
 struct schedACM_func_t {
    struct PDU_t * (*getPDU)(void * private);
-   void  (*processPDU)(void * private,
+   int  (*processPDU)(void * private,
 	               getPDU_t getPDU, void * source);
 
    struct PDU_t * (* buildBBFRAME)(void * private);
@@ -122,7 +122,7 @@ double utiliteDerivee(t_qosMgt * qos, double x, struct DVBS2ll_t * dvbs2ll);
  * la construction d'une nouvelle trame
  */
 struct PDU_t * schedACM_getPDU(struct schedACM_t * sched);
-void schedACM_processPDU(struct schedACM_t * sched,
+int schedACM_processPDU(struct schedACM_t * sched,
                          getPDU_t getPDU, void * source);
 
 

@@ -60,9 +60,9 @@ void PDU_free(struct PDU_t * pdu);
  */
 typedef struct PDU_t * (*getPDU_t)(void * source);
 
-typedef void (*processPDU_t)(void * receiver,
-                             getPDU_t getPDU,
-                             void * source);
+typedef int (*processPDU_t)(void * receiver,
+			    getPDU_t getPDU,
+			    void * source);
 
 /*
  * Les sondes systeme

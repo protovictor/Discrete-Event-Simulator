@@ -65,9 +65,9 @@ struct PDU_t * PDU_create(int size, void * private)
  */
 void PDU_free(struct PDU_t * pdu)
 {
-   probe_sample(PDU_freeProbe, (double)pdu->id);
-
    if (pdu != NULL) {
+      probe_sample(PDU_freeProbe, (double)pdu->id);
+
       pdu->next = firstFreePDU;
       firstFreePDU = pdu;
    }

@@ -132,7 +132,7 @@ void srvGen_terminateProcess(struct srvGen_t * srv)
    }
 
    // On propose la PDU à la destination
-   srv->destProcessPDU(srv->destination, srvGen_getPDU, srv);
+   (void)srv->destProcessPDU(srv->destination, srvGen_getPDU, srv);
 
    // On va chercher la prochaine s'il y en a une
    // WARNING : et s'il y en a deux ?
@@ -151,12 +151,17 @@ void srvGen_terminateProcess(struct srvGen_t * srv)
 /*
  * Notification de la présence d'une PDU
  */
-void srvGen_processPDU(struct srvGen_t * server,
+int srvGen_processPDU(struct srvGen_t * server,
                        getPDU_t getPDU, void * source)
 {
    struct PDU_t * pdu;
 
    printf_debug(DEBUG_SRV, " server processing\n");
+
+   // Si c'est juste pour tester si je suis pret
+   if ((getPDU == NULL) || (source == NULL)) {
+      return (server->srvState == srvStateIdle);
+   }
 
    // Si je suis dispo, je vais la chercher et la traiter
    if (server->srvState == srvStateIdle){
@@ -164,7 +169,9 @@ void srvGen_processPDU(struct srvGen_t * server,
 
       // On va chercher une PDU puisqu'il y en a une de prête
       pdu = getPDU(source);
+
       srvGen_startService(server, pdu);
+      return 1;
 
    // Sinon, je note qu'elle est dispo
    } else {
@@ -178,6 +185,7 @@ void srvGen_processPDU(struct srvGen_t * server,
          server->source = source;
          server->getPDU = getPDU;
       }
+      return 0;
    }
 }
 

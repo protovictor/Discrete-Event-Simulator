@@ -73,14 +73,20 @@ struct PDU_t * muxfcfs_getPDU(void * vm)
 /*
  * Soumission d'une PDU par une source
  */
-void muxfcfs_processPDU(void * vm,
+int muxfcfs_processPDU(void * vm,
                    getPDU_t getPDU,
                    void * source)
 {
    struct muxfcfs_t * mux = (struct muxfcfs_t *) vm;
    struct PDU_t * pdu;
+   int result = 0;
 
    printf_debug(DEBUG_MUX, "IN\n");
+
+   // Si c'est juste pour tester si je suis pret
+   if ((getPDU == NULL) || (source == NULL)) {
+      return (source == NULL);
+   }
 
    // Si la précédente n'a pas été consommée, elle est détruite
    pdu = muxfcfs_getPDU(vm);
@@ -95,9 +101,9 @@ void muxfcfs_processPDU(void * vm,
    // On prévient la destination
    if (mux->destProcessPDU && mux->destination) {
       printf_debug(DEBUG_MUX, "on previent la destination\n");
-      mux->destProcessPDU(mux->destination, muxfcfs_getPDU, mux);
+      result = mux->destProcessPDU(mux->destination, muxfcfs_getPDU, mux);
    }
 
    printf_debug(DEBUG_MUX, "OUT\n");
-
+   return result;
 }

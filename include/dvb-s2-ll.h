@@ -78,7 +78,7 @@ void DVBS2ll_setSource(struct DVBS2ll_t * dvbs2ll, void * source, getPDU_t getPD
 /*
  * Une fonction permettant la conformité au modèle d'échange
  */
-void DVBS2ll_processPDU(struct DVBS2ll_t * dvbs2ll,
+int DVBS2ll_processPDU(struct DVBS2ll_t * dvbs2ll,
                         getPDU_t getPDU,
                         void * source);
 

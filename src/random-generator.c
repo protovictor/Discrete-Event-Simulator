@@ -143,7 +143,8 @@ void randomGenerator_replayInit(struct randomGenerator_t * rg)
 /*==========================================================================*/
 inline double randomGenerator_noDistGetNext(struct randomGenerator_t * rg)
 {
-  motSim_error(MS_FATAL, "No default random distribution");
+   motSim_error(MS_FATAL, "No default random distribution");
+   return 0.0;
 }
 
 /*
@@ -261,6 +262,9 @@ unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg)
 {
    unsigned int result = 0; // Init contre warning
 
+   if (rg->valueType == rGTypeUIntConstant) {
+      result = rg->param.uir.min;
+   } else {
    // Etape 1 : le générateur donne une nouvelle valeur
    //   (elle n'apparait pas explicitement ici, elle est réalisée dans
    //    le distGetNext())
@@ -286,7 +290,11 @@ unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg)
          result = min(result, rg->param.uir.max);
       break;
 
-      // Pour un sous ensmble, on fait, en gros, comme pour un
+      case rGTypeUIntConstant :
+	result = rg->param.uir.min;
+      break;
+
+      // Pour un sous ensemble, on fait, en gros, comme pour un
       // intervalle : on se ramène à l'intervalle [0, nbValues - 1]
       case rGTypeUIntEnum :
 	result = rg->param.uid.value[min((int)(rg->param.uid.nbValues*alea), rg->param.uid.nbValues -1)];
@@ -294,6 +302,7 @@ unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg)
       default :
 	 motSim_error(MS_FATAL, "not implemented\n");
       break;
+   }
    }
 
    // On probe éventuellement
@@ -496,6 +505,22 @@ struct randomGenerator_t * randomGenerator_createUIntRange(unsigned int min,
 
    return result;
 }
+
+// Des entiers non signés tous �gaux !
+struct randomGenerator_t * randomGenerator_createUIntConstant(unsigned int v)
+{
+  struct randomGenerator_t * result = randomGenerator_createRaw();
+
+   // Data type
+   result->valueType = rGTypeUIntConstant;
+   result->param.uir.min = v;
+   result->param.uir.max = v;
+
+   return result;
+}
+
+
+
 
 /*
  * Création d'un générateur aléatoire de nombres entiers.

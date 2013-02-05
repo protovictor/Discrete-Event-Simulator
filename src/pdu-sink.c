@@ -26,9 +26,18 @@ void PDUSink_setInputProbe(struct PDUSink_t * sink, struct probe_t * insertProbe
 }
 
 
-void PDUSink_processPDU(struct PDUSink_t * pduSink, getPDU_t getPDU, void * source)
+int PDUSink_processPDU(void * s, getPDU_t getPDU, void * source)
 {
+   printf_debug(DEBUG_PDU, "in\n");
+  
+   struct PDUSink_t * pduSink = (struct PDUSink_t * )s;
    struct PDU_t * pdu = getPDU(source);
+
+   // Si c'est juste pour tester si je suis pret
+   if ((getPDU == NULL) || (source == NULL)) { 
+      printf_debug(DEBUG_PDU, "c'etait un test\n");
+      return 1;
+   }
 
    if (pduSink->insertProbe){
       probe_sample(pduSink->insertProbe, PDU_id(pdu));
@@ -37,6 +46,9 @@ void PDUSink_processPDU(struct PDUSink_t * pduSink, getPDU_t getPDU, void * sour
    if (pdu) {
       PDU_free(pdu);
    }
+
+   printf_debug(DEBUG_PDU, "out\n");
+   return 1;
 }
 
 
