@@ -1,4 +1,4 @@
-/*
+/**
  * Les générateurs de dates. Largement fondé sur les générateurs de
  * nombres aléatoires.
  * Toutes les dates sont toujours exprimées en secondes depuis le début de
@@ -20,8 +20,10 @@ struct dateGenerator_t * dateGenerator_create();
 void dateGenerator_setInterArrivalProbe(struct dateGenerator_t * dateGen,
 					struct probe_t * probe);
 
-/*
- * Generation de la prochaine date
+/** @brief Obtention de la prochaine date
+ *
+ *  @param dateGen le générateur à utiliser
+ *  @param currentTime la date actuelle
  */
 double dateGenerator_nextDate(struct dateGenerator_t * dateGen,
 			      double currentTime);

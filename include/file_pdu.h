@@ -35,6 +35,7 @@ void filePDU_setMaxSize(struct filePDU_t * file, unsigned long maxSize);
 unsigned long filePDU_getMaxSize(struct filePDU_t * file);
 
 void filePDU_setMaxLength(struct filePDU_t * file, unsigned long maxLength);
+unsigned long filePDU_getMaxLength(struct filePDU_t * file);
 
 
 /*

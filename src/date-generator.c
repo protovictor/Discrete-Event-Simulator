@@ -6,17 +6,33 @@
 #include <probe.h>
 #include <random-generator.h>
 
+/**
+ * @brief Implantation des générateurs de dates.
+ *
+ * Largement fondé sur les générateurs de nombres aléatoires.
+ * Toutes les dates sont toujours exprimées en secondes depuis le début de
+ * la simulation.
+ */
 struct dateGenerator_t {
-   struct randomGenerator_t *randGen;
+   /** Le generateur aleatoire sur lequel on se fonde. C'est
+       concrètement lui qui va générer les dates successives.*/
+   struct randomGenerator_t *randGen; 
+
+   /** Une sonde sur les inter arrivees. Elle permettra par exemple
+       de vérifier qu'on est conforme à ce que l'on souhaite. */
    struct probe_t * interArrivalProbe;
 
-  //   double (* nextDate)(struct dateGenerator_t * dateGen, double currentTime);
-  //   void           * data;
+  //   double (* nextDate)(struct dateGenerator_t * dateGen, double currentTime);  //   void           * data;
 };
 
 /*-------------------------------------------------------------------------*/
 /*   Les fonctions générales                                               */
 /*-------------------------------------------------------------------------*/
+/** @brief Obtention de la prochaine date
+ *
+ *  @param dateGen le générateur à utiliser
+ *  @param currentTime la date actuelle
+ */
 double dateGenerator_nextDate(struct dateGenerator_t * dateGen, double currentTime)
 {
    double result =  randomGenerator_getNextDouble(dateGen->randGen);
@@ -30,15 +46,15 @@ double dateGenerator_nextDate(struct dateGenerator_t * dateGen, double currentTi
   //   return dateGen->nextDate(dateGen, currentTime);
 }
 
-/*
- * Ajout d'une sonde sur les inter-arrivees
+/** @brief Insertion d'une sonde sur les inter-arrivees.
+ * WARNING, il faut la remplacer par une fonction d'ajout.
+ * 
+ * @param dateGen le générateur de date sur lequel greffer la sonde
+ * @param probe la sonde à y appliquer
  */
 void dateGenerator_setInterArrivalProbe(struct dateGenerator_t * dateGen, struct probe_t * probe)
 {
-  printf("Salut les mecs !\n");
    dateGen->interArrivalProbe = probe;
-  printf("OK pour moi !\n");
-
 }
 
 /*-------------------------------------------------------------------------*/

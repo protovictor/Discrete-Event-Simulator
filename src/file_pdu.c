@@ -128,6 +128,11 @@ void filePDU_setMaxLength(struct filePDU_t * file, unsigned long maxLength)
    file->maxLength = maxLength; 
 }
 
+unsigned long filePDU_getMaxLength(struct filePDU_t * file)
+{
+  return file->maxLength;
+}
+
 /*
  * Choix de la stratégie de perte en cas d'insersion dans une file
  * pleine. Attention, insérer une PDU de taille t dans une file de

@@ -3,6 +3,7 @@ export SRC_DIR	= src
 export INCL_DIR = include
 export EXPL_DIR = examples
 export TEST_DIR = test
+export DOC_DIR = DOCS
 
 export CC=gcc
 
@@ -16,7 +17,7 @@ export LDFLAGS=-g -O3 -L../$(SRC_DIR) -lndes -lm
 
 default : src 
 
-all : src tests examples 
+all : src tests examples doc 
 
 .PHONY: clean src examples test
 
@@ -25,6 +26,9 @@ src :
 
 examples : 
 	@(cd $(EXPL_DIR) && $(MAKE))
+
+doc : 
+	@(cd $(DOC_DIR) && $(MAKE))
 
 install : src
 	@(mkdir lib || true)
@@ -40,6 +44,7 @@ clean :
 	@(cd $(SRC_DIR) && $(MAKE) $@)
 	@(cd $(EXPL_DIR) && $(MAKE) $@)
 	@(cd $(TEST_DIR) && $(MAKE) $@)
+	@(cd $(DOC_DIR) && $(MAKE) $@)
 
 .c.o :
 	$(CC) -I. $< -c

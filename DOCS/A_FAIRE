@@ -1,5 +1,10 @@
 URGENT
 ======
+   . [TOUS]
+      - Il reste des set...Probe à remplacer par des add...Probe (en
+      profiter pour documenter le chainage)
+      - Un ordonnanceur RR (reprendre celui du tuto)
+      - Un ordonnanceur DRR
    . EXAMPLES/DEBITS
       - Pourquoi ce n'est pas reproductible ?
    . [RANDOM]
@@ -41,9 +46,6 @@ URGENT
       - La mémoire allouée ne fait que croître !!!
       - Faire un test qui détruise aussi vite qu'il crée.
    . Fusionner event et event-file
-   . Un canal de propagation
-      - Parfait (sans erreurs !) dans un premier temps, c'est donc
-        juste un retard qui peut contenir plusieurs PD simultanément
    . Remplacer les exit() par un mostim_fatal
    . Tous les reset ne sont pas faits !
       - Files !
@@ -83,6 +85,9 @@ fonction de la façon de construire.
 
 EN COURS
 ========
+   . Un canal de propagation
+      - Parfait (sans erreurs !) dans un premier temps, c'est donc
+        juste un retard qui peut contenir plusieurs PDUs simultanément
    . [FILE]
       - Test du débit et de la capacité limitée
    . Des événements spécifiques

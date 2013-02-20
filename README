@@ -1,10 +1,11 @@
+C'est quoi ?
+
+   Cette chose est un embryon de librairie de simulation réseau plutôt
+orienté files d'attente.
+
 Instructions
 
-
+   make doc
    cd DOCS
-   pdflatex ndes
-   makeindex ndes
-   pdflatex ndes
-   pdflatex ndes
    okular ndes.pdf
    Ouah !
