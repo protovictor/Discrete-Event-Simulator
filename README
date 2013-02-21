@@ -1,11 +1,14 @@
-C'est quoi ?
+/*! \mainpage NDES
 
-   Cette chose est un embryon de librairie de simulation réseau plutôt
-orienté files d'attente.
+\section section_definition C'est quoi 
 
-Instructions
+   Cette chose est un embryon de librairie de simulation rÃ©seau plutÃ´t
+orientÃ© files d'attente.
+
+\section ection_instructions Instructions
 
    make doc
    cd DOCS
    okular ndes.pdf
    Ouah !
+*/

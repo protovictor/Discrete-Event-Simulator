@@ -1,5 +1,5 @@
-/*
- *   Le moteur de simulation.
+/** @file motsim.c
+ * @brief Le moteur de simulation.
  * 
  *   Puisqu'il n'y aura jamais qu'un seul moteur de simulation et
  * qu'il faut le passer en paramètre à de nombreuses fonctions qui n'en
