@@ -1,5 +1,9 @@
-/*
- * Gestion des files de PDUs. Capacite non limitee par défaut.
+/**
+ * @file file_pdu.h
+ * @brief Définition de la gestion des files de PDUs
+ *
+ * Par défaut, une liste à une capacité non limitée et fonctionne
+ * selon une politique FIFO.
  */
 #ifndef __DEF_LISTE_PDU
 #define __DEF_LISTE_PDU
@@ -9,7 +13,7 @@
 
 struct filePDU_t;
 
-/*
+/**
  * Type de la stratégie de perte en cas d'insersion dans une file
  * pleine. Attention, insérer une PDU de taille t dans une file de
  * capacité max < t n'est pas une erreur, mais engendre simplement un

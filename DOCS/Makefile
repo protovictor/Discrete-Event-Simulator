@@ -1,12 +1,16 @@
 .SUFFIXES = .tex .dvi .pdf
 
+DOXYGEN=doxygen
+DOXYFILE=Doxyfile
 PDFLATEX=pdflatex
 MAKEINDEX=makeindex
 BIBTEX=bibtex
 RM=rm -f
 
-all : ndes.pdf
+all : ndes.pdf doxy
 
+doxy :
+	${DOXYGEN} ${DOXYFILE}
 
 %.pdf : %.tex
 	${PDFLATEX}  $<

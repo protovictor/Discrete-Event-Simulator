@@ -1,9 +1,13 @@
+DANS BRANCHE UNSTABLE
+=====================
+   . [TOUS]
+      - Un ordonnanceur RR (reprendre celui du tuto)
+
 URGENT
 ======
    . [TOUS]
       - Il reste des set...Probe à remplacer par des add...Probe (en
       profiter pour documenter le chainage)
-      - Un ordonnanceur RR (reprendre celui du tuto)
       - Un ordonnanceur DRR
    . EXAMPLES/DEBITS
       - Pourquoi ce n'est pas reproductible ?
@@ -111,8 +115,6 @@ EN COURS
          . Les définir dans probe.[ch] ?
          . Elles sont initialisées dans motsim ...
            - A faire dans probe.c ?
-   . Des tests de non régression avec un mode automatique
-      - genre "make test"
    . randomGenerator
    . Documenter le modele in/out (voir plus bas)
    . module gnuplot
@@ -130,13 +132,11 @@ EN COURS
 
 A FAIRE
 =======
+   . Une sortie "à la nam"
    . [FILE-PDU]
       - dégager la file d'objets générique de la file de PDU ?
       - un "cache" qui permette d'accéder en temps constant à la neme
 valeur en lecture, en attendant une vraie refont qui optimise tout ça ...
-   . [RANDOM]
-      - Finir la restructuration ! La distinction entre les 3 niveaux
-      est évidemment difficile
    . Insérer les fonctions dans les structures
       - notemment sur les sondes
       - éviter les switch
@@ -147,7 +147,6 @@ valeur en lecture, en attendant une vraie refont qui optimise tout ça ...
    . Interface TUN/TAP pour communiquer avec le monde réel
    . Traceur gnuplot
       - Sélection du nom de fichier ou nom unique par défaut
-   . Générateur de taille de paquet
    . Un xxx_free() pour chaque xxx_create()
    . Gérer les includes. Un seul ?
    . Normaliser les notations
@@ -202,8 +201,12 @@ A DOCUMENTER
       - Sondes périodiques ?
       - Sondes de sondes ? (Conserver plein de valeurs d'une EMA par exemple)
 
-FAIT
+FAIT (et donc à valider/documenter)
 ====
+   . Générateur de taille de paquet
+   . [RANDOM]
+      - Finir la restructuration ! La distinction entre les 3 niveaux
+      est évidemment difficile
    . [FILE]
       - Une version à capacité limitée
         . En taille
@@ -240,6 +243,8 @@ FAIT
    . Passer le simulateur dans un répertoire
    . Debogage
       - Definir des macros ?
+   . Des tests de non régression avec un mode automatique
+      - genre "make test"
 
 BUG
 ===

@@ -1,3 +1,8 @@
+/**
+ * @file file_pdu.c
+ * @brief Implantation de la gestion des files de PDUs
+ *
+ */
 #include <stdlib.h>    // Malloc, NULL, ...
 #include <assert.h>
 

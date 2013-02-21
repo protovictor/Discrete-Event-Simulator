@@ -1,10 +1,14 @@
+/** @file date-generator.c
+ *  @brief Implantation des générateurs de dates
+ *
+ */
 #include <stdio.h>     // printf
 #include <stdlib.h>    // Malloc, NULL, exit...
 #include <math.h>      // log
 
 #include <motsim.h>
 #include <probe.h>
-#include <random-generator.h>
+#include <random-generator.h>  
 
 /**
  * @brief Implantation des générateurs de dates.
