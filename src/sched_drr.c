@@ -55,7 +55,7 @@ struct schedDRR_t * schedDRR_create(void * destination,
    struct schedDRR_t * result = (struct schedDRR_t * )sim_malloc(sizeof(struct schedDRR_t));
 
    // Gestion de la destination
-   result->destination = destination;
+   result->destination = destination; // Coucou !
    result->destProcessPDU = destProcessPDU;
 
    // Pas de source définie
