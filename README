@@ -1,14 +1,23 @@
-/*! \mainpage NDES
+/**
+@mainpage NDES
 
-\section section_definition C'est quoi 
+@section section_definition C'est quoi 
 
    Cette chose est un embryon de librairie de simulation réseau plutôt
 orienté files d'attente.
 
-\section ection_instructions Instructions
+@section section_instructions Instructions
 
-   make doc
-   cd DOCS
-   okular ndes.pdf
+<PRE>
+   $ make doc
+   $ cd DOCS
+   $ okular ndes.pdf
+   $ firefox html/index.html
+</PRE>
+
    Ouah !
+
+@section section_suite Et la suite ?
+
+<A HREF="../ndes.pdf">La documentation en PDF</A> 
 */

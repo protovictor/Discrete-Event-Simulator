@@ -24,9 +24,17 @@ enum filePDU_dropStrategy {
   filePDU_dropTail // StratÃ©gie par dÃ©faut
 };
 
-/*
- * Une file doit Ãªtre associÃ©e Ã  une destination, Ã  laquelle elle
- * transmet chaque paquet reÃ§u par la fonction send().
+/** @brief Création d'une file.
+ * 
+ *  @param destination l'entité aval (ou NULL ai aucune)
+ *  @param destProcessPDU la fonction de traitement de l'entité aval
+ *  (ou NULL si aucune entité)
+ *  @return Une strut filePDU_t * allouée et initialisée
+ *
+ *  Il est possible de ne pas fournir d'entité aval en paramètre, car
+ *  une file peut être utilisée également comme un simple outil de
+ *  gestion mémoire, sans entrer dans un modèle de réseau. On
+ *  utilisera alors simplement les fonctions d'insertion et d'extraction
  */
 struct filePDU_t * filePDU_create(void * destination,
 			    processPDU_t destProcessPDU);
@@ -50,8 +58,13 @@ unsigned long filePDU_getMaxLength(struct filePDU_t * file);
  */
 void filePDU_setDropStrategy(struct filePDU_t * file, enum filePDU_dropStrategy dropStrategy);
 
-/*
- * Insertion d'une PDU dans la file
+/**
+ * @brief Insertion d'une PDU dans la file
+ * @param file la file dans laquelle on insère la PDU
+ * @param PDU la PDU à insérer à la fin de la file
+ *
+ * Si une destination a été affectée à la file, alors la fonction de
+ * traitement de cette destination est invoquée.
  */
 void filePDU_insert(struct filePDU_t * file,
 		    struct PDU_t * PDU);
@@ -63,11 +76,23 @@ int filePDU_processPDU(void * file,
 		       getPDU_t getPDU,
 		       void * source);
 
-/*
- * Extraction d'une PDU depuis la file. Ici la signature est
- * directement compatible avec le modÃ¨le.
+/**
+ * @brief Extraction d'une PDU depuis la file
+ * @param file la file depuis laquelle on souhaite extraire la
+ * première PDU
+ * @return la première PDU ou NULL si la file est vide
  */
 struct PDU_t * filePDU_extract(struct filePDU_t * file);
+
+/**
+ * @brief Extraction d'une PDU depuis la file
+ * @param file la file depuis laquelle on souhaite extraire la
+ * première PDU
+ * @return la première PDU ou NULL si la file est vide
+ * 
+ * Ici la signature est directement compatible avec le modÃ¨le
+ * d'entrèe-sortie de NDES.
+ */
 struct PDU_t * filePDU_getPDU(void * file);
 
 /*
@@ -77,10 +102,12 @@ int filePDU_length(struct filePDU_t * file);
 
 int filePDU_size(struct filePDU_t * file);
 
-/*
- * Taille cumulÃ©e des n premiÃ¨res PDUs
+/**
+ * @brief Taille cumulÃ©e des n premiÃ¨res PDUs
+ * @param file la file 
+ * @param n le nombre (strictement positif) de PDUs
+ * @return le cumul des tailles des n premières PDUs de la file
  */
-
 int filePDU_size_n_PDU(struct filePDU_t * file, int n);
 
 /*
