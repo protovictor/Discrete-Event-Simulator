@@ -9,7 +9,7 @@ static int pduNB = 0;
 struct probe_t * PDU_createProbe;
 struct probe_t * PDU_reuseProbe;
 struct probe_t * PDU_mallocProbe;
-struct probe_t * PDU_freeProbe;
+struct probe_t * PDU_releaseProbe;
 
 // Pointeur sur une PDU libre (pour accélerer alloc/free)
 struct PDU_t * firstFreePDU = NULL;
@@ -66,7 +66,7 @@ struct PDU_t * PDU_create(int size, void * private)
 void PDU_free(struct PDU_t * pdu)
 {
    if (pdu != NULL) {
-      probe_sample(PDU_freeProbe, (double)pdu->id);
+      probe_sample(PDU_releaseProbe, (double)pdu->id);
 
       pdu->next = firstFreePDU;
       firstFreePDU = pdu;
