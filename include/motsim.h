@@ -159,7 +159,7 @@ static unsigned long debug_mask = 0x00000000
    printf("\n------- Error report -------\n");                      \
    printf("In file  %s\nAt line  %d\nFunction %s\n", __FILE__, __LINE__, __FUNCTION__); \
    printf("Message : "  fmt , ## args);                             \
-   printf("\n------- Error report -------\n");                      \ 
+   printf("\n------- Error report -------\n");                      \
    if (lvl == MS_FATAL) motSim_exit(1);
 
 extern unsigned long __totalMallocSize;
