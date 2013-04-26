@@ -25,11 +25,10 @@ struct schedDRRInput_t {
 			    //les PDU de la source
    unsigned long quantum;         //!< Le quantum attribué à chaque tour (cf [1])
    unsigned long deficitCounter ; //!< Le deficit (cf [1])
-
-   int dejaServi; //!< Un booléen pour déterminer si on l'a déja servi
-	          //sur le cycle en cours du round robin
-
+   int           nbToursSupp;     //!< Combien de tours lui faut-il
+				  //!avant de pouvoir émettre ?
    struct schedDRRInput_t * next ; //!< On chaine les sources
+   struct schedDRRInput_t * prev ; //!< On chaine les sources
 };
 
 /**
@@ -40,6 +39,7 @@ struct schedDRR_t {
 						 //sources inactives
    struct schedDRRInput_t  * activeSourceList;   //!< La liste des
 						 //sources actives
+   struct schedDRRInput_t  * nextSource;   //!< Prochaine source à servir
 };
 
 /**
@@ -94,43 +94,108 @@ A FAIRE
  */
 struct PDU_t * schedDRR_getPDU(void * s)
 {
-   struct schedDRR_t * sched = (struct schedDRR_t * )s;
-   struct PDU_t * result = NULL;
-   struct schedDRRInput_t * currentSource ;
+   struct schedDRR_t      * sched = (struct schedDRR_t * )s;
+   struct PDU_t           * result = NULL;
+   struct schedDRRInput_t * currentSource;
+   unsigned long nbToursSup = ULONG_MAX;
 
-
-   // On parcourt la liste des sources actives jusqu'à en trouver une
-   // qui puisse envoyer au moins un paquet.
+   // Si on n'a pas de nextSource, c'est qu'il faut démarrer un
+   // tour. La première phase consiste à avancer autant que nécessaire
+   // (en faisant éventuellement des tours à vide) pour qu'une source
+   // active puisse émettre.
    do {
-      // On va chercher la première source active
-      if (sched->activeSourceList) {
+      if (sched->nextSource == NULL) {
+         // On va chercher la première source active
+         if (sched->activeSourceList == NULL) {
+            return NULL; // Si pas de source active, pas de PDU à fournir !
+         }
+         // On parcourt la liste des sources actives jusqu'à en trouver une
+         // qui puisse envoyer au moins un paquet. Le problème, c'est qu'il
+         // sera peut-être nécessaire de faire plusieurs tours afin de
+         // cumuler un déficit suffisant pour envoyer ce paquet. Du coup on
+         // compte pour chaque file active le nombre de tours dont elle a
+         // besoin avant d'émettre.
          currentSource = sched->activeSourceList->source;
-      } else {
-         return NULL; // Si pas de source active, pas de PDU à fournir !
+         do {
+	/* Si le déficit est suffisant, on peut émettre de suite, sinon
+	 * le nombre de tours à faire dépend de la taille du prochain
+	 * paquet et du quantum
+	 */
+	    currentSource->nbToursSupp = (currentSource->deficitCounter 
+				      >= filePDU_size_n_PDU(currentSource->file, 1)) ?
+	     0:((filePDU_size_n_PDU(currentSource->file, 1)-currentSource->deficitCounter)/currentSource->quantum + 1);
+            nbToursSup = min(nbToursSup, currentSource->nbToursSupp);
+            currentSource = currentSource->next;
+         } while (currentSource);
+      
+        /* On connait maintenant le nombre minimal de tours à faire pour
+         * que quelqu'un puisse émettre. Le deuxième phase consiste donc
+         * à appliquer la conséquence de ces tours sur les déficits
+         */
+         currentSource = sched->activeSourceList->source;
+         do {
+           currentSource->deficitCounter += currentSource->nbToursSupp*currentSource->quantum;
+           currentSource = currentSource->next;
+         } while (currentSource);
+      
+         /* Maintenant que tout le monde a obtenu le déficit du tour, on
+          * commence effectivement le tour. C'est la troisième phase.
+          */
+         sched->nextSource = sched->activeSourceList;
       }
 
-      // S'il débute son tour de round robin, on lui ajoute un quantum
-      if (!currentSource->dejaServi) {
-         currentSource->deficitCounter += currentSource->quantum;
-         currentSource->dejaServi = 1;
-         // Afin d'éviter de faire un grand nombre de tours de round robin au
-         // cours desquels on incrémente le déficit des sources actives d'un
-         // quantum, on va déterminer le nombre minimal.
-	 nbToursSupp = (int)trunc(filePDU_size_n_PDU(currentSource->file, 1) / currentSource->quantum);
-      }
+      // Tant qu'on n'a pas fini le tour actuel (que l'on débute
+      // éventuellement, si le code précédent a été exécuté), on sert la
+      // prochaine source à servir
+      currentSource = sched->nextSource;
+      do {
+         // Si la source en cours n'a pas été intégralement servie, on
+         // envoie le prochain de ses paquets. On ne change pas
+         // nextSource car elle pourra éventuellement encore être servie
+         // au prochain tour
+         if (filePDU_size_n_PDU(currentSource->file, 1) <= currentSource->deficitCounter) {
+            result = filePDU_extraireUnPDU(currentSource->file);
+            currentSource->deficitCounter -= PDU_sizeOf(result);
+            // Si c'est le dernier paquet de la source, elle n'est
+            // plus active, il faut donc la sortir (avec un déficit
+            // nul)
+            if (filePDU_length(currentSource->file) == 0) {
+               currentSource->deficitCounter = 0;
+	       tmpSrc = currentSource;
+	       // On met à jour la liste active (à laquelle elle appartient)
+               if (currentSource->prev) {
+                  currentSource->prev->next = currentSource->next;
+	       } else { // Le cas de la première
+                  sched->activeSourceList = currentSource->next;
+	       }
+               if (currentSource->next) {
+                  currentSource->next->prev = currentSource->prev;
+	       }
+               // On met à jour la liste inactive (dans laquelle elle
+               // va)
+	       currentSource->next = sched->unactiveSourceList;
+	       sched->unactiveSourceList = currentSource;
+	       currentSource->prev = NULL;
+               if (currentSource->next) {
+                  currentSource->next->prev = currentSource;
+	       }
+	    }
+         } else {
+         // Si la source en cours ne peut pas émettre (pas assez cumulé
+         // de déficit), alors on passe à la suivante
+            currentSource =  currentSource->next;
+         }
+      } while ((result == NULL) && (sched->nextSource != NULL));
 
-      // Tant qu'il a un paquet à émettre de taille inférieure à son
-      // déficit, on l'envoie
-      if (filePDU_size_n_PDU(currentSource->file, 1) <= ) {
-      } else 
+      // Si on a trouvé quelquechose, on est content ! On arrète là après
+      // avoir noté où on en est dans le tour actuel
+      if (result) {
+         sched->nextSource = currentSource;
+      } 
+      // Si on n'a rien trouvé, ici, c'est qu'on vient de finir un tour,
+      // il faut donc en entamer un nouveau
+   } while (result == NULL);
 
-      // Si la source en cours n'a plus assez de déficit, on la met à la
-      // fin de la liste des sources actives (on passe donc à la
-      // suivante)
-A FAIRE
-   } while (result == NULL); // On continue si on n'a rien trouvé
-			     // (alors qu'il y a des sources actives)
-   
    return result;
 }
 
@@ -144,41 +209,36 @@ int schedDRR_processPDU(void *s,
    int result;
    struct schedDRR_t * sched = (struct schedDRR_t *)s;
 
-   A REFAIRE ! On est toujours dispo (files intégrées)
-
    printf_debug(DEBUG_SCHED, "in\n");
-   // La destination est-elle prete ?
-   int destDispo = sched->destProcessPDU(sched->destination, NULL, NULL);
 
-   printf_debug(DEBUG_SCHED, "dispo du lien aval : %d\n", destDispo);
-
-   // Si c'est un test de dispo, je dÃ©pend de l'aval
+   // Si c'est un test de dispo, je suis prêt !
    if ((getPDU == NULL) || (source == NULL)) {
       printf_debug(DEBUG_SCHED, "c'etait juste un test\n");
-      result = destDispo;
+      result = 1;
    } else {
-      if (destDispo) {
          // On cherche la source dans la liste des sources inactives
-         while (   (sched->unactiveSourceList != NULL) 
-		  && (sched->unactiveSourceList->source != source) ){
-            sched->unactiveSourceList = sched->unactiveSourceList->next;
+         s = sched->unactiveSourceList;
+         while (( s!= NULL)  && (s->source != source) ){
+            s = s->next;
          }
-	 assert((sched->unactiveSourceList == NULL)||(sched->unactiveSourceList->source == source));
+	 assert((s == NULL)||(s->source == source));
 
          // Si on l'a trouvé, il faut l'extraire et la mettre dans la
-         // liste des sources actives (à la fin de la liste)
+         // liste des sources actives
          if ((sched->unactiveSourceList != NULL) && (sched->unactiveSourceList->source == source)) {
-	   A FAIRE (chainage à double sens ?)
+	   A FAIRE (chainage à double sens )
 	 }
-
+	 // Si on ne l'a pas trouvé dans les inactives, on va la
+	 // chercher dans les actives
+A FAIRE
+         // Une fois qu'on a trouvé la source (et qu'on l'a
+         // éventuellement rendue active), on prend le paquet et on le
+         // met dans la file correspondante
+A FAIRE
          // Si l'aval est dispo, on lui dit de venir chercher une PDU, ce
          // qui dÃ©clanchera l'ordonnancement
          printf_debug(DEBUG_SCHED, "on fait suivre ...\n");
          result = sched->destProcessPDU(sched->destination, schedDRR_getPDU, sched);
-      } else {
-         // On ne fait rien si l'aval (un support a priori) n'est pas pret
-         printf_debug(DEBUG_SCHED, "on ne fait rien (aval pas pret) ...\n");
-         result = 0;
       }
    }
    printf_debug(DEBUG_SCHED, "out %d\n", result);
