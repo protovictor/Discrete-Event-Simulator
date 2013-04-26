@@ -1,7 +1,12 @@
-/*----------------------------------------------------------------------*/
-/*      Algorithme d'ordonnancement de flots de paquets sur un lien     */
-/*   DVB-S2                                                             */
-/*----------------------------------------------------------------------*/
+/** @file sched_ks.c
+ *  @brief Ordonnacement sur un lien DVB-S2
+ * 
+ *      Implantation d'un algorithme d'ordonnancement de flots de
+ *      paquets sur un lien DVB-S2. Cet algorithme se fonde sur le
+ *      problème du sac à dos. Il se veut donc efficace, mais son
+ *      temps d'exécution peut devenir explosif !
+ */
+ 
 #include <stdlib.h>    // Malloc, NULL, exit...
 #include <strings.h>   // bzero, bcopy, ...
 #include <stdio.h>     // printf, ...
@@ -21,8 +26,8 @@ static struct schedACM_func_t schedKS_func = {
    .schedule = scheduler_knapsack_exhaustif
 };
 
-/*
- * Les caractéristiques d'un tel ordonnanceur
+/**
+ * @brief : Les caractéristiques d'un tel ordonnanceur
  */
 struct sched_kse_t {
    struct schedACM_t * schedACM;
@@ -36,14 +41,23 @@ struct sched_kse_t {
 
 };
 
-/*
+/**
+ * @brief Création et initialisation d'un ordonnanceur
+ * @param dvbs2ll le lien sur lequel sont transmises les trames
+ * @param nbQoS le nombre de files de qualité de service
+ * @param declOK autorise-t-on le déclassement ?
+ * @param exhaustif faut-il utiliser un algorithme exhaustif ?
+ *
  * Création d'un scheduler avec sa "destination". Cette dernière doit
  * être de type struct DVBS2ll_t  et avoir déjà été complêtement
  * construite (tous les MODCODS créés).
  * Le nombre de files de QoS différentes par MODCOD est également
  * passé en paramètre.
  */
-struct schedACM_t * sched_kse_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int declOK, int exhaustif)
+struct schedACM_t * sched_kse_create(struct DVBS2ll_t * dvbs2ll,
+				     int nbQoS,
+				     int declOK,
+				     int exhaustif)
 {
    struct sched_kse_t * result = (struct sched_kse_t * ) sim_malloc(sizeof(struct sched_kse_t));
    assert(result);
@@ -105,9 +119,18 @@ void afficherFiles(struct sched_kse_t * sched, int mc)
    }
 }
 
-/*
- * Resolution exhaustive du problème du sac à dos avec une BBFRAME dont le modcod est
- * passé en paramètre
+/**
+ * @brief Resolution exhaustive du problème du sac à dos avec une
+ * BBFRAME dont le modcod est passé en paramètre 
+ * @param mc le numéro du MODCOD à tester
+ * @param sched l'ordonnanceur à utiliser
+ *
+ * Cette fonction utilise le tableau remplissage de la structure
+ * sched. Ce tableau doit être initialisé à 0, et il sera réinitialisé
+ * à la fin de cette fonction.
+ *
+ * Si la meilleure solution trouvée pour ce MODCOD est meilleur que la
+ * meilleure solution du scheduler, alors elle la remplace.
  */
 void knapsackParModCod(int mc, struct sched_kse_t * sched)
 {
@@ -333,9 +356,16 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
    tabRemplissage_raz(sched->remplissage, NB_SOUS_CAS_MAX, nbModCod(sched->schedACM), nbQoS(sched->schedACM));
 }
 
-/*
- * bestSolution (out) ordonnancement choisi (doit être initialisé
- * avant appel de cette fonction).
+/**
+ * @brief Application de l'ordonnancement
+ * @param sched structure définissant l'ordonnanceur à utiliser
+ *
+ * C'est cette fonction qui réalise l'ordonnancement général. Elle
+ * passe en revue tous les MODCODs disponibles et applique
+ * l'algorithme sur chacun d'entre eux. Au final, l'ordonnanceur
+ * contient dans son champ solutionChoisie (obtenue par la fonction
+ * schedACM_getSolution) la meilleure de toutes les solutions
+ * envisagées.
  */
 void scheduler_knapsack_exhaustif(struct sched_kse_t * sched)
 {
@@ -344,7 +374,11 @@ void scheduler_knapsack_exhaustif(struct sched_kse_t * sched)
    int mc;
    int q, m;
 
-   remplissage_raz(schedACM_getSolution(sched->schedACM), nbModCod(sched->schedACM), nbQoS(sched->schedACM));
+   /** On met à zéro la solution choisie
+    */
+   remplissage_raz(schedACM_getSolution(sched->schedACM),
+		   nbModCod(sched->schedACM),
+		   nbQoS(sched->schedACM));
 
    /*
     * Resolution pour tous les MODCODs
@@ -356,12 +390,15 @@ void scheduler_knapsack_exhaustif(struct sched_kse_t * sched)
       afficherFiles(sched, mc);
       knapsackParModCod(mc, sched);
 
-      printf_debug(DEBUG_KS, "-------====< Ordonnancement choisi mc=%d >====-------\n", schedACM_getSolution(sched->schedACM)->modcod);
-      printf_debug(DEBUG_KS, "Nombre de solutions testées : %d\n", schedACM_getNbSolutions(sched->schedACM));
+      printf_debug(DEBUG_KS, "-------====< Ordonnancement choisi mc=%d >====-------\n",
+		   schedACM_getSolution(sched->schedACM)->modcod);
+      printf_debug(DEBUG_KS, "Nombre de solutions testées : %d\n",
+		   schedACM_getNbSolutions(sched->schedACM));
       for (m = 0; m < nbModCod(sched->schedACM); m++) {
          printf_debug(DEBUG_KS, "  MODCOD %d\n", m);
          for (q = 0; q < nbQoS(sched->schedACM); q++) {
-            printf_debug(DEBUG_KS, "   Ord[m=%d][q=%d] = %2d\n", m, q, schedACM_getSolution(sched->schedACM)->nbrePaquets[m][q]);
+            printf_debug(DEBUG_KS, "   Ord[m=%d][q=%d] = %2d\n",
+			 m, q, schedACM_getSolution(sched->schedACM)->nbrePaquets[m][q]);
          }
       }
       printf_debug(DEBUG_KS, "  Interet %7.2e  Volume %d/%d (mc %d)\n",
