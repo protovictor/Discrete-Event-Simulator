@@ -3,6 +3,7 @@ OBJ_FILES= $(SRC_FILES:.c=.o)
 
 TESTS = generators-0 generators-1 \
 	generators-3 generators-4 \
+	drr \
 #	file-pdu file-pdu-2 file-pdu-3 \
 #	debits \
 #	probes-1 probes-2 probes-3 probes-4 \
@@ -16,6 +17,9 @@ all : $(TESTS)
 
 tests :  $(TESTS)
 	./run-tests.sh $(TESTS)
+
+drr : drr.o ../$(SRC_DIR)/libndes.a
+	$(CC) drr.o -o drr $(LDFLAGS)
 
 generators-0 : generators-0.o ../$(SRC_DIR)/libndes.a
 	$(CC) generators-0.o -o generators-0 $(LDFLAGS)

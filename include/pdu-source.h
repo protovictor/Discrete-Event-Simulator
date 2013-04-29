@@ -5,7 +5,12 @@
 #include <pdu.h>
 #include <motsim.h>
 
-struct PDUSource_t;
+struct PDUSource_t; //!< Le type d'une source
+
+struct dateSize {
+   double date;
+   unsigned int size;
+};
 
 /*
  * A chaque source est attribuée une destination et une 
@@ -15,6 +20,23 @@ struct PDUSource_t;
 struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
 				      void * destination,
 				      processPDU_t destProcessPDU);
+
+/** @brief Création d'un générateur déterministe
+ * 
+ *  @param sequence Un tableau de {date, size} définissant chaque PDU
+ *  @param destination L'entité aval
+ *  @param destProcessPDU La fonction de traitement de la destination
+ *  @result Un pointeur sur la source créée/initialisée
+ *
+ *  Un tel générateur permet de définir explicitement la séquence des
+ *  PDUs à générer. Cette séquence est définie par un tableau de
+ *  couples {date, taille}. Le dernier élément du tableau doit être
+ *  {0.0, 0}. Le tableau n'est pas copié, il ne doit donc pas être
+ *  libéré tant que la source peut servir.
+ */
+struct PDUSource_t * PDUSource_createDeterministic(struct dateSize * sequence,
+						   void * destination,
+						   processPDU_t destProcessPDU);
 
 /*
  * Spécification du générateur de taille de PDU associé. En l'absence

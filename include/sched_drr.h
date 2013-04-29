@@ -29,8 +29,8 @@ struct schedDRR_t * schedDRR_create(void * destination,
 /**
  * Ajout d'une source (ce sera par exemple une file)
  */
-void schedDRR_addSource(struct rrSched_t * sched,
-			unsigned int nbBitPerRound,
+void schedDRR_addSource(struct schedDRR_t * sched,
+			unsigned long nbBitPerRound,
 			void * source,
 			getPDU_t getPDU);
 /**

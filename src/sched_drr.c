@@ -9,9 +9,10 @@
  *   [1] M. Shreedhar, G. Varghese - "Efficient Fair Queueing using
  *   Deficit Round Robin". SIGCOMM '95.
  */
+#include <limits.h>
 
 #include <sched_drr.h>
-
+#include <file_pdu.h>
 
 /**
  * Chaque entrée d'un Deficit Round Robin est caractérisée par un
@@ -21,7 +22,7 @@ struct schedDRRInput_t {
    void * source ;    //!< La source elle-même
    getPDU_t getPDU;   //!< Sa fonction fournissant une PDU
 
-   struct PDUFile_t * file;  //!< La file dans laquelle sont placées
+   struct filePDU_t * file;  //!< La file dans laquelle sont placées
 			    //les PDU de la source
    unsigned long quantum;         //!< Le quantum attribué à chaque tour (cf [1])
    unsigned long deficitCounter ; //!< Le deficit (cf [1])
@@ -35,6 +36,9 @@ struct schedDRRInput_t {
  * Structure dÃ©finissant notre ordonanceur
  */
 struct schedDRR_t {
+   void         * destination;    //!< La destination (typiquement un lien)
+   processPDU_t   destProcessPDU;   //!< Fonction de réception de la destination
+
    struct schedDRRInput_t  * unactiveSourceList; //!< La liste des
 						 //sources inactives
    struct schedDRRInput_t  * activeSourceList;   //!< La liste des
@@ -61,6 +65,7 @@ struct schedDRR_t * schedDRR_create(void * destination,
    // Pas de source dÃ©finie
    result->unactiveSourceList = NULL;
    result->activeSourceList = NULL;
+   result->nextSource = NULL;
 
    return result;
 }
@@ -73,19 +78,27 @@ void schedDRR_addSource(struct schedDRR_t * sched,
 			void * source,
 			getPDU_t getPDU)
 {
-   struct schedDRRInput_t  *  input = (struct schedDRRInput_t  *)sim_malloc(sizeof(struct schedDRRInput_t));
+   struct schedDRRInput_t  *  input = 
+     (struct schedDRRInput_t  *)sim_malloc(sizeof(struct schedDRRInput_t));
+
    // On crée une structure définissant cette source
-   input-> = ;
-   input-> = ;
-   input-> = ;
-   input-> = ;
+   input->source = source;
+   input->getPDU = getPDU;
 
    // On crée une file qui stoquera ses paquets
-   input-> = filePDU_create(NULL, NULL);
+   input->file = filePDU_create(NULL, NULL);
+
+   input->quantum = quantum;
+   input->deficitCounter = 0;
+   input->nbToursSupp = 0;
 
    // On l'insère à la fin de la liste des sources inactives
-
-A FAIRE
+   input->next = sched->unactiveSourceList;
+   input->prev = NULL;
+   if (input->next != NULL) {
+      input->next->prev = input;
+   }
+   sched->unactiveSourceList = input;
 }
 
 /*
@@ -154,14 +167,15 @@ struct PDU_t * schedDRR_getPDU(void * s)
          // nextSource car elle pourra éventuellement encore être servie
          // au prochain tour
          if (filePDU_size_n_PDU(currentSource->file, 1) <= currentSource->deficitCounter) {
-            result = filePDU_extraireUnPDU(currentSource->file);
-            currentSource->deficitCounter -= PDU_sizeOf(result);
+            result = filePDU_extract(currentSource->file);
+	    assert(result != NULL);
+            currentSource->deficitCounter -= PDU_size(result);
             // Si c'est le dernier paquet de la source, elle n'est
             // plus active, il faut donc la sortir (avec un déficit
             // nul)
             if (filePDU_length(currentSource->file) == 0) {
                currentSource->deficitCounter = 0;
-	       tmpSrc = currentSource;
+
 	       // On met à jour la liste active (à laquelle elle appartient)
                if (currentSource->prev) {
                   currentSource->prev->next = currentSource->next;
@@ -206,8 +220,10 @@ int schedDRR_processPDU(void *s,
 			getPDU_t getPDU,
 			void * source)
 {
-   int result;
-   struct schedDRR_t * sched = (struct schedDRR_t *)s;
+   int                      result;
+   struct schedDRR_t      * sched = (struct schedDRR_t *)s;
+   struct schedDRRInput_t * src;
+   struct PDU_t           * pdu;
 
    printf_debug(DEBUG_SCHED, "in\n");
 
@@ -216,31 +232,62 @@ int schedDRR_processPDU(void *s,
       printf_debug(DEBUG_SCHED, "c'etait juste un test\n");
       result = 1;
    } else {
-         // On cherche la source dans la liste des sources inactives
-         s = sched->unactiveSourceList;
-         while (( s!= NULL)  && (s->source != source) ){
-            s = s->next;
-         }
-	 assert((s == NULL)||(s->source == source));
-
-         // Si on l'a trouvé, il faut l'extraire et la mettre dans la
-         // liste des sources actives
-         if ((sched->unactiveSourceList != NULL) && (sched->unactiveSourceList->source == source)) {
-	   A FAIRE (chainage à double sens )
-	 }
-	 // Si on ne l'a pas trouvé dans les inactives, on va la
-	 // chercher dans les actives
-A FAIRE
-         // Une fois qu'on a trouvé la source (et qu'on l'a
-         // éventuellement rendue active), on prend le paquet et on le
-         // met dans la file correspondante
-A FAIRE
-         // Si l'aval est dispo, on lui dit de venir chercher une PDU, ce
-         // qui dÃ©clanchera l'ordonnancement
-         printf_debug(DEBUG_SCHED, "on fait suivre ...\n");
-         result = sched->destProcessPDU(sched->destination, schedDRR_getPDU, sched);
+      // On cherche la source dans la liste des sources inactives
+      src = sched->unactiveSourceList;
+      while (( src != NULL)  && (src->source != source) ){
+         src = src->next;
       }
+      assert((src == NULL)||(src->source == source));
+
+      // Si on l'a trouvé, il faut l'extraire et la mettre dans la
+      // liste des sources actives
+      if ((src != NULL) && (src->source == source)) {
+         // On met à jour la liste inactive (à laquelle elle appartient)
+         if (src->prev) {
+            src->prev->next = src->next;
+         } else { // Le cas de la première
+            sched->unactiveSourceList = src->next;
+         }
+         if (src->next) {
+            src->next->prev = src->prev;
+         }
+
+         // On met à jour la liste inactive (dans laquelle elle va)
+         src->next = sched->activeSourceList;
+         sched->activeSourceList = src;
+         src->prev = NULL;
+         if (src->next) {
+            src->next->prev = src;
+         }
+      }
+
+      // On va maintenant la chercher dans les sources actives (elle y
+      // est forcément)
+      if (src == NULL) {
+         src = sched->activeSourceList;
+         while (( src != NULL)  && (src->source != source) ){
+            src = src->next;
+         }
+         assert((s == NULL)||(s->source == source));
+      }
+
+      // Si on ne l'a pas trouvé, il y a un problème, car elle est
+      // donc inconnue !
+      assert(src != NULL);
+
+      // Une fois qu'on a trouvé la source (qui est nécessairement
+      // active), on prend le paquet et on le met dans la file
+      // correspondante 
+      pdu = src->getPDU(src->source);
+      assert(pdu != NULL);
+      filePDU_insert(src->file, pdu);
+
+      // Si l'aval est dispo, on lui dit de venir chercher une PDU, ce
+      // qui dÃ©clanchera l'ordonnancement
+      printf_debug(DEBUG_SCHED, "on fait suivre ...\n");
+      result = sched->destProcessPDU(sched->destination, schedDRR_getPDU, sched);
    }
+
    printf_debug(DEBUG_SCHED, "out %d\n", result);
 
    return result;

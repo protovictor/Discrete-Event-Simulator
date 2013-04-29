@@ -1,5 +1,7 @@
-/*
- *   Source générique de PDU.
+/**
+ * @file pdu-source.c
+ *
+ * @brief Source générique de PDU.
  *
  *   Lorsqu'une PDU est produite, elle est fourni immédiatement à la
  *   destination. Si celle-ci ne la consomme pas, elle RESTE
@@ -12,18 +14,16 @@
 #include <pdu-source.h>
 
 struct PDUSource_t {
-   // Le générateur de date de départ
-   struct dateGenerator_t * dateGen;
+   struct dateGenerator_t * dateGen; //!< Le générateur de date de départ
+   struct randomGenerator_t * sizeGen;//!< Le générateur de taille
 
-   // Le générateur de taille
-   struct randomGenerator_t * sizeGen;
+   void * destination; //!< L'objet auquel sont destinées les PDUs
+   processPDU_t destProcessPDU; //!< La fonction permettant de signaler la présence de la PDU
 
-   void * destination; // L'objet auquel sont destinées les PDUs
-   processPDU_t destProcessPDU; // La fonction permettant de signaler la présence de la PDU
-
-   // Une sonde sur la taille des PDU produites
-   struct probe_t *  PDUGenerationSizeProbe;
+   struct probe_t *  PDUGenerationSizeProbe; //!< Une sonde sur la taille des PDU produites
    struct PDU_t * pdu;
+
+   struct dateSize sequence[]; //!< Pour le cas déterministe
 };
 
 struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
@@ -39,11 +39,42 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
    result->destination = destination;
    result->sizeGen = NULL;
    result->PDUGenerationSizeProbe = NULL;
+   result->sequence = NULL;
 
    // Ajout à la liste des choses à réinitialiser avant une prochaine simu
    motsim_addToResetList(result, PDUSource_start);
    
    return result;
+}
+
+
+/** @brief Création d'un générateur déterministe
+ * 
+ *  @param sequence Un tableau de {date, size} définissant chaque PDU
+ *  @param destination L'entité aval
+ *  @param destProcessPDU La fonction de traitement de la destination
+ *  @result Un pointeur sur la source créée/initialisée
+ *
+ *  Un tel générateur permet de définir explicitement la séquence des
+ *  PDUs à générer. Cette séquence est définie par un tableau de
+ *  couples {date, taille}. Le dernier élément de la liste doit être
+ *  {0.0, 0}. Le tableur n'est pas copié, il ne doit donc pas être
+ *  libéré tant que la source peut servir.
+ */
+struct PDUSource_t * PDUSource_createDeterministic(struct dateSize * sequence,
+						   void * destination,
+						   processPDU_t destProcessPDU)
+{
+   struct PDUSource_t * result = PDUSource_create(dateGenDeterministic,
+						  destination,
+						  destProcessPDU);
+   result->sizeGen = NULL; // Pour le moment, c'est implanté par
+			   // quelques lignes spécifiques fondées sur
+			   // l'absence de générateur de date, pas
+			   // terrible mais vite fait !
+   result->sequence = sequence;
+   return result;
+
 }
 
 /*
@@ -69,7 +100,8 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
 {
    double date;
    struct event_t * event;
-   unsigned int size;
+   unsigned int size = 0; 
+   int i;
 
    printf_debug(DEBUG_SRC, " building new PDU\n");
 
@@ -79,8 +111,19 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
       PDU_free(source->pdu);
    }
 
+   // Gestion de la version "déterministe" par une valeur spéciale du
+   // pointeur. Je n'aime pas ça, mais en attendant mieux, ...
+   if (source->dateGen == NULL) {
+      // On va chercher la prochaine date
+A FAIRE
+   } else {
+      // On détermine la date de prochaine transmission
+      date = dateGenerator_nextDate(source->dateGen, motSim_getCurrentTime());
+      // On choisi la taille
+      size = source->sizeGen?randomGenerator_getNextUInt(source->sizeGen):0;
+   }
+
    // Création de la PDU
-   size = source->sizeGen?randomGenerator_getNextUInt(source->sizeGen):0;
    source->pdu = PDU_create(size, NULL); 
 
    printf_debug(DEBUG_SRC, " PDU %d (size %u %u) created at %6.3f\n",
@@ -95,8 +138,6 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
    if ((source->destProcessPDU) && (source->destination)) {
      (void)source->destProcessPDU(source->destination, PDUSource_getPDU, source);
    }
-   // On détermine la date de prochaine transmission
-   date = dateGenerator_nextDate(source->dateGen, motSim_getCurrentTime());
 
    printf_debug(DEBUG_SRC, " next PDU at %f\n", date);
 
@@ -135,6 +176,8 @@ void PDUSource_start(struct PDUSource_t * source)
 
    // On détermine la date de prochaine transmission
    date = dateGenerator_nextDate(source->dateGen, motSim_getCurrentTime());
+
+A FAIRE ...
 
    printf_debug(DEBUG_SRC, " First PDU at %f\n", date);
 
