@@ -7,15 +7,23 @@
 
 struct PDUSource_t; //!< Le type d'une source
 
+/**
+ * @brief Définition de couples {date, taille}
+ *
+ * Pour définir explicitement une séquence de PDUs
+ */
 struct dateSize {
    double date;
    unsigned int size;
 };
 
-/*
+/**
+ * @brief création d'une source de PDUs
+ *
  * A chaque source est attribuée une destination et une 
  * fonction permettant de soumettre à cette destination
  * les PDU produites
+ * 
  */
 struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
 				      void * destination,
@@ -38,9 +46,11 @@ struct PDUSource_t * PDUSource_createDeterministic(struct dateSize * sequence,
 						   void * destination,
 						   processPDU_t destProcessPDU);
 
-/*
- * Spécification du générateur de taille de PDU associé. En l'absence
- * d'un tel générateur, les PDUs générées sont de taille nulle.
+/**
+ * @brief Spécification du générateur de taille de PDU associé
+ *
+ *  En l'absence d'un tel générateur, les PDUs générées sont de taille
+ *  nulle.
  */
 void PDUSource_setPDUSizeGenerator(struct PDUSource_t * src,
 				   struct randomGenerator_t * rg);
@@ -53,8 +63,9 @@ void PDUSource_setPDUSizeGenerator(struct PDUSource_t * src,
 void PDUSource_addPDUGenerationSizeProbe(struct PDUSource_t * src,
 					 struct probe_t *  PDUGenerationSizeProbe);
 
-/*
- * Démarrage d'une source dans le cadre d'un simulateur.
+/**
+ * @brief Démarrage d'une source dans le cadre d'un simulateur
+ *
  * A partir de cet instant, elle peut produire des PDUs.
  */
 void PDUSource_start(struct PDUSource_t * source);

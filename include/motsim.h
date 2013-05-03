@@ -71,6 +71,10 @@ motSimDate_t motSim_getCurrentTime();
  */
 void motSim_runUntil(double date);
 
+/** brief Simulation jusqu'à épuisement des événements
+ */
+void motSim_runUntilTheEnd();
+
 /*
  * Un petit affichage de l'état actuel de la simulation
  */
@@ -141,11 +145,11 @@ static unsigned long debug_mask = 0x00000000
   //   | DEBUG_KS_VERB   // L'algorithme Knapsack verbeux
   //     | DEBUG_WARN      // Des infos qui peuvent aider à debuger la SIMU
   //       | DEBUG_ACM
-  //       | DEBUG_SCHED
+  | DEBUG_SCHED  // Les ordonnanceurs
   //       | DEBUG_PDU
   //     | DEBUG_MALLOC    // L'utilisation de malloc
        | DEBUG_TBD       // Le code pas implanté
-       | DEBUG_ALWAYS
+  //       | DEBUG_ALWAYS
   ;
 
 #else

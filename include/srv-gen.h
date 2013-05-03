@@ -1,10 +1,19 @@
-/*     Un serveur générique */
+/**
+ * @file srv-gen.h
+ * @brief Un serveur générique
+ *
+ * Permet de modéliser des serveurs simples. Utile pour modéliser par
+ * exemple un lien.
+ */
 
 #include <pdu.h>
 #include <motsim.h>
 
 struct srvGen_t;
 
+/**
+ * @brief Création d'un serveur générique
+ */
 struct srvGen_t * srvGen_create(void * destination,
                                 processPDU_t destProcessPDU);
 
@@ -33,6 +42,19 @@ enum serviceTime_t {
    serviceTimeProp
 } ;
 
+/**
+ * @brief Choix du temps de service
+ * @param srv le serveur à modifier
+ * @param st le type de temps service
+ * @param parameter signification dépendant du type de temps de
+ * service
+ *
+ * Si st == serviceTimeCst, alors parameter est la période
+ * Si st == serviceTimeExp, alors parameter est le "mu" de la loi
+ * exponentielle
+ * Si st == serviceTimeProp, alors parameter est le facteur
+ * multiplicatif sur la taille de la PDU (temps de traitement par octet)
+ */
 void srvGen_setServiceTime(struct srvGen_t * srv,
 			   enum serviceTime_t st,
 			   double parameter);

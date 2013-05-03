@@ -1753,6 +1753,97 @@ suffisante :
 %------------------------------------------------------------------------
 %
 %------------------------------------------------------------------------
+\subsection{Une source de {\sc pdu}}
+
+   Un objet de type {\tt PDUSource\_t} permet de produire des {\sc
+pdu}s selon différentes lois.  Ce type est défini dans le fichier {\tt
+     pdu-source.h}. 
+
+   Une source de {\sc pdu}s est essentiellement caractérisée par deux
+jeux de parmètres
+
+\begin{itemize}
+   \item l'un définissant la loi qui régit les dates de créations
+     des {\sc pdu}s ;
+   \item l'autre définissant la loi qui régit les tailles de {\sc
+     pdu}.
+\end{itemize}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Création d'une source}
+
+   Une source est créée par la fonction 
+
+\index{PDUSource\_create}
+\begin{verbatim}
+struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
+				      void * destination,
+				      processPDU_t destProcessPDU);
+\end{verbatim}
+
+   Par défaut, la taille des {\sc pdu}s produites est constante égale
+à 0.
+
+   Une fonction particulière permet la création d'une source
+``déterministe''. Une telle source est initialisée avec une séquence
+de couples {\tt \{date, taille\}} qui définit explicitement la liste
+des dates et tailles de {\sc pdu}s à produire. Un tel outil ne peut
+être utilisé que pour un nombre limité de {\sc pdu}s, mais il est très
+pratique à des fins de démonstration ou débogage.
+
+   La fonction d'initialisation est la suivante
+
+\index{PDUSource\_createDeterministic}
+\begin{verbatim}
+struct PDUSource_t * PDUSource_createDeterministic(struct dateSize * sequence,
+						   void * destination,
+						   processPDU_t destProcessPDU);
+\end{verbatim}
+
+   Le type {\tt struct dateSize} est défini ainsi
+
+\index{struct dateSize}
+\begin{verbatim}
+struct dateSize {
+   double date;
+   unsigned int size;
+};
+\end{verbatim}
+
+   La séquence passée en paramètre à {\tt
+     PDUSource\_createDeterministic} doit être ordonnée
+   chronologiquement et terminée par un couple {\tt \{0.0, 0\}}.
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Activation d'une source}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Choix de la loi des dates}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Choix de la loi des tailles}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Activation d'une source}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Les sondes}
+
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
 \subsection{Un lien unidirectionnel}
 
 %------------------------------------------------------------------------

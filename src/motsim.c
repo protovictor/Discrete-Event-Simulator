@@ -178,6 +178,30 @@ void motSim_runNevents(int nbEvents)
    }
 }
 
+/** brief Simulation jusqu'à épuisement des événements
+ */
+void motSim_runUntilTheEnd()
+{
+   struct event_t * event;
+
+   if (!__motSim->nbRanEvents) {
+      __motSim->actualStartTime = time(NULL);
+   }
+   while (1) {
+      event = eventFile_extract(__motSim->events);
+      if (event) {
+         printf_debug(DEBUG_EVENT, "next event at %f\n", event_getDate(event));
+         assert(__motSim->currentTime <= event_getDate(event));
+         __motSim->currentTime = event_getDate(event);
+         event_run(event);
+         __motSim->nbRanEvents ++;
+      } else {
+         printf_debug(DEBUG_MOTSIM, "no more event !\n");
+         return ;
+      }
+   }
+}
+
 /*
  * Lancement de plusieurs simulations consécutives de même durée
  *
