@@ -70,6 +70,6 @@ typedef int (*processPDU_t)(void * receiver,
 extern struct probe_t * PDU_createProbe;
 extern struct probe_t * PDU_reuseProbe;
 extern struct probe_t * PDU_mallocProbe;
-extern struct probe_t * PDU_freeProbe;
+extern struct probe_t * PDU_releaseProbe;
 
 #endif

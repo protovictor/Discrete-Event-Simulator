@@ -90,7 +90,7 @@ void schedulerUtilityMC(struct schedUtility_t * sched, int mc, t_remplissage * r
             if ((remplissage->nbrePaquets[m][q] < filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q))) // Il en reste un
 		&& (remplissage->volumeTotal + filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+1)
                     <= (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8))) {
-               schedACM_tryingNewSolution(sched->schedACM);
+	      schedACM_tryingNewSolution(sched->schedACM); // On compte les solutions envisagées
 	       // Si oui, est-elle la première ou, sinon, plus intéressante que la plus
 	       // intéressante ?
 	       if ((paquetDispo == 0)

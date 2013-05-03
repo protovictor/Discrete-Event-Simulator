@@ -24,14 +24,21 @@ typedef struct {
    struct probe_t * bwProbe; // Une sonde sur le débit évalué par et pour l'algo
 } t_qosMgt;
 
-/*
- * Un mode de remplissage d'une BBFRAME. La fonction d'ordonnancement
- * doit renseigner les premiers champs.
+/**
+ * @brief Un mode de remplissage d'une BBFRAME.
+ *
+ * Cette structure permet de définir le remplissage d'une BBFRAME,
+ * sans réellement le mettre en oeuvre. Cela permet à l'algorithme
+ * d'évaluer les conséquences d'une décision d'ordonnancement sans
+ * aller chercher les paquets dans les files, par exemple. C'est donc
+ * avec cet outil que l'ordonnanceur peut envisager diverses
+ * solutions.
+ *
  */
 typedef struct {
-   int       modcod;         // Le numero de MODCOD choisi
-   int    ** nbrePaquets;    // Nombre de paquets de chaque file à transmettre
-   int       volumeTotal;    // Le nombre total d'octets à transmettre
+   int       modcod;         //!< Le numero de MODCOD choisi
+   int    ** nbrePaquets;    //!< Nombre de paquets de chaque file à transmettre
+   int       volumeTotal;    //!< Le nombre total d'octets à transmettre
 
    /* Les champs suivants sont à la dispo de l'ordonnanceur. Il
       faudrait surement faire plus propre, avec un  pointeur sur prive

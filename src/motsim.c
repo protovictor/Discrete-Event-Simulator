@@ -138,8 +138,8 @@ void motSim_create()
    PDU_mallocProbe = probe_createMean();
    probe_setName(PDU_mallocProbe, "mallocd PDUs");
 
-   PDU_freeProbe = probe_createMean();
-   probe_setName(PDU_createProbe, "released PDUs");
+   PDU_releaseProbe = probe_createMean();
+   probe_setName(PDU_releaseProbe, "released PDUs");
 
    printf_debug(DEBUG_MOTSIM, "Simulateur pret ...\n");
 }
@@ -352,11 +352,12 @@ void motSim_printStatus()
 	  event_nbCreate, event_nbMalloc, event_nbReuse, event_nbFree);
    printf("[MOTSI] Simulated events : %d in, %d out, %d pr.\n",
 	  __motSim->nbInsertedEvents, __motSim->nbRanEvents, eventFile_length(__motSim->events));
-   printf("[MOTSI] PDU : %ld created (%ld m + %ld r)/%ld freed\n",
+   printf("[MOTSI] PDU (%d bytes): %ld created (%ld m + %ld r)/%ld released\n",
+	  sizeof(struct PDU_t),
 	  probe_nbSamples(PDU_createProbe),
 	  probe_nbSamples(PDU_mallocProbe),
 	  probe_nbSamples(PDU_reuseProbe),
-	  probe_nbSamples(PDU_freeProbe));
+	  probe_nbSamples(PDU_releaseProbe));
    printf("[MOTSI] Total malloc'ed memory : %ld bytes\n",
 	  __totalMallocSize);
    printf("[MOTSI] Realtime duration : %ld sec\n", time(NULL) - __motSim->actualStartTime);

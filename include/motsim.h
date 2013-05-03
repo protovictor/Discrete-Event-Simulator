@@ -159,11 +159,11 @@ static unsigned long debug_mask = 0x00000000
 #define MS_FATAL 1
 #define MS_WARN  2
 
-#define motSim_error(lvl, fmt, args...) \
+#define motSim_error(lvl, fmt, args...)                             \
    printf("\n------- Error report -------\n");                      \
    printf("In file  %s\nAt line  %d\nFunction %s\n", __FILE__, __LINE__, __FUNCTION__); \
-   printf("Message : "  fmt , ## args);\
-   printf("\n------- Error report -------\n");  \
+   printf("Message : "  fmt , ## args);                             \
+   printf("\n------- Error report -------\n");                      \
    if (lvl == MS_FATAL) motSim_exit(1);
 
 extern unsigned long __totalMallocSize;
@@ -173,6 +173,11 @@ extern unsigned long __totalMallocSize;
    assert(__tmpMallocRes); \
    __totalMallocSize += l; \
     __tmpMallocRes; \
+  })
+
+#define sim_free(p)            \
+  ({assert(p);                 \
+  free(p);                     \
   })
 
 #define sim_malloc_avec_printf_qui_foire(l)				\

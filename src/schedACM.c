@@ -16,16 +16,16 @@ struct fileQoS {
    t_qosMgt           qos;
 };
 
-/*
- * Caractérisation générale d'un ordonnanceur sur ACM
+/**
+ * @brief Caractérisation générale d'un ordonnanceur sur ACM
  */
 struct schedACM_t {
-   int nbQoS;
-   int nbModCod;
+   int nbQoS;      //!< Le nombre de files de QoS
+   int nbModCod;    //!< Le nombre de MODCOD en aval
 
    // Les sources sont forcément des files, mais il serait 
    // bon de les utiliser de façon cohérente avec le modèle I/O
-   struct filePDU_t *** files;  // Les files d'attentes
+   struct filePDU_t *** files;  //!< Les files d'attentes
    t_qosMgt          ** qos;
    int                  declassement;
 
@@ -35,14 +35,14 @@ struct schedACM_t {
    // à un ACM
    struct DVBS2ll_t * dvbs2ll; // Le lien sur lequel on transmet
 
-   // pqFromMQinMC[m][q][mc] est une probe qui compte la taille et le nombre de
-   // paquets de la file [m][q] qui sont transmis par le MODCOD mc.
    struct probe_t **** pqFromMQinMC;
+   //!< pqFromMQinMC[m][q][mc] est une probe qui compte la taille et le nombre de
+   //!< paquets de la file [m][q] qui sont transmis par le MODCOD mc.
 
-   int paquetsEnAttente; // Ai-je au moins un pq en attente ?
-   t_remplissage solutionChoisie;
+   int paquetsEnAttente; //!< Ai-je au moins un pq en attente ?
+   t_remplissage solutionChoisie; //!< La solution choisie lors du dernier ordonnancement
 
-   int nbSol; // Le nombre de solutions envisagées
+   int nbSol; //!< Le nombre de solutions envisagées
    struct probe_t * nbSolProbe;
 
    void * private;
@@ -345,10 +345,10 @@ void schedACM_schedule(struct schedACM_t * sched)
       printf_debug(DEBUG_ACM, "calling dedicated facility ...\n");
       sched->func->schedule(sched->private);
       if (sched->nbSolProbe) {
-	probe_sample(sched->nbSolProbe, sched->nbSol);
+ 	 probe_sample(sched->nbSolProbe, sched->nbSol);
       }
    } else {
-      motSim_error(MS_FATAL, "need a scheduler !\n");
+       motSim_error(MS_FATAL, "need a scheduler !\n");
    }
 }
 
