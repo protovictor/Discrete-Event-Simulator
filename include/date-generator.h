@@ -1,5 +1,7 @@
 /**
- * Les générateurs de dates. Largement fondé sur les générateurs de
+ * @file date-generator.h
+ * @brief Les générateurs de dates
+ * Ils sont largement fondé sur les générateurs de
  * nombres aléatoires.
  * Toutes les dates sont toujours exprimées en secondes depuis le début de
  * la simulation.
@@ -14,8 +16,8 @@ struct dateGenerator_t;
 
 struct dateGenerator_t * dateGenerator_create();
 
-/*
- * Ajout d'une sonde sur les inter-arrivees
+/**
+ * @brief Ajout d'une sonde sur les inter-arrivees
  */
 void dateGenerator_setInterArrivalProbe(struct dateGenerator_t * dateGen,
 					struct probe_t * probe);

@@ -9,7 +9,7 @@ export CC=gcc
 
 # Debugage
 #export CFLAGS=-Wall -g -DDEBUG_NDES
-#export LDFLAGS=-g 
+#export LDFLAGS=-g  -L../$(SRC_DIR) -lndes -lm
 
 # Performances
 export CFLAGS=-Wall -g -DNDEBUG -O3

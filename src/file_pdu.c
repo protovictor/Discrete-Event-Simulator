@@ -172,6 +172,18 @@ void filePDU_reset(struct filePDU_t * file)
    assert(file->size == 0);
 }
 
+/** @brief Création d'une file.
+ * 
+ *  @param destination l'entité aval (ou NULL ai aucune)
+ *  @param destProcessPDU la fonction de traitement de l'entité aval
+ *  (ou NULL si aucune entité)
+ *  @return Une strut filePDU_t * allouée et initialisée
+ *
+ *  Il est possible de ne pas fournir d'entité aval en paramètre, car
+ *  une file peut être utilisée également comme un simple outil de
+ *  gestion mémoire, sans entrer dans un modèle de réseau. On
+ *  utilisera alors simplement les fonctions d'insertion et d'extraction
+ */
 struct filePDU_t * filePDU_create(void * destination,
                                   processPDU_t destProcessPDU)
 {
