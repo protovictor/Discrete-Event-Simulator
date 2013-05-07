@@ -1025,6 +1025,11 @@ macro {\tt DEBUG\_NDES}.
 \subsection{Gestion des événements}
 
    Elle est décrite dans {\tt event.h} et codée dans {\tt event.c}.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Création d'un événement}
  
    On peut créer un événement avec la fonction suivante 
 
@@ -1036,7 +1041,8 @@ struct event_t * event_create(void (*run)(void *data),
 \end{verbatim}
 
    Attention, l'événement ne sera exécuté que si il est placé dans la
-file d'attente du simulateur.
+file d'attente du simulateur. Pour cela, il faut utiliser la fonction
+{\tt motSim\_addEvent}. 
 
    On peut créer un événement et l'insérer immédiatement dans cette
 file grâce à la fonction
@@ -1047,6 +1053,33 @@ void event_add(void (*run)(void *data),
 	       void * data,
 	       double date);
 \end{verbatim}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Création d'un événement périodique}
+
+   Certains événements se reproduisent périodiquement, il est alors
+nécessaire d'utiliser, dans le code de traitement de l'événement, la
+fonction {\tt event\_add}. Une autre solution consiste à utiliser
+l'une des fonctions suivantes 
+
+\index{event\_periodicCreate}
+\index{event\_periodicAdd}
+\begin{verbatim}
+struct event_t * event_PeriodicCreate(void (*run)(void *data),
+			      void * data,
+			      double date,
+		              double period);
+void event_periodicAdd(void (*run)(void *data),
+		       void * data,
+		       double date,
+		       double period);
+
+\end{verbatim}
+
+   L'événement sera alors exécuté de façon périodique à partir de la
+date fournie en paramètre.
 
 %========================================================================
 %
@@ -1077,35 +1110,79 @@ points de mesure disponibles.
 %
 %------------------------------------------------------------------------
 \subsection{Les méthodes de base}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Création et destruction}
+
+   Il existe diffférents types de sondes, et chaque type dispose d'au
+moins une fonction de création spécificique. Ces différentes fonctions
+seront donc listée dans la sous-section suivante.
+
+   La destruction d'une sonde se fait grâce à la fonction 
+
+\index{probe\_delete}
+\begin{verbatim}
+void probe_delete(struct probe_t * p);
+\end{verbatim}
+
+%........................................................................
+%
+%........................................................................
 \subsubsection{L'échantillonage}
 
    La méthode suivante permet d'échantilloner une valeur dans une
 sonde 
 
+\index{probe\_sample}
 \begin{verbatim}
-/*
- * Echantillonage d'une valeur
- */
 void probe_sample(struct probe_t * probe, double value);
 \end{verbatim}
 
    Il est également possible d'échantilloner une date, sans valeur
 associée, de la façon suivante 
 
+\index{probe\_sampleEvent}
 \begin{verbatim}
-/*
- * Echantillonage de la date d'occurence d'un evenement
- */
 void probe_sampleEvent(struct probe_t * probe);
 \end{verbatim}
 
+%........................................................................
+%
+%........................................................................
 \subsubsection{Consultation d'un échantillon}
 
+%........................................................................
+%
+%........................................................................
 \subsubsection{La moyenne}
 
+%........................................................................
+%
+%........................................................................
 \subsubsection{Les valeurs extrèmes}
 
+%........................................................................
+%
+%........................................................................
+\subsubsection{La mesure du débit}
 
+   Les valeurs échantillonées pourront souvent être des tailles de
+messages, émis ou reçus. Dans ce cas, il peut être intéressant
+d'utiliser la fonction suivante qui fournit une mesure du ``débit
+instantané''.
+
+\index{probe\_throughput}
+\begin{verbatim}
+double probe_throughput(struct probe_t * p);
+\end{verbatim}
+
+   Bien sûr, le mode d'estimation de cette valeur est dépendant de la
+nature de la sonde.
+%........................................................................
+%
+%........................................................................
 \subsubsection{La sauvegarde}
 
    Une sonde peut être dumpée dans un fichier ouvert grâce à la
@@ -1117,25 +1194,31 @@ format);}
 %------------------------------------------------------------------------
 %
 %------------------------------------------------------------------------
-\subsubsection{La mesure du débit}
-
-   Les valeurs échantillonées pourront souvent être des tailles de
-messages, émis ou reçus. Dans ce cas, il peut être intéressant
-d'utiliser la fonction suivante qui fournit une mesure du ``débit
-instantané''.
-
-\begin{verbatim}
-double probe_throughput(struct probe_t * p);
-\end{verbatim}
-
-   Bien sûr, le mode d'estimation de cette valeur est dépendant de la
-nature de la sonde.
-
-%------------------------------------------------------------------------
-%
-%------------------------------------------------------------------------
 \subsection{Les différents types}
 
+%........................................................................
+%
+%........................................................................
+\subsubsection{La sonde exhaustive}
+
+   La sonde la plus simple est la sonde exhaustive. Avec une telle
+sonde, tout échantillon est conservé ``définitivement''. L'avantage
+d'une telle technique est que les résultats sont aussi précis qu'on
+peut l'espérer, mais l'inconvénient est que cela peut s'avérer très
+gourmand en ressources.
+
+   Une sonde exhaustive est créée de la façon suivante
+
+\index{probe\_createExhaustive}
+\begin{verbatim}
+struct probe_t * probe_createExhaustive();  
+\end{verbatim}
+
+   Il n'y a donc aucun paramètre.
+
+%........................................................................
+%
+%........................................................................
 \subsubsection{Les ``méta-sondes''}
 
    À chaque échantillon, certaines sondes mettent à jours des
@@ -1154,33 +1237,63 @@ différentes \lstinline!S1!, \lstinline!S2!, ldots Pour cela,
 \lstinline!G! sera ajoutée comme sonde sur les échantillons de
 \lstinline!S1!, \lstinline!S2!, ldots 
 
-\subsubsection{La sonde exhaustive}
-
+%........................................................................
+%
+%........................................................................
 \subsubsection{L'histogramme}
 
+%........................................................................
+%
+%........................................................................
 \subsubsection{La fenêtre glissante}
 
    Ces sondes conservent tous les échantillons sur une fenêtre
 glissante dont la taille est fournie en paramêtre du constructeur :
 
+\index{probe\_slidingWindowCreate}
 \begin{verbatim}
 struct probe_t * probe_slidingWindowCreate(int windowLength);
 \end{verbatim}
 
+   A tout moment, une telle sonde conserve donc au maximum les {\tt
+windowLength} derniers échantillons. Toutes les valeurs observées
+{\em via} une telle sonde (la moyenne, le minimum, le maximum, \ldots)
+sont donc obtenues au regard de ces seuls échantillons !
+
+   Si l'on souhaite déterminer des moyennes temporelles, on utilisera
+plutôt des sondes par tranche temporelle.
+
+%........................................................................
+%
+%........................................................................
 \subsubsection{La sonde périodique}
 
    Le but d'une sonde périodique est de prélever un échantillon toutes
 les $\tau$ unitées de temps. On se fonde pour cela sur l'idée que la
-valeur mesurée n'est modifier qu'au cours du traitement d'un
+valeur mesurée n'est modifiée qu'au cours du traitement d'un
 événement.
 
+   La cration d'une telle sonde est réalisée par la fonction 
 
+\index{probe\_periodicCreate}
+\begin{verbatim}
+struct probe_t * probe_periodicCreate(double t);
+\end{verbatim}
+
+   Le paramètre {\tt t} est évidemment la période des échantillons.
+
+%........................................................................
+%
+%........................................................................
 \subsubsection{La moyenne mobile}
 
    Une moyenne du type \lstinline!EMAProbeType! conserve à tout moment
 une moyenne mobile calculée à chaque nouvel échantillon $e$ de la façon
 suivante $m <- \alpha . m + (1 - \alpha).e$.
 
+%........................................................................
+%
+%........................................................................
 \subsubsection{La moyenne par tranches temporelles}
 
    Cette sonde conserve une moyenne pour chaque tranche temporelle de

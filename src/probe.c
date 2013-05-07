@@ -1,4 +1,6 @@
-/*
+/**
+ * @file probe.c
+ * @brief Implantation des probes
  * Attention à la structure des sondes exhaustives, le parcours en
  * lecture n'est pas forcément intuitif ...
  *
@@ -23,12 +25,12 @@
 #include <event.h>
 #include <probe.h>
 
-/*
- * Structure permettant la gestion des sondes exhaustives
+/**
+ * @brief Structure permettant la gestion des sondes exhaustives
  */
 struct sampleSet_t {
-   double samples[PROBE_NB_SAMPLES_MAX]; // list of samples
-   double dates[PROBE_NB_SAMPLES_MAX];   // date for each sample
+   double samples[PROBE_NB_SAMPLES_MAX]; //!< list of samples
+   double dates[PROBE_NB_SAMPLES_MAX];   //!< date for each sample
 
    // Pour le chainage
    struct sampleSet_t * prev;
@@ -71,14 +73,15 @@ struct periodic_t {
    struct probe_t * data; // Une sonde exhaustive pour stocker un échantillon par période
 };
 
-/*
- * Gestion des sondes à fenêtre.
+/**
+ * @brief Gestion des sondes à fenêtre.
  */
 struct slidingWindow_t {
    double * samples;
    double * dates;
 
-   int length, capacity, first, last;
+   int capacity;   //!< Le nombre d'échantillons conservés
+   int length, last;
 };
 
 /*
@@ -202,7 +205,6 @@ void probe_EMAReset(struct probe_t * pr)
 void probe_slidingWindowReset(struct probe_t * pr)
 {
    pr->data.window->length = 0;
-   pr->data.window->first = 0;
    pr->data.window->last = 0;
 }
 
@@ -360,6 +362,11 @@ struct probe_t * probe_EMACreate(double a)
    return result;
 }
 
+/** 
+ * @brief Création d'une sonde à fenêtre glissante
+ * @param windowLength Nombre d'échantillons conservés
+ *
+ */
 struct probe_t * probe_slidingWindowCreate(int windowLength)
 {
    printf_debug(DEBUG_PROBE, "in\n");
@@ -371,7 +378,6 @@ struct probe_t * probe_slidingWindowCreate(int windowLength)
    result->data.window->samples = (double *)sim_malloc(windowLength*sizeof(double));
    result->data.window->capacity = windowLength;
    result->data.window->length = 0;
-   result->data.window->first = 0;
    result->data.window->last = 0;
 
    printf_debug(DEBUG_PROBE, "out\n");
@@ -599,6 +605,9 @@ double probe_exhaustiveGetSampleN(struct probe_t * probe, int n)
    return currentSet->samples[n% PROBE_NB_SAMPLES_MAX];
 }
 
+/**
+ * @brief Echantillon d'une valeur dans une probe à fenêtre glissante
+ */
 void probe_slidingWindowSample(struct probe_t * pr, double v)
 {
    printf_debug(DEBUG_PROBE_VERB, "v = %f\n", v);

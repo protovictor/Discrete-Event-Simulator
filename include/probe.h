@@ -1,6 +1,7 @@
-/*----------------------------------------------------------------------*/
-/*   Gestion des probes.                                                */
-/*----------------------------------------------------------------------*/
+/**
+ * @file probe.h
+ * @brief Gestion des probes
+ */
 #ifndef __DEF_PROBE
 #define __DEF_PROBE
 
@@ -31,10 +32,15 @@ enum probeType_t {
 /*
  * Pour le moment, c'est forcément des doubles
  */
-// Conserve tous les échantillons
+/**
+ * @brief Création d'une sonde exhaustive
+ * Attention, une telle sonde conserve tous les échantillons
+ */
 struct probe_t * probe_createExhaustive();  
 
-// Conserve des échantillons sur une fenêtre
+/**
+ * Une telle sonde conserve des échantillons sur une fenêtre
+ */
 struct probe_t * probe_slidingWindowCreate(int windowLength);
 
 // Ne conserve aucun échantillon, juste la somme et le nombre
@@ -46,7 +52,13 @@ struct probe_t * probe_createTimeSliceAverage(double t);
 // Conserve un débit moyen par tranche temporelle de durée t
 struct probe_t * probe_createTimeSliceThroughput(double t);
 
-// Conserve un échantillon à la fin de chaque tranche temporelle de durée t
+/** 
+ * @brief Création d'une sonde périodique
+ * @param t Période de l'échantillonage
+ *
+ * Une telle sonde conserve un échantillon à la fin de chaque tranche
+ * temporelle de durée t 
+ */
 struct probe_t * probe_periodicCreate(double t);
 
 // Conserve une moyenne mobile M <- a.M + (1-a).sample
@@ -57,15 +69,15 @@ struct probe_t * probe_EMACreate(double a);
  */
 struct probe_t * probe_createGraphBar(double min, double max, unsigned long nbInt);
 
-/*
- * Destruction d'une probe
+/**
+ * @brief Destruction d'une probe
  */
 void probe_delete(struct probe_t * p);
 
 /*
  * Chaînage des probes p1 et p2, dans cet ordre. Tout échantillon sur
  * p1 sera répercuté sur p2. C'est la seule méthode qui soit
- * réperecutée en cascade. Les reset, calcul de moyenne, ... doivent
+ * répercutée en cascade. Les reset, calcul de moyenne, ... doivent
  * être invoquées sur chaque sonde si nécessaire
  */
 void probe_chain(struct probe_t * p1, struct probe_t * p2);
@@ -186,7 +198,6 @@ void probe_exhaustiveToBlockMean(struct probe_t * ep, struct probe_t * bmp, unsi
  * Dump d'une sonde dans un fichier
  */
 void probe_dumpFd(struct probe_t * probe, int fd, int format);
-
 /*
  * Dump d'un graphBar dans un fichier
  */
