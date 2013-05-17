@@ -1,3 +1,8 @@
+/**
+ * @file schedACM.c
+ * @brief Outils de base pour les ordonnanceurs ACM
+ *
+ */
 #include <math.h>      // exp, pow, ...
 
 #include <schedACM.h>
@@ -39,14 +44,28 @@ struct schedACM_t {
    //!< pqFromMQinMC[m][q][mc] est une probe qui compte la taille et le nombre de
    //!< paquets de la file [m][q] qui sont transmis par le MODCOD mc.
 
+   struct schedACM_func_t * func;
+
    int paquetsEnAttente; //!< Ai-je au moins un pq en attente ?
-   t_remplissage solutionChoisie; //!< La solution choisie lors du dernier ordonnancement
+
+   // Dans la version la plus simple, l'algorithme d'ordonnancenemt
+   // doit déterminer un remplissage pour la prochaine BBFRAME. Il
+   // place alors sa solution dans le champ suivant
+   t_remplissage solutionChoisie; //!< La solution choisie lors du
+				  //!dernier ordonnancement
 
    int nbSol; //!< Le nombre de solutions envisagÃ©es
    struct probe_t * nbSolProbe;
 
+   // Dans la version plus évoluée, l'ordonnanceur est amené à
+   // calculer plusieurs BBFRAMEs d'un coup. Il sera donc invoquer
+   // plus rarement et proposera le remplissage de plusieurs BBFRAMEs
+   // qui seront utilisées par autant d'appels consécutifs à
+   // getPDU. La liste des remplissages est stockée dans le champ
+   // suivant.
+   t_sequence sequenceChoisie;
+
    void * private;
-   struct schedACM_func_t * func;
 };
 /*
  * CrÃ©ation d'un scheduler avec sa "destination". Cette derniÃ¨re doit
@@ -353,7 +372,9 @@ void schedACM_schedule(struct schedACM_t * sched)
 }
 
 
-/*
+/**
+ * @brief Construction générique d'une BBFRAME
+ *
  * Construction d'une BBFRAME avec les paquets en attente dans les
  * files s'il y en a suffisemment. Sinon, un pointeur NULL est retournÃ©.
  */
@@ -420,7 +441,9 @@ struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
 }
 
 
-/*
+/**
+ * @brief Construction d'une BBFRAME
+ * 
  * Construction d'une BBFRAME avec les paquets en attente dans les
  * files s'il y en a suffisemment. Sinon, un pointeur NULL est retournÃ©.
  */
@@ -469,9 +492,18 @@ int schedACM_processPDUGeneric(struct schedACM_t * sched,
    }
 }
 
-/*
+/**
+ * @brief Fonction générique de production d'une PDU
+ *
+ * @param sched L'ordonnanceur qui doit fournir la PDU
+ * @result la PDU créée (NULL si rien n'est disponible)
+ *
  * Fonction Ã  invoquer lorsque le support est libre afin de solliciter
- * la construction d'une nouvelle BBFRAME
+ * la construction d'une nouvelle BBFRAME. Cette fonction générique
+ * sera utilisée si l'ordonnanceur n'en implante pas une version
+ * spécifique.
+ * Elle se contente de faire appel à la fonction de création d'une
+ * BBFRAME.
  */
 struct PDU_t * schedACM_getPDUGeneric(struct schedACM_t * sched)
 {

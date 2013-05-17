@@ -1,5 +1,48 @@
-/*
- * Forme générale d'un ordonnanceur pour un lien ACM
+/**
+ * @file schedACM.h
+ * @brief Forme générale d'un ordonnanceur pour un lien ACM
+ *
+ * Ce fichier définit un cadre général pour l'implantation d'un
+ * ordonnanceur sur un lien ACM.
+ * 
+ * Comme tout outil de NDES, un ordonnanceur est caractérisé par une
+ * fontion d'entrée schedACM_processPDU et une fonction de sortie
+ * schedACM_getPDU. Ces deux fonctions invoquent une fonction
+ * générique (schedACM_processPDUGeneric et schedACM_getPDUGeneric
+ * respectivement), mais chaque ordonnanceur peut redéfinir sa propre
+ * fonction (a déclaer dans le champ func).
+ *
+ * Fonction d'entrée
+ * 
+ * Le comportement de la fonction schedACM_processPDUGeneric est assez
+ * simple et ne nécessite a priori pas de redéfinition. Cette fonction
+ * ne fait que prendre le paquet, le mettre dans une file d'attente,
+ * et invoquer si necessaire l'ordonnancement via la fonction
+ * schedACM_buildBBFRAME.
+ *
+ * Fonction de sortie
+ *
+ * La fonction schedACM_getPDUGeneric est également très simple,
+ * puisqu'elle se contente d'invoquer la fonction
+ * schedACM_buildBBFRAME. On ne la remplacera donc pas par une
+ * fonction spécifique dans la mesure du possible.
+ *
+ * La fonction schedACM_buildBBFRAMEGeneric quant à elle invoque la fonction
+ * d'ordonnancement et utilise le champ sched->solutionChoisie calculé
+ * par cette dernière pour construire effectivement la BBFRAME.
+ *
+ * Tout repose donc évidemment sur la fonction d'odonnancement, dont
+ * le rôle est donc de déterminer un remplissage de BBFRAME. Ce
+ * remplissage ne sera pas mis en oeuvre (les files ne sont pas
+ * touchées) mais décrit dans la structure solutionChoisie. C'est la
+ * fonction schedACM_buildBBFRAMEGeneric qui se chargera de construire
+ * la BBFRAME et de vider les files conformément à cette solution.
+ *
+ * Si cette structure convient, l'implantation de l'ordonnanceur
+ * réside donc dans l'écriture d'une fonction d'ordonnancement qui
+ * construit une solution. C'est la seule fonction à définir. 
+ * Si la structure ne suffit pas, il faut redéfinir éventuellement la
+ * fonction de création d'une BBFRAME, voire la fonction getPDU.
  */
 #ifndef __SCHED_ACM
 #define __SCHED_ACM
@@ -48,9 +91,29 @@ typedef struct {
    int       casTraite;      // Pour éviter de retraiter un cas
 } t_remplissage ;
 
-/*
- * Définition des fonctions que doit implanter un ordonnanceur sur
- * ACM.
+/**
+ * @brief Une séquence de remplissages
+ *
+ * Cette structure permer de ne plus simplement chercher une trame
+ * avec l'ordonnanceur, mais une séquence de trames de longueur
+ * quelconque.
+ */
+typedef struct {
+   int longueur; //!< Nombre maximal de trames consécutives
+
+   /* Les champs suivants sont à la dispo de l'ordonnanceur. Il
+   faudrait surement faire plus propre, avec un  pointeur sur prive
+   ou une union, ... */
+
+   int       positionActuelle; //!< Identification de la BBFRAME en
+                               //!cours d'analyse
+   double    interet;
+   int       casTraite;        //!< Pour éviter de retraiter un cas
+} t_sequence ;
+
+/**
+ * @brief Définition des fonctions que doit implanter un ordonnanceur
+ * sur un lien ACM.
  *
  * Les fonctions getPDU/processPDU peuvent être null si rien de
  * spécifique n'est nécessaire. Des fonctions génériques font le

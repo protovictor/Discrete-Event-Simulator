@@ -1,7 +1,14 @@
-/*----------------------------------------------------------------------*/
-/*      Algorithme d'ordonnancement de flots de paquets sur un lien     */
-/*   DVB-S2. Cet algorithme est fondé sur des fonctions d'utilité.      */
-/*----------------------------------------------------------------------*/
+/**
+ * @file schedUtility.c
+ * @brief Ordonnancement sur un lien DVB-S2 à base de fonctions d'utilité
+ *
+ *      Algorithme d'ordonnancement de flots de paquets sur un lien    
+ *   DVB-S2. Cet algorithme est fondé sur des fonctions d'utilité. À
+ *   chaque instant d'ordonnancement, il sert la file maximisant la
+ *   dérivée de la fonction d'utilité. S'il ne peut pas compléter la
+ *   BBFRAME avec, il passe à la file suivante selon cette même
+ *   règle. 
+ */
 #include <stdlib.h>    // Malloc, NULL, exit...
 #include <strings.h>   // bzero, bcopy, ...
 #include <stdio.h>     // printf, ...
