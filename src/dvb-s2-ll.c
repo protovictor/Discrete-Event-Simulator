@@ -56,6 +56,7 @@ void DVBS2ll_reset(struct DVBS2ll_t * dvbs2ll)
 {
    if (dvbs2ll->currentPDU) {
       PDU_free(dvbs2ll->currentPDU);
+      dvbs2ll->currentPDU = NULL;
    }
    dvbs2ll->available = 1;
 }
