@@ -32,7 +32,7 @@ static struct schedACM_func_t schedUtility_func = {
    .getPDU = NULL,
    .processPDU = NULL,
    .buildBBFRAME = NULL,
-   .schedule = schedulerUtility
+   .schedule = (void (*)(void*))schedulerUtility
 };
 
 /*
@@ -53,6 +53,34 @@ struct schedACM_t * schedUtility_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, i
    printf_debug(DEBUG_SCHED, "%p created (in schedACM %p)\n", result, result->schedACM);
 
    return result->schedACM;
+}
+/*
+ * Affichage de l'état du système des files d'attente avec l'interet de
+ * chaque paquet étant donné le MODCOD envisagé 'mc'.
+ */
+void schedUtil_afficherFiles(struct schedUtility_t * sched, int mc)
+{
+   int m, q, n;
+   int taille, id;
+   double deriv ;
+
+   printf_debug(DEBUG_ALWAYS, "Etat des files considerees: \n");
+   for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)); m++) {
+      printf_debug(DEBUG_ALWAYS, "  MODCOD %d\n", m);
+      for (q = 0; q < nbQoS(sched->schedACM); q++) {
+	printf_debug(DEBUG_ALWAYS, "    QoS %d (%d PDUs)\n", q, filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)));
+	 for (n = 1; n <= filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)); n++) {
+            id = filePDU_id_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), n);
+            taille = filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), n);
+	    deriv = utiliteDerivee(schedACM_getQoS(sched->schedACM, m, q),
+						  schedACM_getQoS(sched->schedACM, m, q)->debit,
+				   schedACM_getACMLink(sched->schedACM));
+            printf_debug(DEBUG_ALWAYS, "      [%d] : PDU %d (taille %d, deriv %e)\n", n, id, 
+			 taille, 
+			 deriv);
+         }
+      }
+   }
 }
 
 /*
@@ -142,7 +170,7 @@ void schedulerUtilityMC(struct schedUtility_t * sched, int mc, t_remplissage * r
 void schedulerUtility(struct schedUtility_t * sched)
 {
    t_remplissage remplissage; // Le remplissage construit ici
-   int m, q;
+   int m;
 
    remplissage_init(&remplissage, nbModCod(sched->schedACM), nbQoS(sched->schedACM));
 
@@ -153,7 +181,7 @@ void schedulerUtility(struct schedUtility_t * sched)
       printf_debug(DEBUG_SCHED, "Cherchons sur le modcod %d, avec les files suivantes\n", m);
 #ifdef DEBUG_NDES
       if (debug_mask&DEBUG_SCHED)
-        schedACM_afficherFiles(sched->schedACM,  m);
+        schedUtil_afficherFiles(sched,  m);
 #endif
       schedulerUtilityMC(sched, m, &remplissage);
 
@@ -186,4 +214,167 @@ void schedulerUtility(struct schedUtility_t * sched)
       }
    }
 */
+}
+
+/*
+ * Version proportionnelle : On sert chaque file au prorata de sa fonction d'utilité
+ */
+void schedulerUtilityMCProp(struct schedUtility_t * sched, int mc, t_remplissage * remplissage)
+{
+   int bestQoS = 0;   
+   int bestMC = mc;
+   double poids[NB_MODCOD_MAX][3];   // WARNING
+   double sommePoids;
+   double meilleurPoids=0.0;
+   int m, qa, qb, q, ma, mb; // Indices des boucles
+
+   if ((nbModCod(sched->schedACM)> NB_MODCOD_MAX) || (nbQoS(sched->schedACM) > 3)) {printf("***\nERREUR DE DIM\n"); exit(1);}
+
+   // 1 - On commence par calculer l'utilité sur chaque file
+   sommePoids = 0.0;
+   //    Pour chaque modcod envisageable
+   for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)); m++) {
+      //    Pour chaque file du modcod
+      for (q = 0; q < nbQoS(sched->schedACM); q++) {
+         poids[m][q] = utiliteDerivee(schedACM_getQoS(sched->schedACM, m, q),
+				      schedACM_getQoS(sched->schedACM, m, q)->debit,
+				      schedACM_getACMLink(sched->schedACM));
+	 assert(poids[m][q]>=0);
+         sommePoids += poids[m][q];
+      }
+   }
+
+   // 2 - On normalise 
+   //    Pour chaque modcod envisageable
+   for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)); m++) {
+      //    Pour chaque file du modcod
+      for (q = 0; q < nbQoS(sched->schedACM); q++) {
+	 poids[m][q] = poids[m][q]/sommePoids ;
+	 if (poids[m][q] > meilleurPoids) {
+  	    meilleurPoids = poids[m][q];
+            bestMC = m;
+   	    bestQoS = q;
+	 }
+      }
+   }
+
+   // 3 - Pour chaque file, on envisage de prendre un volume correspondant au poids
+   //     multiplié par la taille de la BBFRAME
+   for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)); m++) {
+      //    Pour chaque file du modcod
+      for (q = 0; q < nbQoS(sched->schedACM); q++) {
+         // Tant que (1) il reste un paquet (2) que j'ai le droit d'émettre (3) qui tient dans la trame
+	while ((remplissage->nbrePaquets[m][q] < filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q))) // (1)
+	       && (filePDU_size_n_PDU(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+1)
+                     <= poids[m][q]*(DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8))  // (2)
+               &&  (remplissage->volumeTotal +filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+1)
+		    <= (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8))
+               ) {
+	  remplissage->nbrePaquets[m][q]++;
+          remplissage->volumeTotal += filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]);
+	  remplissage->interet += (double)(filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q])) * poids[m][q]*sommePoids;
+	}
+      }
+   }
+
+   // 4 - On n'a pas forcément rempli : les restes laissés par chacun peuvent permettre
+   //     d'émettre des paquets
+   // on se dit que c'est marginal, donc on va reprendre les files dans l'ordre et bourrer !
+   mb = bestMC;
+   for (ma = 0; ma < (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)) - mc; ma++) {
+      m = mc+((mb+ma-mc) % (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)-mc));
+      qb = bestQoS;
+      for (qa = 0; qa < nbQoS(sched->schedACM); qa++) {
+         q = (qa + qb)%nbQoS(sched->schedACM);
+
+         while ((remplissage->nbrePaquets[m][q]
+		 < filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q))) // Il en reste un
+	  && (remplissage->volumeTotal + filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q),
+							   remplissage->nbrePaquets[m][q]+1)
+                    <= (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8))) {
+	 remplissage->volumeTotal += 
+            filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM,
+						      m, q), remplissage->nbrePaquets[m][q]+1);
+         remplissage->nbrePaquets[m][q]++;
+         }
+      }
+   }
+
+   printf_debug(DEBUG_SCHED, "--------- %d : v=%d/i=%f ---------\n", mc, remplissage->volumeTotal, remplissage->interet);
+}
+
+void schedulerUtilityProp(struct schedUtility_t * sched)
+{
+   t_remplissage remplissage; // Le remplissage construit ici
+   int m,q;
+
+   remplissage_init(&remplissage, nbModCod(sched->schedACM), nbQoS(sched->schedACM));
+
+   for (m = 0; m < nbModCod(sched->schedACM) ; m++){
+      remplissage_raz(&remplissage, nbModCod(sched->schedACM), nbQoS(sched->schedACM));
+      remplissage.modcod = m;
+
+      printf_debug(DEBUG_ALWAYS, "Cherchons sur le modcod %d, avec les files suivantes\n", m);
+#ifdef DEBUG_NDES
+      if (debug_mask&DEBUG_ALWAYS)
+      schedUtil_afficherFiles(sched,  m);
+#endif
+      schedulerUtilityMCProp(sched, m, &remplissage);
+
+      // N'a qqchose ?
+      if (remplissage.volumeTotal) {
+
+         // C'est mieux si au moins une des affirmations suivantes est vraie
+         //    on n'avait rien pour le moment (volumeTotal nul)
+         //    l'interet de la nouvelle proposition est meilleur
+	 //    l'interet est le même, mais avec un plus gros volume
+         if (   (schedACM_getSolution(sched->schedACM)->volumeTotal == 0)
+	       || (remplissage.interet > schedACM_getSolution(sched->schedACM)->interet)
+	       || (   (remplissage.interet == schedACM_getSolution(sched->schedACM)->interet)
+		 && (remplissage.volumeTotal > schedACM_getSolution(sched->schedACM)->volumeTotal))) {
+            remplissage_copy(&remplissage, schedACM_getSolution(sched->schedACM),
+		       nbModCod(sched->schedACM), nbQoS(sched->schedACM));
+            schedACM_getSolution(sched->schedACM)->modcod = m;
+         }
+      }
+   }
+
+   printf_debug(DEBUG_ALWAYS, "Solution choisie : mc %d, vol = %d, i = %f\n",
+		schedACM_getSolution(sched->schedACM)->modcod,
+		schedACM_getSolution(sched->schedACM)->volumeTotal,
+		schedACM_getSolution(sched->schedACM)->interet);
+
+   for (m = 0; m < nbModCod(sched->schedACM); m++) {
+      for (q = 0; q < nbQoS(sched->schedACM); q++) {
+	printf_debug(DEBUG_ALWAYS, "[%d][%d] - %d\n", m, q, schedACM_getSolution(sched->schedACM)->nbrePaquets[m][q]);
+      }
+   }
+
+}
+
+static struct schedACM_func_t schedUtilityProp_func = {
+   .getPDU = NULL,
+   .processPDU = NULL,
+   .buildBBFRAME = NULL,
+   .schedule = (void (*)(void*))schedulerUtilityProp
+};
+
+/*
+ * Création d'un scheduler avec sa "destination". Cette dernière doit
+ * être de type struct DVBS2ll_t  et avoir déjà été complêtement
+ * construite (tous les MODCODS créés).
+ * Le nombre de files de QoS différentes par MODCOD est également
+ * passé en paramètre.
+ */
+struct schedACM_t * schedUtilityProp_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int declOK)
+{
+   struct schedUtility_t * result = (struct schedUtility_t * ) sim_malloc(sizeof(struct schedUtility_t));
+   assert(result);
+
+   result->schedACM = schedACM_create(dvbs2ll, nbQoS, declOK, &schedUtilityProp_func);
+   schedACM_setPrivate(result->schedACM, result);
+
+   printf_debug(DEBUG_SCHED, "%p created (in schedACM %p)\n", result, result->schedACM);
+
+   return result->schedACM;
 }

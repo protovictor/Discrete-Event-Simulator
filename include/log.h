@@ -11,18 +11,24 @@
 #ifndef __DEF_LOG
 #define __DEF_LOG
 
+#include <stdarg.h>
 #include <motsim.h>
 
 
 /*
  * Initialisation du log
  */
-void ndesLog_init(char * line);
+void ndesLog_init();
 
 /*
  * Insertion d'une ligne de log
  */
 void ndesLog_logLine(char * line);
+
+/*
+ * @brief Insertion d'une ligne de log avec formatage
+ */
+void ndesLog_logLineF(char * fmt, ...);
 
 /*
  * Dump du log dans un fichier (l'éventuel contenu précédent est détruit)

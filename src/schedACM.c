@@ -572,9 +572,8 @@ void schedACM_afficherFiles(struct schedACM_t * sched, int mc)
 	 for (n = 1; n <= filePDU_length(schedACM_getInputQueue(sched, m, q)); n++) {
             id = filePDU_id_PDU_n(schedACM_getInputQueue(sched, m, q), n);
             taille = filePDU_size_PDU_n(schedACM_getInputQueue(sched, m, q), n);
-            printf_debug(DEBUG_ALWAYS, "      [%d] : PDU %d (taille %d, gain %7.2f)\n", n, id, 
-			 taille, 
-			 gainUtilite(schedACM_getQoS(sched, m, q), taille, mc, schedACM_getACMLink(sched)));
+            printf_debug(DEBUG_ALWAYS, "      [%d] : PDU %d (taille %d)\n", n, id, 
+			 taille);
          }
       }
    }

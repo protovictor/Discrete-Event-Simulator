@@ -6,8 +6,8 @@
 #include <time.h>
 
 #include <event-file.h>
-
 #include <pdu.h>
+#include <log.h>
 
 struct resetClient_t {
    void * data;
@@ -140,6 +140,10 @@ void motSim_create()
 
    PDU_releaseProbe = probe_createMean();
    probe_setName(PDU_releaseProbe, "released PDUs");
+
+   // Intialisation des log
+   printf_debug(DEBUG_MOTSIM, "Initialisation des log ...\n");
+   ndesLog_init();
 
    printf_debug(DEBUG_MOTSIM, "Simulateur pret ...\n");
 }

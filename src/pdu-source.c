@@ -48,10 +48,11 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
    result->detNextIdx = 0;
 
    // Ajout à la liste des choses à réinitialiser avant une prochaine simu
-   motsim_addToResetList(result, PDUSource_start);
+   motsim_addToResetList(result, (void (*)(void *))PDUSource_start);
    
    return result;
 }
+
 
 
 /** @brief Création d'un générateur déterministe
@@ -145,7 +146,9 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
 
       // On passe la PDU au suivant  
       if ((source->destProcessPDU) && (source->destination)) {
-         (void)source->destProcessPDU(source->destination, PDUSource_getPDU, source);
+         // On logue cet événement
+	//	 ndesLog_logLine("");
+  	 (void)source->destProcessPDU(source->destination, (getPDU_t)PDUSource_getPDU, source);
       }
    }
    // Maintenant on prépare la prochaine PDU
@@ -187,10 +190,10 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
                 PDU_id(source->nextPdu), size, PDU_size(source->nextPdu),motSim_getCurrentTime());
 
       // On crée un événement pour cette date
-       event = event_create((eventAction_t)PDUSource_buildNewPDU, source, date);
+      event = event_create((eventAction_t)PDUSource_buildNewPDU, source, date);
 
       // On ajoute cet événement au simulateur
-       motSim_addEvent(event);
+      motSim_addEvent(event);
    } else {
      printf_debug(DEBUG_SRC, " Aborted (too late) !\n");
    }

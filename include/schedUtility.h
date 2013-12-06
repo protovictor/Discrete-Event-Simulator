@@ -16,5 +16,7 @@
  */
 struct schedACM_t * schedUtility_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int declOK);
 
+struct schedACM_t * schedUtilityProp_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int declOK);
+
 
 #endif

@@ -90,19 +90,20 @@ double gainUtilite(t_qosMgt * qos, int taillePaquet, int mcBBFRAME, struct DVBS2
    double tpsEmission = DVBS2ll_bbframeTransmissionTime(dvbs2ll, mcBBFRAME);
 
    result = utiliteDerivee(qos, qos->debit, dvbs2ll);
+   result = result *taillePaquet/tpsEmission ;
 
-   return result *taillePaquet/tpsEmission ;
+   return result;
 }
 
 /*
  * Affichage de l'état du système des files d'attente avec l'interet de
  * chaque paquet étant donné le MODCOD envisagé 'mc'.
  */
-void afficherFiles(struct sched_kse_t * sched, int mc)
+void KS_afficherFiles(struct sched_kse_t * sched, int mc)
 {
    int m, q, n;
    int taille, id;
-
+   double gain ;
    printf_debug(DEBUG_KS, "Etat des files considerees: \n");
    for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)); m++) {
       printf_debug(DEBUG_KS, "  MODCOD %d\n", m);
@@ -111,9 +112,10 @@ void afficherFiles(struct sched_kse_t * sched, int mc)
 	 for (n = 1; n <= filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)); n++) {
             id = filePDU_id_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), n);
             taille = filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), n);
-            printf_debug(DEBUG_KS, "      [%d] : PDU %d (taille %d, gain %7.2f)\n", n, id, 
+	    gain = gainUtilite(schedACM_getQoS(sched->schedACM, m, q), taille, mc, schedACM_getACMLink(sched->schedACM));
+            printf_debug(DEBUG_KS, "      [%d] : PDU %d (taille %d, gain %f)\n", n, id, 
 			 taille, 
-			 gainUtilite(schedACM_getQoS(sched->schedACM, m, q), taille, mc, schedACM_getACMLink(sched->schedACM)));
+			 gain);
          }
       }
    }
@@ -384,10 +386,13 @@ void scheduler_knapsack_exhaustif(struct sched_kse_t * sched)
     * Resolution pour tous les MODCODs
     */
    printf_debug(DEBUG_KS, "********************DEBUT KNAPSACK****************************\n");
-   //   afficherFiles(sched, 0);
+   //   KS_afficherFiles(sched, 0);
    for (mc = 0; mc < nbModCod(sched->schedACM); mc++) {
       printf_debug(DEBUG_KS, "-------====< MODCOD %d >====-------\n", mc);
-      afficherFiles(sched, mc);
+#ifdef DEBUG_NDES
+      if (debug_mask&DEBUG_ALWAYS)
+      KS_afficherFiles(sched, mc);
+#endif
       knapsackParModCod(mc, sched);
 
       printf_debug(DEBUG_KS, "-------====< Ordonnancement choisi mc=%d >====-------\n",
