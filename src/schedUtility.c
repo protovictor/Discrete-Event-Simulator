@@ -19,6 +19,11 @@
 #include <motsim.h>
 #include <schedUtility.h>
 
+#define propModDirect         1
+#define propModProp           2
+#define propModPropThenDirect 3
+#define propMod               propModProp
+
 /*
  * Les caractéristiques d'un tel ordonnanceur
  */
@@ -213,7 +218,7 @@ void schedulerUtility(struct schedUtility_t * sched)
 	printf_debug(DEBUG_SCHED, "[%d][%d] - %d\n", m, q, schedACM_getSolution(sched->schedACM)->nbrePaquets[m][q]);
       }
    }
-*/
+s*/
 }
 
 /*
@@ -228,7 +233,10 @@ void schedulerUtilityMCProp(struct schedUtility_t * sched, int mc, t_remplissage
    double meilleurPoids=0.0;
    int m, qa, qb, q, ma, mb; // Indices des boucles
 
+   printf_debug(DEBUG_SCHED, "IN\n");
+
    if ((nbModCod(sched->schedACM)> NB_MODCOD_MAX) || (nbQoS(sched->schedACM) > 3)) {printf("***\nERREUR DE DIM\n"); exit(1);}
+   printf_debug(DEBUG_SCHED, "1 ... \n");
 
    // 1 - On commence par calculer l'utilité sur chaque file
    sommePoids = 0.0;
@@ -243,6 +251,7 @@ void schedulerUtilityMCProp(struct schedUtility_t * sched, int mc, t_remplissage
          sommePoids += poids[m][q];
       }
    }
+   printf_debug(DEBUG_SCHED, "2 ...\n");
 
    // 2 - On normalise 
    //    Pour chaque modcod envisageable
@@ -250,6 +259,7 @@ void schedulerUtilityMCProp(struct schedUtility_t * sched, int mc, t_remplissage
       //    Pour chaque file du modcod
       for (q = 0; q < nbQoS(sched->schedACM); q++) {
 	 poids[m][q] = poids[m][q]/sommePoids ;
+         printf_debug(DEBUG_SCHED, "Poids[%d, %d] = %f\n", m, q,  poids[m][q]);
 	 if (poids[m][q] > meilleurPoids) {
   	    meilleurPoids = poids[m][q];
             bestMC = m;
@@ -257,35 +267,71 @@ void schedulerUtilityMCProp(struct schedUtility_t * sched, int mc, t_remplissage
 	 }
       }
    }
+   printf_debug(DEBUG_SCHED, "bestMC/bestQoS = %d/%d\n",bestMC, bestQoS);
 
    // 3 - Pour chaque file, on envisage de prendre un volume correspondant au poids
    //     multiplié par la taille de la BBFRAME
    for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)); m++) {
+      printf_debug(DEBUG_SCHED, "Lets try m = %d ...\n", m);
       //    Pour chaque file du modcod
       for (q = 0; q < nbQoS(sched->schedACM); q++) {
-         // Tant que (1) il reste un paquet (2) que j'ai le droit d'émettre (3) qui tient dans la trame
+	/*
+         printf_debug(DEBUG_SCHED, "Lets see q = %d ...\n", q);
+         printf_debug(DEBUG_SCHED, "remplissage->nbrePaquets[m][q] = %d ...\n", remplissage->nbrePaquets[m][q]);
+         printf_debug(DEBUG_SCHED, "filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)) = %d ...\n", filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)));
+	 if (filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q))) {
+            printf_debug(DEBUG_SCHED, "filePDU_size_n_PDU(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+1) = %d ...\n", filePDU_size_n_PDU(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+1));
+            printf_debug(DEBUG_SCHED, "poids[m][q]*(DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8) = %f ...\n", poids[m][q]*(DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8));
+            printf_debug(DEBUG_SCHED, "remplissage->volumeTotal +filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+1) = %d ...\n", remplissage->volumeTotal +filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+1));
+            printf_debug(DEBUG_SCHED, "DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8 = %d ...\n", (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8));
+	 }
+	*/
+         // Tant que (1) il reste un paquet  (2) qui tient dans la trame (3) que j'ai le droit d'émettre
 	while ((remplissage->nbrePaquets[m][q] < filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q))) // (1)
-	       && (filePDU_size_n_PDU(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+1)
-                     <= poids[m][q]*(DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8))  // (2)
-               &&  (remplissage->volumeTotal +filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+1)
+               &&  (remplissage->volumeTotal +filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+1) // (2)
 		    <= (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8))
-               ) {
+	       &&  // (3)
+	       (
+		 (   (propMod == propModDirect) 
+		 )||((propMod == propModProp) && (
+                     (filePDU_size_n_PDU(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+1)
+                     <= poids[m][q]*(DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8)) 
+						  )
+		 )
+		)){
 	  remplissage->nbrePaquets[m][q]++;
           remplissage->volumeTotal += filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]);
+	  /*
+          printf_debug(DEBUG_SCHED, "   %d pq de %d/%d (volume %d -> cumul %d, reste %d sur %d)\n",
+		       remplissage->nbrePaquets[m][q],
+		       m, q,
+		       filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q),
+					  remplissage->nbrePaquets[m][q]),
+		       remplissage->volumeTotal,
+		       (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8) - remplissage->volumeTotal,
+		       (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8));
+	  */
 	  remplissage->interet += (double)(filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q])) * poids[m][q]*sommePoids;
 	}
       }
    }
+   printf_debug(DEBUG_SCHED, "4 ...\n");
 
    // 4 - On n'a pas forcément rempli : les restes laissés par chacun peuvent permettre
    //     d'émettre des paquets
    // on se dit que c'est marginal, donc on va reprendre les files dans l'ordre et bourrer !
    mb = bestMC;
+   printf_debug(DEBUG_SCHED, "mb = %d\n", mb);
    for (ma = 0; ma < (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)) - mc; ma++) {
-      m = mc+((mb+ma-mc) % (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)-mc));
+     printf_debug(DEBUG_SCHED, "   ma = %d, mb = %d, mc = %d, MOD = %d\n", ma, mb, mc, ((schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1))-mc));
+      m = mc+((mb+ma-mc) % ((schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1))-mc));
+      printf_debug(DEBUG_SCHED, "   m = %d\n", m);
       qb = bestQoS;
+      printf_debug(DEBUG_SCHED, "   qb = %d\n", qb);
       for (qa = 0; qa < nbQoS(sched->schedACM); qa++) {
+         printf_debug(DEBUG_SCHED, "   qa = %d\n", qa);
          q = (qa + qb)%nbQoS(sched->schedACM);
+         printf_debug(DEBUG_SCHED, "   q = %d\n", q);
 
          while ((remplissage->nbrePaquets[m][q]
 		 < filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q))) // Il en reste un
@@ -299,6 +345,7 @@ void schedulerUtilityMCProp(struct schedUtility_t * sched, int mc, t_remplissage
          }
       }
    }
+   printf_debug(DEBUG_SCHED, "Done\n");
 
    printf_debug(DEBUG_SCHED, "--------- %d : v=%d/i=%f ---------\n", mc, remplissage->volumeTotal, remplissage->interet);
 }

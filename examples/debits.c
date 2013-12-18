@@ -41,7 +41,6 @@ int main() {
 #define nbTailles 4
    unsigned int tailles[nbTailles] = {
      128, 256, 512, 1024
-     //     100, 100, 100, 100
    };
    double probas[nbTailles] = {
       0.25, 0.25, 0.25, 0.25
@@ -51,11 +50,10 @@ int main() {
    motSim_create();
 
    /* Création d'un générateur de dates */
-   //dateGenExp = dateGenerator_createPeriodic(1.0/lambda);
      dateGenExp = dateGenerator_createExp(lambda);
 
    /* Création d'un générateur de tailles */
-   sizeGen = randomGenerator_createUIntDiscrete(nbTailles, tailles, probas);
+   sizeGen = randomGenerator_createUIntDiscreteProba(nbTailles, tailles, probas);
 
    /* La source */
    sourcePDU = PDUSource_create(dateGenExp, NULL, NULL);

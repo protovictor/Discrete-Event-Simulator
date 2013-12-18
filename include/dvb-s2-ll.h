@@ -1,4 +1,7 @@
 /*
+ * @file dvb-s2-ll.h
+ * @brief Modélisation d'une couche de type DVB-S2
+ *
  * Attention, ici les tailles sont comptées en bits alors que partout
  * ailleurs c'est en octets. Il faudra peut être revoir ça. A titre
  * préventif, cela apparait dans les noms des variables, et des macros
@@ -18,8 +21,14 @@ struct t_modcod;
 struct DVBS2ll_t;
 
 /*
- * Création d'une entité DVB-S2 couche 2. Attention, elle ne contient
+ * @brief Création d'une entité DVB-S2 couche 2
+ * Attention, elle ne contient
  * aucun MODCOD par défaut, il faut en ajouter
+ * @param destination L'entité aval
+ * @param destProcessPDU La fonction de traitement par l'aval
+ * @param symbolPerSecond Le débit de la ligne, en symboles par seconde
+ * @param FECFrameBitLength La taille totale de la BBFRAME
+ * @result Un pointeur sur la structure créée ou NULL
  */
 struct DVBS2ll_t * DVBS2ll_create(void * destination,
 				  processPDU_t destProcessPDU,
@@ -50,7 +59,8 @@ struct DVBS2ll_t * DVBS2ll_create(void * destination,
 
 
 /*
- * Ajout d'un MODCOD. Le codage est paramétré par le nombre de bits
+ * @brief Ajout d'un MODCOD
+ * Le codage est paramétré par le nombre de bits
  * par BBFRAME et la modulation par le nombre de bits par symbole.
  * La valeur retournée est l'indice de ce nouveau MODCOD.
  */

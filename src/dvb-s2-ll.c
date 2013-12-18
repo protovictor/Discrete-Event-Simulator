@@ -1,5 +1,6 @@
 /*----------------------------------------------------------------------*/
-/*      Implantation de la couche liaison DVB-S2.                       */
+/* @file dvb-s2-ll.h  */
+/* @brief Implantation de la couche liaison DVB-S2.                       */
 /*                                                                      */
 /*  ATENTION : propagation à voir !!! Ce qui est fait dans endPropag    */
 /*  devrait entre dans end transmission et un autre object (genre file) */
@@ -74,21 +75,22 @@ struct DVBS2ll_t * DVBS2ll_create(void * destination,
 {
    struct DVBS2ll_t * result = (struct DVBS2ll_t * )sim_malloc(sizeof(struct DVBS2ll_t));
  
-   result->nbModCods = 0;
-   result->destination = destination;
-   result->send = destProcessPDU;
-   result->symbolPerSecond = symbolPerSecond;
-   result->FECFrameBitLength = FECFrameBitLength;
-   result->source = NULL;
-   result->getPDU = NULL;
-   result->dummyFecFrameProbe = NULL;
-   result->available = 1;
+   if (result) {
+      result->nbModCods = 0;
+      result->destination = destination;
+      result->send = destProcessPDU;
+      result->symbolPerSecond = symbolPerSecond;
+      result->FECFrameBitLength = FECFrameBitLength;
+      result->source = NULL;
+      result->getPDU = NULL;
+      result->dummyFecFrameProbe = NULL;
+      result->available = 1;
+ 
+      // Ajout à la liste des choses à réinitialiser avant une prochaine simu
+      motsim_addToResetList(result, (void (*)(void *))DVBS2ll_reset);
 
-   // Ajout à la liste des choses à réinitialiser avant une prochaine simu
-   motsim_addToResetList(result, (void (*)(void *))DVBS2ll_reset);
-
-   printf_debug(DEBUG_DVB, "%p created\n", result);
-
+      printf_debug(DEBUG_DVB, "%p created\n", result);
+   }
    return result;
 };
 
