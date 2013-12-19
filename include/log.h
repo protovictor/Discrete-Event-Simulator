@@ -21,7 +21,7 @@
 void ndesLog_init();
 
 /*
- * Insertion d'une ligne de log
+ * Insersion d'une ligne de log
  */
 void ndesLog_logLine(char * line);
 
