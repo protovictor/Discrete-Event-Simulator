@@ -9,6 +9,7 @@
 
 #include <motsim.h>
 #include <probe.h>
+#include <ndesObject.h>
 
 /*
  * Le type est visible car utilisé par différents modules vu que c'est
@@ -17,6 +18,8 @@
  * fournies plus bas.
  */
 struct PDU_t {
+   declareAsNdesObject;
+
    int      id;    // Un identifiant général
    motSimDate_t  creationDate;
 
@@ -27,6 +30,11 @@ struct PDU_t {
    struct PDU_t * prev;
    struct PDU_t * next;
 };
+
+/**
+ * @brief Déclaration des fonctions spécifiques liées au ndesObject
+ */
+declareObjectFunctions(PDU);
 
 /*
  * Création d'une PDU de taille fournie. Elle peut contenir

@@ -13,7 +13,14 @@
 #include <event.h>
 #include <pdu-source.h>
 
+#include <ndesObject.h>
+#include <log.h>
+
+/**
+ * @brief Une source générique de PDU
+ */
 struct PDUSource_t {
+   declareAsNdesObject;  //!< C'est un ndesObject
    struct dateGenerator_t * dateGen; //!< Le générateur de date de départ
    struct randomGenerator_t * sizeGen;//!< Le générateur de taille
 
@@ -28,12 +35,22 @@ struct PDUSource_t {
    int detNextIdx; //!< Prochain indice dans le cas déterministe
 };
 
+/**
+ * @brief Définition des fonctions spécifiques liées au ndesObject
+ */
+defineObjectFunctions(PDUSource);
+struct ndesObjectType_t PDUSourceType = {
+  ndesObjectTypeDefaultValues(PDUSource)
+};
+
 struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
 				      void * destination,
 				      processPDU_t destProcessPDU)
 {
    struct PDUSource_t * result = (struct PDUSource_t *)
               sim_malloc(sizeof(struct PDUSource_t));
+
+   ndesObjectInit(result, PDUSource);
 
    result->pdu = NULL;
    result->nextPdu = NULL;
@@ -54,8 +71,8 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
 }
 
 
-
-/** @brief Création d'un générateur déterministe
+/**
+ *  @brief Création d'un générateur déterministe
  * 
  *  @param sequence Un tableau de {date, size} définissant chaque PDU
  *  @param destination L'entité aval
@@ -147,8 +164,11 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
       // On passe la PDU au suivant  
       if ((source->destProcessPDU) && (source->destination)) {
          // On logue cet événement
-	//	 ndesLog_logLine("");
-  	 (void)source->destProcessPDU(source->destination, (getPDU_t)PDUSource_getPDU, source);
+ 	ndesLog_logLineF(PDU_getObject(source->pdu),
+                         "CREATED_BY %d", PDUSource_getObjectId(source));
+        (void)source->destProcessPDU(source->destination,
+                                     (getPDU_t)PDUSource_getPDU,
+                                     source);
       }
    }
    // Maintenant on prépare la prochaine PDU
@@ -213,9 +233,10 @@ struct PDU_t * PDUSource_getPDU(struct PDUSource_t * source)
 		PDU_id(pdu),
 		PDU_size(pdu));
 
+   ndesLog_logLineF(PDU_getObject(pdu), "OUT %d", PDUSource_getObjectId(source));
+
    return pdu;
 }
-
 
 void PDUSource_start(struct PDUSource_t * source)
 {

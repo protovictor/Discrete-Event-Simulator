@@ -81,6 +81,8 @@ int main() {
    motSim_runUntilTheEnd();
 
    motSim_printStatus();
+   printf("Fini !\n");
+   ndesLog_dump("fichier");
 
    return 1;
 }

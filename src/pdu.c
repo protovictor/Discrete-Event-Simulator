@@ -14,6 +14,18 @@ struct probe_t * PDU_releaseProbe;
 // Pointeur sur une PDU libre (pour accélerer alloc/free)
 struct PDU_t * firstFreePDU = NULL;
 
+/**
+ * @brief Définition des fonctions spécifiques liées au ndesObject
+ */
+defineObjectFunctions(PDU);
+
+/**
+ * @brief Les entrées de log sont des ndesObject
+ */
+struct ndesObjectType_t PDUType = {
+  ndesObjectTypeDefaultValues(PDU)
+};
+
 int PDU_size(struct PDU_t * PDU){
    return PDU->taille;
 }
@@ -45,6 +57,7 @@ struct PDU_t * PDU_create(int size, void * private)
       probe_sample(PDU_mallocProbe, (double)PDU->id);
    }
 
+   ndesObjectInit(PDU, PDU);
    PDU->taille = size;
    PDU->id = pduNB ++;
    PDU->data = private;

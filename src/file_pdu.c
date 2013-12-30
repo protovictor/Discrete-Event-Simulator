@@ -8,6 +8,9 @@
 
 #include <file_pdu.h>
 #include <motsim.h>
+
+#include <ndesObject.h>
+
 /*
 struct filePDU_t_elt {
    struct PDU_t         * PDU;
@@ -16,15 +19,20 @@ struct filePDU_t_elt {
    struct filePDU_t_elt * precedent;
 };
 */
+/**
+ * @brief Structure d'une file
+ */
 struct filePDU_t {
+   declareAsNdesObject;  //!< C'est un ndesObject
+
    int           nombre;
-   unsigned long size;       // Le volume réel
-   int           nbOverflow; // Nombre de pertes par dépassement
+   unsigned long size;       //!< Le volume réel
+   int           nbOverflow; //!< Nombre de pertes par dépassement
 
    enum filePDU_dropStrategy dropStrategy;
 
-   int           maxLength;  // Nombre maximal d'éléments
-   int           maxSize ;   // Le volume maximal
+   int           maxLength;  //!< Nombre maximal d'éléments
+   int           maxSize ;   //!< Le volume maximal
 
    /* Gestion de la file */
    struct PDU_t * premier;
@@ -43,6 +51,14 @@ struct filePDU_t {
    struct probe_t * extractProbe;
    struct probe_t * dropProbe;
    struct probe_t * sejournProbe;
+};
+
+/**
+ * @brief D�finition des fonctions sp�cifiques li�es au ndesObject
+ */
+defineObjectFunctions(filePDU);
+struct ndesObjectType_t filePDUType = {
+  ndesObjectTypeDefaultValues(filePDU)
 };
 
 /*
@@ -106,11 +122,15 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file)
    }
    printf_debug(DEBUG_FILE, "out (pdu id %d)\n", PDU?PDU_id(PDU):-1);
    //   filePDU_dump(file);
+   ndesLog_logLineF(PDU_getObject(PDU), "OUT %d", filePDU_getObjectId(file));
+   
    return PDU;
 }
 struct PDU_t * filePDU_getPDU(void * file)
 {
-   return filePDU_extract((struct filePDU_t *) file);
+   struct PDU_t * pdu = filePDU_extract((struct filePDU_t *) file);
+
+   return pdu;
 }
 
 /*
@@ -192,6 +212,8 @@ struct filePDU_t * filePDU_create(void * destination,
    struct filePDU_t * result = (struct filePDU_t *) sim_malloc(sizeof(struct filePDU_t));
    assert(result);
 
+   ndesObjectInit(result, filePDU);
+
    result->nombre = 0;
    result->size = 0;
    result->maxSize = 0;
@@ -224,6 +246,7 @@ struct filePDU_t * filePDU_create(void * destination,
 void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
 {
    struct PDU_t * pq;
+   struct PDU_t * pduDel;
  
    printf_debug(DEBUG_FILE, " file %p insert PDU %d size %d (Length = %d/%d, size = %lu/%d, strat %d)\n",
                 file, PDU_id(PDU), PDU_size(PDU),
@@ -243,7 +266,10 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
          if (file->dropProbe) {
             probe_sample(file->dropProbe, PDU_size(PDU));
          }
-         PDU_free(filePDU_extract(file));
+         pduDel = filePDU_extract(file);
+         ndesLog_logLineF(PDU_getObject(pduDel), "DELETED BY %d", filePDU_getObjectId(file));
+
+         PDU_free(pduDel);
 
          file->nbOverflow++;
       }
@@ -268,6 +294,8 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
       file->nombre++;
       file->size += PDU_size(PDU);
 
+      ndesLog_logLineF(PDU_getObject(PDU), "IN %d", filePDU_getObjectId(file));
+
       /* Gestion des sondes */
       if (file->insertProbe) {
          probe_sample(file->insertProbe, PDU_size(PDU));
@@ -290,6 +318,7 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
       if (file->dropProbe) {
          probe_sample(file->dropProbe, PDU_size(PDU));
       }
+      ndesLog_logLineF(PDU_getObject(PDU), "DELETED BY %d", filePDU_getObjectId(file));
 
       PDU_free(PDU); 
       file->nbOverflow++;

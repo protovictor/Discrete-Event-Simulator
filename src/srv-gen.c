@@ -1,4 +1,7 @@
-/*
+/**
+ * @file srv-gen.c
+ * @brief Un serveur générique
+ *
  * Un serveur generique. Il prend des PDU en entree, les sert
  * en un temps defini par une loi (cte, exp, ...) et les envoie
  * en sortie.
@@ -9,6 +12,7 @@
 #include <event.h>
 #include <date-generator.h>
 #include <srv-gen.h>
+#include <ndesObject.h>
 
 #include <stdlib.h>    // Malloc, NULL, exit...
 
@@ -17,7 +21,12 @@ enum srvState_t {
   srvStateBusy
 };
 
+/** 
+ * @brief Définition d'un serveur générique
+ */
 struct srvGen_t {
+   declareAsNdesObject; //< C'est un ndesObject 
+
    enum srvState_t          srvState;
    struct PDU_t           * currentPDU;   // The PDU being served
    float                    serviceStartTime;
@@ -42,6 +51,18 @@ struct srvGen_t {
    struct probe_t * serviceProbe;
 };
 
+/**
+ * @brief Définition des fonctions spécifiques liées au ndesObject
+ */
+defineObjectFunctions(srvGen);
+
+/**
+ * @brief Les entrées de log sont des ndesObject
+ */
+struct ndesObjectType_t srvGenType = {
+   ndesObjectTypeDefaultValues(srvGen)
+};
+
 /*
  * Creation et initialisation d'un serveur
  */
@@ -49,6 +70,7 @@ struct srvGen_t * srvGen_create(void * destination,
                                 processPDU_t destProcessPDU)
 {
    struct srvGen_t * result = sim_malloc(sizeof(struct srvGen_t));
+   ndesObjectInit(result, srvGen);
 
    result->srvState = srvStateIdle;
    result->currentPDU = NULL;
@@ -141,6 +163,7 @@ void srvGen_terminateProcess(struct srvGen_t * srv)
       pdu = srv->getPDU(srv->source);
       // Est-elle encore prete ?
       if (pdu) {
+         ndesLog_logLineF(PDU_getObject(pdu), "IN %d", srvGen_getObjectId(srv));
          srvGen_startService(srv, pdu);
       } else { // Si elle ne l'est plus, inutile d'y revenir pour le moment
          srv->source = NULL; 
@@ -169,6 +192,7 @@ int srvGen_processPDU(struct srvGen_t * server,
 
       // On va chercher une PDU puisqu'il y en a une de prête
       pdu = getPDU(source);
+      ndesLog_logLineF(PDU_getObject(pdu), "IN %d", srvGen_getObjectId(server));
 
       srvGen_startService(server, pdu);
       return 1;
@@ -197,6 +221,8 @@ struct PDU_t * srvGen_getPDU(struct srvGen_t * srv)
    struct PDU_t * pdu = srv->currentPDU;
    
    srv->currentPDU = NULL;
+
+   ndesLog_logLineF(PDU_getObject(pdu), "OUT %d", srvGen_getObjectId(srv));
 
    return pdu;
 }

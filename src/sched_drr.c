@@ -14,6 +14,8 @@
 #include <sched_drr.h>
 #include <file_pdu.h>
 
+#include <ndesObject.h>
+
 /**
  * Chaque entrée d'un Deficit Round Robin est caractérisée par un
  * certain nombre de paramètres.
@@ -36,6 +38,7 @@ struct schedDRRInput_t {
  * Structure dÃ©finissant notre ordonanceur
  */
 struct schedDRR_t {
+   declareAsNdesObject;
    void         * destination;    //!< La destination (typiquement un lien)
    processPDU_t   destProcessPDU;   //!< Fonction de réception de la destination
 
@@ -44,6 +47,14 @@ struct schedDRR_t {
    struct schedDRRInput_t  * activeSourceList;   //!< La liste des
 						 //sources actives
    struct schedDRRInput_t  * nextInput;   //!< Prochaine source à servir
+};
+
+/**
+ * @brief Définition des fonctions spécifiques liées au ndesObject
+ */
+defineObjectFunctions(schedDRR);
+struct ndesObjectType_t schedDRRType = {
+  ndesObjectTypeDefaultValues(schedDRR)
 };
 
 /**
@@ -59,6 +70,7 @@ struct schedDRR_t * schedDRR_create(void * destination,
    struct schedDRR_t * result = (struct schedDRR_t * )sim_malloc(sizeof(struct schedDRR_t));
 
    printf_debug(DEBUG_SCHED, "in\n");
+   ndesObjectInit(result, schedDRR);
 
    // Gestion de la destination
    result->destination = destination; // Coucou !
@@ -251,6 +263,9 @@ struct PDU_t * schedDRR_getPDU(void * s)
    printf_debug(DEBUG_SCHED, "scheduling PDU %d (size %d)\n", 
                 PDU_id(result),
                 PDU_size(result));
+
+   ndesLog_logLineF(PDU_getObject(result), "OUT %d", schedDRR_getObjectId(sched));
+
    return result;
 }
 

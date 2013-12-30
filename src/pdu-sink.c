@@ -1,16 +1,40 @@
+/**
+ * @file pdu-sink.c
+ * @brief Implantation d'un puits de PDU
+ *
+ */
 #include <stdio.h>     // printf
 #include <stdlib.h>    // Malloc, NULL, exit...
 
 #include <pdu-sink.h>
 
-struct PDUSink_t {
-   struct probe_t * insertProbe;
+#include <ndesObject.h>
 
+/**
+ * @brief structure d'un puits
+ */
+struct PDUSink_t {
+   declareAsNdesObject; //< C'est un ndesObject 
+   struct probe_t * insertProbe;
+};
+
+/**
+ * @brief Définition des fonctions spécifiques liées au ndesObject
+ */
+defineObjectFunctions(PDUSink);
+
+/**
+ * @brief Les entrées de log sont des ndesObject
+ */
+struct ndesObjectType_t PDUSinkType = {
+  ndesObjectTypeDefaultValues(PDUSink)
 };
 
 struct PDUSink_t * PDUSink_create()
 {
    struct PDUSink_t * result = (struct PDUSink_t *)sim_malloc(sizeof(struct PDUSink_t));
+
+   ndesObjectInit(result, PDUSink);
 
    result->insertProbe = NULL;
 
@@ -44,6 +68,8 @@ int PDUSink_processPDU(void * s, getPDU_t getPDU, void * source)
    }
 
    if (pdu) {
+      ndesLog_logLineF(PDU_getObject(pdu), "IN %d", PDUSink_getObjectId(s));
+
       PDU_free(pdu);
    }
 
