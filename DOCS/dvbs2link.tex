@@ -1,0 +1,110 @@
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\section{Un lien {\sc dvb-s2}}
+
+   Le module {\tt dvb-s2-ll} permet de simuler une liaison de type
+DVB-S2.
+
+\subsection{Création}
+
+Une telle entité sera créée grâce à la fonction suivante
+
+\index{DVBS2ll\_create}
+\begin{verbatim}
+struct DVBS2ll_t * DVBS2ll_create(void * destination,
+				  processPDU_t destProcessPDU,
+				  unsigned long  symbolPerSecond,
+				  unsigned int FECFrameBitLength);
+\end{verbatim}
+
+   Les caractéristiques principales du canal sont passées en
+   paramètres.
+Pour simplifier le
+paramètrage, les macros suivantes sont fournies
+
+\index{FEC\_FRAME\_BITSIZE\_LARGE}
+\begin{verbatim}
+#define FEC_FRAME_BITSIZE_LARGE 64800
+\end{verbatim}
+
+\subsection{Ajout/modification d'un MODCOD}
+
+   À un canal DVB-S2 doit être associé un certain nombre de MODCODs
+disponibles. Cela se fait par la fonction suivante
+
+\index{DVBS2ll\_addModcod}
+\begin{verbatim}
+int DVBS2ll_addModcod(struct DVBS2ll_t * dvbs2ll,
+		      unsigned int bbframeBitLength,
+		      unsigned int bitsPerSymbol);
+\end{verbatim}
+
+   La valeur retourné est l'indice du MODCOD. Pour simplifier le
+paramètrage, les macros suivantes sont fournies
+
+\index{C14SIZE}
+\index{C13SIZE}
+\index{C25SIZE}
+\index{C12SIZE}
+\index{C35SIZE}
+\index{C23SIZE}
+\index{C34SIZE}
+\index{C45SIZE}
+\index{C56SIZE}
+\index{C89SIZE}
+\index{C910SIZE}
+\index{MQPSK}
+\index{M8PSK}
+\index{M16APSK}
+\index{M32APSK}
+\begin{verbatim}
+#define  C14SIZE  16008
+#define  C13SIZE  21408
+#define  C25SIZE  25728
+#define  C12SIZE  32208
+#define  C35SIZE  38688
+#define  C23SIZE  43040
+#define  C34SIZE  48408
+#define  C45SIZE  51648
+#define  C56SIZE  53840
+#define  C89SIZE  57472
+#define  C910SIZE 58192
+
+#define   MQPSK    2
+#define   M8PSK    3
+#define   M16APSK  4
+#define   M32APSK  5
+\end{verbatim}
+
+   Si l'on souhaite modifier le MODCOD n, par exemple pour refléter un
+chagenement de conditions de réception, on pourra utiliser la fonction
+
+\index{DVBS2ll\_setModcod}
+\begin{verbatim}
+void DVBS2ll_setModcod(struct DVBS2ll_t * dvbs2ll,
+                       int n,
+		       unsigned int bbframeBitLength,
+		       unsigned int bitsPerSymbol);
+\end{verbatim}
+
+\subsection{Exemple}
+
+   À titre d'exemple, voici le code permettant de créer un lien DVB-S2
+(menant par exemple vers un puits) de 10Msymboles/sec avec 4 MODCODs :
+
+\begin{verbatim}
+struct DVBS2ll_t * dvbS2;
+
+...
+
+dvbS2 = DVBS2ll_create(sink,
+                       (processPDU_t)PDUSink_processPDU,
+                       FEC_FRAME_BITSIZE_LARGE,
+                       10000000);
+DVBS2ll_addModcod(dvbS2, C13SIZE, MQPSK);
+DVBS2ll_addModcod(dvbS2, C25SIZE, M8PSK);
+DVBS2ll_addModcod(dvbS2, C34SIZE, M16APSK);
+DVBS2ll_addModcod(dvbS2, C56SIZE, M16APSK);
+\end{verbatim}
+

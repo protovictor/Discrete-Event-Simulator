@@ -1,0 +1,126 @@
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\section{Un ordonnanceur {\sc acm}}
+
+   Les fichiers {\tt schedACM.h} et {\tt schedACM.c} définissent et
+implantent un cadre général et des fonctions communes permettant de
+construire des algorithmes d'ordonnancement pour des liens implantant
+des techniques de type {\sc acm} ({\em Adaptive Coding and
+  Modulation}).
+
+   L'objectif de cette structure est de faire des choses aussi
+génériques que possible qui puissent être adaptées à différents
+contexte. Ce n'est pas encore complètement le cas et ces fichiers
+restent relativement dépendants de DVB-S2.
+
+%.......................................................................
+%
+%.......................................................................
+\subsection{Ajout d'une file}
+
+%.......................................................................
+%
+%.......................................................................
+\subsection{Principe général}
+
+   Le principe général est le suivant.
+
+\begin{itemize}
+   \item L'ordonnanceur va chercher une ``solution'' par le biais d'une
+   fonction {\tt schedule}.
+   \item Une trame va être construite en fonction de cette solution
+     par la fonction {\tt buildBBFRAME}.
+   \item Cette trame sera transmise au travers de la fonction {\tt
+     getPDU}.
+\end{itemize}
+
+   Cette structure est assez riche car une ``solution'' peut être
+extrèmement complexe. Nous envisageons en effet ici le cas le plus
+général dans lequel il est éventuellement possible de transmettre
+plusieurs paquets dans une même trame.
+
+   De ce fait, une ``solution'' sera décrite par une structure
+permettant cette souplesse.
+
+%.......................................................................
+%
+%.......................................................................
+\subsection{Les fonctions spécifiques à un ordonnanceur}
+
+   Chaque type d'ordonnanceur {\sc acm} pourra implanter un certain
+nombre de fonctions spécifiques. Elles seront enregistrées dans une
+structure du type suivant 
+
+\index{struct schedACM\_func\_t}
+\begin{verbatim}
+struct schedACM_func_t {
+   struct PDU_t * (*getPDU)(void * private);
+   int  (*processPDU)(void * private,
+	               getPDU_t getPDU, void * source);
+
+   struct PDU_t * (* buildBBFRAME)(void * private);
+
+   void (*schedule)(void * private);
+};
+\end{verbatim}
+
+   Les trois premières sont optionnelles, car une fonction par défaut
+est définie qui devrait convenir dans la plupart des cas. C'est la
+dernière qui implante l'algorithme lui-même, elle est donc nécessaire.
+
+\paragraph{La fonction {\tt getPDU}}  est la fonction qui sera invoquée pour
+demander à l'ordonnanceur de ``produire'' une {\sc pdu} (en
+ordonnançant des paquets). Si elle n'est pas définie, la fonction
+\index{schedACM\_getPDUGeneric}{\tt schedACM\_getPDUGeneric} sera
+utilisée par défaut. Cette fonction se contente de faire appel à la
+fonction {\tt buildBBFRAME}.
+
+\paragraph{La fonction {\tt buildBBFRAME}} a pour rôle de construire
+une trame avec les paquets choisis par l'ordonnanceur. Elle renvoie
+donc un pointeur vers la {\sc pdu} ains créée. En l'absence d'une
+telle fonction définie, c'est la fonction
+\index{schedACM\_buildBBFRAMEGeneric} {\tt
+  schedACM\_buildBBFRAMEGeneric} qui sera invoquée.
+
+   Nous décrirons cette fonction plus loin.
+
+%.......................................................................
+%
+%.......................................................................
+\subsection{Définition des solutions}
+
+   Nous l'avons dit, une solution trouvée par l'ordonnanceur peut être
+composés de plusieurs paquets, provenant éventuellement de
+plusieurs files.
+
+   La structure permettant de modéliser cela est la suivante
+
+\index{t\_remplissage}
+\begin{verbatim}
+typedef struct {
+   int       modcod;         //!< Le numero de MODCOD choisi
+   int    ** nbrePaquets;    //!< Nombre de paquets de chaque file à transmettre
+   int       volumeTotal;    //!< Le nombre total d'octets à transmettre
+
+   /* Les champs suivants sont à la dispo de l'ordonnanceur. Il
+      faudrait surement faire plus propre, avec un  pointeur sur prive
+      ou une union, ... */
+   double    interet;
+   int       nbChoix;        // Nombre de choix menant à cet interet
+   int       casTraite;      // Pour éviter de retraiter un cas
+} t_remplissage ;
+\end{verbatim}
+
+
+%.......................................................................
+%
+%.......................................................................
+\subsection{La fonction {\tt schedACM\_buildBBFRAMEGeneric}}
+\index{schedACM\_buildBBFRAMEGeneric|(}
+
+   Cette fonction s'occupe de consulter la solution fournie par
+l'ordonnanceur, de construire la trame correspondante et d'extraire
+les paquets à transmettre des files d'entrée.
+
+\index{schedACM\_buildBBFRAMEGeneric|)}

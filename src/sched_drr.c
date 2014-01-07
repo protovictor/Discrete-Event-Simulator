@@ -15,6 +15,7 @@
 #include <file_pdu.h>
 
 #include <ndesObject.h>
+#include <log.h>
 
 /**
  * Chaque entrée d'un Deficit Round Robin est caractérisée par un

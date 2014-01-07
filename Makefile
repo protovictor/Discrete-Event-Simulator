@@ -15,6 +15,9 @@ export LDFLAGS=-g  -L../$(SRC_DIR) -lndes -lm
 #export CFLAGS=-Wall -g -DNDEBUG -O3
 #export LDFLAGS=-g -O3 -L../$(SRC_DIR) -lndes -lm
 
+# Génération d'une librairie avec les log intégrés
+#export CFLAGS +=  -DNDES_USES_LOG
+
 default : src 
 
 all : src tests examples doc 

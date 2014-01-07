@@ -1,0 +1,163 @@
+%========================================================================
+%
+%========================================================================
+\section{Les files de {\sc pdu}}
+\label{section:file}
+
+   C'est l'outil de base pour stocker des objets selon une stratégie
+{\sc fifo}. Elles sont définies dans le fichier {\tt file\_pdu.h} et
+implantées dans le fichier {\tt file\_pdu.c}. Une file ne contient que
+des {\sc pdu}s mais, comme on l'a vu, les {\sc pdu}s peuvent être
+utilisées pour véhiculer tout et n'importe quoi grâce à leurs données
+privées. Il est donc simple de construire des files de n'importe quoi
+!
+
+   Par défaut, la taille d'une file n'est limitée quepar les capacités
+du système.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Création}
+
+   Une file est créée de la façon suivante 
+
+\index{filePDU\_create}
+\begin{verbatim}
+struct filePDU_t * filePDU_create(void * destination,
+			    processPDU_t destProcessPDU);
+\end{verbatim}
+
+   Le paramètre \lstinline!destination! est un pointeur sur l'objet
+vers lequel sont transmis les objets présents dans la file. Dés qu'un
+objet est inséré dans la file, si la destination est disponible, il
+lui est envoyé au travers de la fonction \lstinline!destProcessPDU!
+passée en paramètre.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Insertion}
+
+   On insère dans une file avec une fonction assez classique :
+
+\index{filePDU\_insert}
+\begin{verbatim}
+void filePDU_insert(struct filePDU_t * file,
+		    struct PDU_t * PDU);
+\end{verbatim}
+
+   Mais on dispose également de la fonction d'entrée-sortie homogène
+avec le reste du simulateur :
+
+\index{filePDU\_processPDU}
+\begin{verbatim}
+int filePDU_processPDU(void * file,
+		       getPDU_t getPDU,
+		       void * source);
+\end{verbatim}
+
+   Elle permet d'utiliser la file comme n'importe quelle autre entité
+dans un simulateur (voir par exemple le premier tutoriel).
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Extraction}
+
+   L'extraction d'une {\sc pdu} d'une file est réalisé par :
+
+\index{filePDU\_extract}
+\begin{verbatim}
+struct PDU_t * filePDU_extract(struct filePDU_t * file);
+\end{verbatim}
+
+   dont la valeur de retour peut être {\tt NULL} en cas de file vide.
+
+   La aussi, une fonction spécifique à la simulation est fournie :
+
+\index{filePDU\_getPDU}
+\begin{verbatim}
+struct PDU_t * filePDU_getPDU(void * file);
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Gestion de la taille}
+
+   Deux fonctions permettent de consulter la taille de la file, la
+première donne la taille en nombre de {\sc pdu}s
+
+\index{filePDU\_length}
+\begin{verbatim}
+int filePDU_length(struct filePDU_t * file);
+\end{verbatim}
+
+   la seconde donne la somme cumulée des tailles des {\sc pdu}s
+présentes :
+
+\index{filePDU\_size}
+\begin{verbatim}
+int filePDU_size(struct filePDU_t * file);
+\end{verbatim}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Taille maximale}
+
+   Il est possible de limiter la taile d'une file. La borne supérieure
+peut être exprimée en nombre de {\sc pdu}s présentes ou en taille
+cumulée :
+
+\index{filePDU\_setMaxSize}
+\index{filePDU\_setMaxLength}
+\begin{verbatim}
+void filePDU_setMaxSize(struct filePDU_t * file, unsigned long maxSize);
+void filePDU_setMaxLength(struct filePDU_t * file, unsigned long maxLength);
+\end{verbatim}
+
+   Une valeur nulle signifie l'absence de limite (c'est la valeur par
+défaut). Les deux paramètres peuvent être utilisés simultanéments
+(c'est alors le plus contraignant qui bloque). Leur valeur peut être
+consultée grâce à l'une des fonctions suivantes :
+
+\index{filePDU\_getMaxSize}
+\index{filePDU\_getMaxLength}
+\begin{verbatim}
+unsigned long filePDU_getMaxSize(struct filePDU_t * file);
+unsigned long filePDU_getMaxLength(struct filePDU_t * file);
+\end{verbatim}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Et en cas de débordement ?}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Les sondes}
+
+   Les files sont dotées des points de mesure suivants
+
+\begin{description}
+   \item[{\tt InsertSize}] pour mesurer la taille des paquets insérés
+     dans la file. A chaque insertion d'une {\sc pdu}, la taille de
+     cette dernière est échantillonée avec la date d'insertion.
+   \item[{\tt ExtractSize}] pour mesurer la taille des paquets extraits
+     de la file. A chaque extraction d'une {\sc pdu}, la taille de
+     cette dernière est échantillonée avec la date d'extraction.
+   \item[{\tt DropSize}]
+   \item[{\tt Sejourn}]
+\end{description}
+
+   On peut ajouter une sonde sur chacun de ces points de mesure avec
+une fonction de la forme
+
+\begin{verbatim}
+   void filePDU_add<measure>Probe(struct filePDU_t * file,
+                                  struct probe_t   * probe);
+\end{verbatim}
+

@@ -1,0 +1,41 @@
+%========================================================================
+%
+%========================================================================
+\section{Des exemples}
+
+   Le répertoire {\tt examples} des sources de {\sc ndes} comprend un
+certain nombre d'exemples. Certains de ces exemples servent de
+tutoriels et ont donc été décrits précédemment. D'autres sont
+présentés ici.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Utilisation des sondes}
+
+\subsubsection{Mesurer un débit}
+
+   Le programme d'exemple {\tt debits.c} montre plusieurs méthodes de
+calcul d'un débit.
+
+   Considérons le cas simple d'une source, dont nous voulons mesurer
+le débit de sortie. Pour cela, nous allons insérer une sonde sur la
+taille des paquets transmis grâce à la méthode {\tt
+  PDUSource\_setPDUGenerationSizeProbe}.
+
+   Le type de sonde dépendra de la mesure souhaitée.
+
+%.......................................................................
+%
+%.......................................................................
+\paragraph{Débit moyen}
+
+   Supposons que nous voulons simplement connaître le débit moyen sur
+toute la transmission, alors une sonde mesurant la moyenne sera parfaitement
+suffisante :
+
+%.......................................................................
+%
+%.......................................................................
+\paragraph{Débit ``instantanté''}
+

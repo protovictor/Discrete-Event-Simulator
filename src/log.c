@@ -13,7 +13,22 @@
  */
 #include <string.h>
 
+#ifdef NDES_USES_LOG
+#   define NDES_USES_LOG_IS_SET
+#else
+#   undef NDES_USES_LOG_IS_SET
+#endif
+
+#define NDES_USES_LOG // Nécessaire localement
 #include <log.h>
+
+#ifdef NDES_USES_LOG_IS_SET
+#   define NDES_USES_LOG
+#else
+#   undef NDES_USES_LOG
+#endif
+
+
 #include <ndesObjectFile.h>
 
 /**
@@ -142,10 +157,11 @@ void ndesLog_logLineF(struct ndesObject_t * ndesObject, char * fmt, ...)
    char msg[1024];
    va_list args;
  
-   printf_debug(DEBUG_ALWAYS, "IN\n");
+   printf_debug(DEBUG_ALWAYS, "Coucou IN\n");
 
    va_start(args, fmt);
-   vsprintf(msg, fmt, args);
+   printf(fmt, args);
+   //   vsprintf(msg, fmt, args);
    va_end(args);
 
    ndesLog_logLine(ndesObject, msg);

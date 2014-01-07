@@ -9,6 +9,7 @@
 #include <pdu-sink.h>
 
 #include <ndesObject.h>
+#include <log.h>
 
 /**
  * @brief structure d'un puits

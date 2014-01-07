@@ -1,0 +1,40 @@
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\section{Un ordonnanceur {\sc acm} par knapsack}
+
+   Les fichiers {\tt sched\_ks.h} et {\tt sched\_ks.c} définissent et
+implante un ordonnancement sur un lien ACM, typiquement DVB-S2 en se
+fondant une recherche par l'algorithme du sac à dos.
+
+%.......................................................................
+%
+%.......................................................................
+\subsection{Création}
+
+   Une instance de l'ordonanceur est créé par 
+
+\index{sched\_kse\_create}
+\begin{verbatim}
+struct schedACM_t * sched_kse_create(struct DVBS2ll_t * dvbs2ll,
+				     int nbQoS,
+				     int declOK,
+				     int exhaustif);
+\end{verbatim}
+
+   Les paramètres ont la signification suivante
+
+\begin{description}
+   \item[{\tt dvbs2ll}] est un pointeur vers le lien  DVB-S2 au
+     travers duquel les paquets seront transmis.
+   \item[{\tt nbQoS}] est le nombre de files de qualité de service à
+     considérer par MODCOD.
+   \item[{\tt declOK}] est un booléen validant l'utilisation du déclassement.
+   \item[{\tt exhaustif}] permet de choisir la version exhaustive de
+     l'algorithme. 
+\end{description}
+
+   Le pointeur fourni en retour est de type {\tt struct schedACM\_t *
+   }. Voir ce type ci dessus pour plus de précisions.
+

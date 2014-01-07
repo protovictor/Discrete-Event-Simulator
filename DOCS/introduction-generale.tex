@@ -1,0 +1,50 @@
+%========================================================================
+%
+%========================================================================
+\section{Introduction générale}
+
+   {\em Network Discrete Event Simulator} (ou {\sc ndes}) est une
+librairie permettant de construire des simulateurs réseaux à
+événements discret. Cette librairie peut être utilisée à différentes
+fins. Nous classerons les individus en deux catégories en fonction de
+leurs objectifs.
+
+\begin{description}
+   \item[Un utilisateur] est une personne souhaitant écrire un
+     programme de simulation fondé sur cette librairie. Il n'a besoin
+     que de la version compilée de cette librairie. Il ne lui est pas
+     nécessaire d'en connaître les détails de fonctionnement.
+   \item[Un programmeur] est une personne visant à améliorer, enrichir
+     ou déboguer cette librairie. Il a donc besoin de manipuler le
+     code source et, pour cela, d'en comprendre le fonctionnement.
+\end{description}
+
+   La distinction est importante pour la suite du
+document.
+
+   L'utilisateur pourra commencer par lire la section
+\ref{section:user-tuto} qui présente l'utilisation du simulateur sous
+la forme d'un tutoriel (dont le code est fourni avec les source de
+{\sc ndes}). Il pourra ensuite consulter les sections présentant les
+outils du simulateur (les sondes, les générateurs, \ldots) et la
+librairie des modèles.
+
+   Le programmeur, quant à lui, devra lire la section dédiée à
+l'extension du simulateur, là aussi présentée sous la forme d'un
+tutoriel, puis consulter les sections décrivant les arcanes de {\sc
+  ndes} telles que le moteur de simulation.
+
+   Comme souvent dans ce genre de projet, malheureusement, il est
+illusoire d'espérer une documentation à jour. L'objectif est avant
+tout de développer l'outil afin d'en améliorer l'usage ciblé que de
+maintenir une documentation. Le lecteur est donc invité à consulter
+les sources suivantes d'information, dans l'ordre inverse de fraîcheur
+:
+
+\begin{itemize}
+   \item ce document ;
+   \item la documentation extraite par doxygen des sources et présente
+     dans le répertoire {\tt DOCS} ;
+   \item le code source.
+\end{itemize}
+

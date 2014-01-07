@@ -1,0 +1,224 @@
+%========================================================================
+%
+%========================================================================
+\section{Les sondes}
+\label{section:sondes}
+
+   Les sondes sont implantées dans le modules {\tt probe}. Les sondes
+permettent d'enregistrer des mesures de paramètres scalaires. Ce sont
+elles qui permettront ensuite d'analyser le résultat de la simulation,
+d'évaluer les performances du système, de tracer des courbes, \ldots
+
+   Chaque échantillon d'une mesure prélevé par une sonde est daté. Il
+est également possible de n'enregistrer que la date d'un événement,
+sans aucune mesure associée.
+
+   Les sondes peuvent être placées en divers points des outils de
+simulation via des fonctions de la forme
+\lstinline!<type>_add<point>Probe(...)!. Plusieurs sondes peuvent être
+ainsi ``chaînées'' sur un même point de mesure. En revanche, la même
+sonde {\bf ne peut pas} être chaînée plusieurs fois.
+
+   Pour chacun des objets décrit dans ce fabuleux document, je
+tâcherai de lister (dans une section''Les sondes'') les différents
+points de mesure disponibles.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Les méthodes de base}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Création et destruction}
+
+   Il existe diffférents types de sondes, et chaque type dispose d'au
+moins une fonction de création spécificique. Ces différentes fonctions
+seront donc listée dans la sous-section suivante.
+
+   La destruction d'une sonde se fait grâce à la fonction 
+
+\index{probe\_delete}
+\begin{verbatim}
+void probe_delete(struct probe_t * p);
+\end{verbatim}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{L'échantillonage}
+
+   La méthode suivante permet d'échantilloner une valeur dans une
+sonde 
+
+\index{probe\_sample}
+\begin{verbatim}
+void probe_sample(struct probe_t * probe, double value);
+\end{verbatim}
+
+   Il est également possible d'échantilloner une date, sans valeur
+associée, de la façon suivante 
+
+\index{probe\_sampleEvent}
+\begin{verbatim}
+void probe_sampleEvent(struct probe_t * probe);
+\end{verbatim}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Consultation d'un échantillon}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{La moyenne}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Les valeurs extrèmes}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{La mesure du débit}
+
+   Les valeurs échantillonées pourront souvent être des tailles de
+messages, émis ou reçus. Dans ce cas, il peut être intéressant
+d'utiliser la fonction suivante qui fournit une mesure du ``débit
+instantané''.
+
+\index{probe\_throughput}
+\begin{verbatim}
+double probe_throughput(struct probe_t * p);
+\end{verbatim}
+
+   Bien sûr, le mode d'estimation de cette valeur est dépendant de la
+nature de la sonde.
+%........................................................................
+%
+%........................................................................
+\subsubsection{La sauvegarde}
+
+   Une sonde peut être dumpée dans un fichier ouvert grâce à la
+fonction
+
+{\tt void probe\_graphBarDumpFd(struct probe\_t * probe, int fd, int
+format);}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Les différents types}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{La sonde exhaustive}
+
+   La sonde la plus simple est la sonde exhaustive. Avec une telle
+sonde, tout échantillon est conservé ``définitivement''. L'avantage
+d'une telle technique est que les résultats sont aussi précis qu'on
+peut l'espérer, mais l'inconvénient est que cela peut s'avérer très
+gourmand en ressources.
+
+   Une sonde exhaustive est créée de la façon suivante
+
+\index{probe\_createExhaustive}
+\begin{verbatim}
+struct probe_t * probe_createExhaustive();  
+\end{verbatim}
+
+   Il n'y a donc aucun paramètre.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Les ``méta-sondes''}
+
+   À chaque échantillon, certaines sondes mettent à jours des
+informations que l'on peut souhaiter conserver (par exemple la moyenne
+mobile) afin de tracer leur évolution dans le temps.
+
+   Pour cela, une sonde périodique \lstinline!P! peut être placée sur
+une sonde observée \lstinline!O!. La sonde \lstinline!P! permettra
+ainsi d'observer une propriété de la sonde\lstinline!O! sur la base
+d'un échantillonage à une fréquence caractérisant la sonde
+\lstinline!P!. 
+
+   Cette technique permet également de collecter dans une sonde unique
+\lstinline!G! des échantillons prélevés dans plusieurs sondes
+différentes \lstinline!S1!, \lstinline!S2!, ldots Pour cela,
+\lstinline!G! sera ajoutée comme sonde sur les échantillons de
+\lstinline!S1!, \lstinline!S2!, ldots 
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{L'histogramme}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{La fenêtre glissante}
+
+   Ces sondes conservent tous les échantillons sur une fenêtre
+glissante dont la taille est fournie en paramêtre du constructeur :
+
+\index{probe\_slidingWindowCreate}
+\begin{verbatim}
+struct probe_t * probe_slidingWindowCreate(int windowLength);
+\end{verbatim}
+
+   A tout moment, une telle sonde conserve donc au maximum les {\tt
+windowLength} derniers échantillons. Toutes les valeurs observées
+{\em via} une telle sonde (la moyenne, le minimum, le maximum, \ldots)
+sont donc obtenues au regard de ces seuls échantillons !
+
+   Si l'on souhaite déterminer des moyennes temporelles, on utilisera
+plutôt des sondes par tranche temporelle.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{La sonde périodique}
+
+   Le but d'une sonde périodique est de prélever un échantillon toutes
+les $\tau$ unitées de temps. On se fonde pour cela sur l'idée que la
+valeur mesurée n'est modifiée qu'au cours du traitement d'un
+événement.
+
+   La cration d'une telle sonde est réalisée par la fonction 
+
+\index{probe\_periodicCreate}
+\begin{verbatim}
+struct probe_t * probe_periodicCreate(double t);
+\end{verbatim}
+
+   Le paramètre {\tt t} est évidemment la période des échantillons.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{La moyenne mobile}
+
+   Une moyenne du type \lstinline!EMAProbeType! conserve à tout moment
+une moyenne mobile calculée à chaque nouvel échantillon $e$ de la façon
+suivante $m <- \alpha . m + (1 - \alpha).e$.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{La moyenne par tranches temporelles}
+
+   Cette sonde conserve une moyenne pour chaque tranche temporelle de
+durée {\tt t}, passée en paramètre du constructeur (les fenêtres
+temporelles sont sautantes donc disjointes):
+
+\begin{verbatim}
+struct probe_t * probe_createTimeAverage(double t);
+\end{verbatim}
+
+

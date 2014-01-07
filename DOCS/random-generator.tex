@@ -1,0 +1,268 @@
+%========================================================================
+%
+%========================================================================
+\section{Les générateurs aléatoires}
+\label{section:rand-gen}
+
+   Dans un simulateur, la génération de nombres aléatoires est un
+élément important. Dans {\sc ndes}, on prend ces choses-là très au
+sérieux. Du coup, la gestion des nombres aléatoires est une horreur
+sans nom ! J'avoue avoir moi-même du mal à comprendre. La bonne
+nouvelle c'est que du coup le résultat est vraiment \ldots{}
+aléatoire.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Caractéristiques d'un générateur aléatoire}
+
+   Un générateur aléatoire est caractérisé par trois composantes
+fondamentales 
+
+\begin{description}
+   \item[Le type des données générées] peut être réel, entier,
+     discret, \ldots
+   \item[La loi] peut être uniforme, exponentielle, \ldots
+   \item[La source] permet de déterminer la qualité de l'aléa, et par
+     exemple de le rendre déterministe (afin d'obtenir la même
+     séquence sur plusieurs simulation).
+\end{description}
+
+   Attention, ces trois composantes sont éventuellement constitutées
+d'un jeu de paramètres.
+
+   Le principe général de génération d'une valeur est le suivant.
+
+\begin{itemize}
+   \item Un nombre aléatoire est fourni par la source. Ce sera un
+     entier entre deux valeurs extrèmes, par exemple, en fonction de
+     la nature de la source.
+   \item Une transformation est appliquée afin de respecter la
+     densité de probabilité de la loi.
+   \item Une seconde transformation est appliquée pour obtenir une
+     valeur du type voulu.
+\end{itemize}
+
+   Bref, tout est fait pour laisser sa place au hasard \ldots
+
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Utilisation}
+
+   Le schéma général d'utilisation est simple : on crée un générateur,
+on l'initialise avec le type de données voulu, on lui associe une
+distribution, éventuellement on peut changer la source d'aléa sur
+laquelle il se fonde, puis on peut lui extirper des valeurs aléatoires
+et enfin on le détruit sans un mot de remerciement.
+
+   Observons en détail les fonctions utiles à ce programme alléchant.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Création et destruction}
+
+   Il existe au moins une fonction de création pour chaque type de
+données géré (il manquerait plus que ça !). Mais il existe également
+parfois des fonctions permettant de spécifier en même temps la
+distribution à utiliser. Voyons ça type par type.
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Les entiers non signés}
+
+   La fonction de création de base est 
+
+\index{randomGenerator\_createUInt}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createUInt();
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Les entiers non signés entre {\tt min} et {\tt max} inclus}
+
+   Ça c'est sympa pour jouer aux dés. On les crée avec 
+
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createUIntRange(unsigned int min,
+						      unsigned int max);
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Une liste d'entiers non signés}
+
+   Pratique pour tirer au hasard des tailles de paquets !
+
+\index{randomGenerator\_createUIntDiscrete}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
+							      unsigned int * values);
+\end{verbatim}
+
+   Le premier paramètre donne le nombre de valeurs, et le second est
+un tableau qui contient (au moins) ces valeurs. Son contenu sera
+recopié, donc si tu veux le détruire/modifier ensuite, vis ta vie !
+
+   Comme on se doute bien que dans ce genre de situations on va
+vouloir associer une probabilité à chaque valeur, on peut utiliser la
+version suivante :
+
+\index{randomGenerator\_createUIntDiscreteProba}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(
+				int nbValues,
+				unsigned int * values,
+				double * proba);
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Des réels double précision}
+
+   On crée un tel générateur avec la fonction suivante
+
+\index{randomGenerator\_createDouble}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDouble();
+\end{verbatim}
+
+   On peut également en créer un fondé sur une distribution
+exponentielle de paramètre {\tt lambda} :
+
+\index{randomGenerator\_createDoubleExp}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda);
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Des réels double précision entre {\tt min} et {\tt max}}
+
+\begin{verbatim}
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Une liste de réels double précision}
+
+   Pour générer des nombres aléatoires choisis dans une liste fournie
+en paramètre :
+
+\index{randomGenerator\_createDoubleDiscrete}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDoubleDiscrete(
+                                     int nbValues,
+                                     double * values);
+\end{verbatim}
+
+   ou, en fournissant directement les probabilités :
+
+\index{randomGenerator\_createDoubleDiscreteProba}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(
+                                     int nbValues,
+                                     double * values,
+                                     double * proba);
+\end{verbatim}
+
+   Les paramètres sont analogues à la version fondée sur des entiers
+non signés, bref, voir ci-dessus.
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Destruction}
+
+   On détruit un générateur grâce à la fonction
+
+\index{randomGenerator\_delete}
+\begin{verbatim}
+void randomGenerator_delete(struct randomGenerator_t * rg);
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Choix de la loi}
+
+   Avant de pouvoir être utilisé, un générateur aléatoire doit être
+caractérisé par la loi qui le gouverne. Il existe des fonctions
+spécifiques à cet objectif. Certaines fonctions de création font appel
+à l'une ou l'autre de ces fonctions, mais pas toute ! Attention donc à
+s'assurer qu'une distribution est associée à un générateur avant de
+l'utiliser.
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Loi uniforme}
+
+   On spécifie une loi uniforme grâce à la fonction suivante
+
+\index{randomGenerator\_setDistributionUniform}
+\begin{verbatim}
+void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
+\end{verbatim}
+
+   Attention, le type des données peut être un intervalle borné
+``continu'' ou un ensemble discret, mais s'il s'agit d'un intervalle
+non borné, le résultat est \ldots {} aléatoire.
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Loi  explicite}
+
+   Je ne sais pas trop comment l'appeler celle-là ! L'idée est qu'on
+fournit explicitement toutes les probabilités. Elle est spécifiée par
+la fonction suivante :
+
+\index{randomGenerator\_setDistributionDiscrete}
+\begin{verbatim}
+void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
+					     int nb,
+                                             double * proba);
+\end{verbatim}
+
+   Attention, elle ne s'applique de toute évidence qu'à des données
+discrètes !
+
+   Les probabilités sont copiées par la fonctions donc le pointeur
+{\tt proba} peut être libéré ensuite.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Choix de la source}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Génération d'une valeur}
+
+\index{randomGenerator\_getNextUInt}
+\index{randomGenerator\_getNextDouble}
+
+   Une nouvelle valeur est obtenue à chaque appel d'une des fonctions
+suivantes (à choisir en fonction du type attendu)
+
+\begin{verbatim}
+unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg);
+double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Les sondes}
+

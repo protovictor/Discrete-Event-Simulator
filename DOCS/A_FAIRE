@@ -1,59 +1,6 @@
 DANS BRANCHE UNSTABLE
 =====================
    . [TOUS]
-      - Définir un objet ndesObject dont pourront "hériter" tous les
-      autres objets (PDU, Files, Ordonnanceurs, sondes, ..., et
-      pourquoi pas les événements ?). Il aura par exemple un nom, un
-      identifiant unique, un type (voire plusieurs), des fonctions
-      associées (initialisation, ...), une date de création, un
-      pointeur vers des données privées (l'objet lui-même), ...
-      On pourra alors stocker tous les objets, les chercher par nom ou
-      identifiant, ...
-      On pourra alors suivre plus facilement certains éléments dans
-      une simulation, par exemple en créant une sonde qui logue la
-      date d'arrivée et l'identifiant des PDU sur un élément actif. Ou
-      au contraire, les date/identifiant des points de passage pour
-      une PDU. Pour ça, il faudrait des sondes sur les PDUs je pense :
-      voir plus loin !
-
-      Une idée de génie (de moi donc !) serait d'automatiser la
-      création de cette structure dans un appel à une variante de
-      motSim_malloc(). Cette dernière allouerait une place
-      supplémentaire pour stocker le pointeur vers le ndesObject. Une
-      fonction getNDESObject(void * ptr) pourrait alors simplement
-      être implantée par return (ptr - sizeof(void *)). Tout ça allège
-      l'implantation de nouveaux types, mais ça interdit certaines
-      vérifications.
-      Une autre solution est peut-être de fournir des macros qui
-      définissent automatiquement les champs et fonctions nécessaires dans
-      chaque nouveau type :
-
-struct {
-   NDESObject_declare;
-   ...
-} monType;
-
-
-   NDESFunctions(monType); 
-   // Définit monType_getNDESObject(monType * o) 
-   // mais aussi monType_initNDESObject
-   // et d'autres fonctions puis une structure monTypeFunctions
-
-   monType * monType_create( ... ) 
-   {
-      monType * result;
-      ...
-
-      monType_initNDESObject(result); // alloue et initialise
-      return result;
-   }
-      Du coup les choses sont mieux protégées. On construit les noms
-      en concaténant avec ## :
-
-#define NDESFunctions(monType) \
-   monType##_getNDESObject(monType * o) {...}
-
-   . [TOUS]
       - Enrichir les fonctions malloc/free pour (de façon optionnelle
       !) être capable de mieux suivre les fuites mémoire.
 
@@ -195,6 +142,62 @@ EN COURS
       - Utiliser un handler pour les fins de process
       - Utiliser "on_exit()" pour terminer proprement
          . effacer les fichiers temporaires
+
+   . [TOUS] (cette chose est en cours, la doc est à faire, et
+   l'utilisation  à généraliser, ou pas !)
+
+      - Définir un objet ndesObject dont pourront "hériter" tous les
+      autres objets (PDU, Files, Ordonnanceurs, sondes, ..., et
+      pourquoi pas les événements ?). Il aura par exemple un nom, un
+      identifiant unique, un type (voire plusieurs), des fonctions
+      associées (initialisation, ...), une date de création, un
+      pointeur vers des données privées (l'objet lui-même), ...
+      On pourra alors stocker tous les objets, les chercher par nom ou
+      identifiant, ...
+      On pourra alors suivre plus facilement certains éléments dans
+      une simulation, par exemple en créant une sonde qui logue la
+      date d'arrivée et l'identifiant des PDU sur un élément actif. Ou
+      au contraire, les date/identifiant des points de passage pour
+      une PDU. Pour ça, il faudrait des sondes sur les PDUs je pense :
+      voir plus loin !
+
+      Une idée de génie (de moi donc !) serait d'automatiser la
+      création de cette structure dans un appel à une variante de
+      motSim_malloc(). Cette dernière allouerait une place
+      supplémentaire pour stocker le pointeur vers le ndesObject. Une
+      fonction getNDESObject(void * ptr) pourrait alors simplement
+      être implantée par return (ptr - sizeof(void *)). Tout ça allège
+      l'implantation de nouveaux types, mais ça interdit certaines
+      vérifications.
+      Une autre solution est peut-être de fournir des macros qui
+      définissent automatiquement les champs et fonctions nécessaires dans
+      chaque nouveau type :
+
+struct {
+   NDESObject_declare;
+   ...
+} monType;
+
+
+   NDESFunctions(monType); 
+   // Définit monType_getNDESObject(monType * o) 
+   // mais aussi monType_initNDESObject
+   // et d'autres fonctions puis une structure monTypeFunctions
+
+   monType * monType_create( ... ) 
+   {
+      monType * result;
+      ...
+
+      monType_initNDESObject(result); // alloue et initialise
+      return result;
+   }
+      Du coup les choses sont mieux protégées. On construit les noms
+      en concaténant avec ## :
+
+#define NDESFunctions(monType) \
+   monType##_getNDESObject(monType * o) {...}
+
 
 A FAIRE
 =======

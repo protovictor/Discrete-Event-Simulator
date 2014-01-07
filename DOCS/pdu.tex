@@ -1,0 +1,54 @@
+%========================================================================
+%
+%========================================================================
+\section{Les {\sc pdu}s}
+\label{section:pdu}
+
+   La {\sc pdu} est l'objet de base échangé entre les entités du
+simulateur. Si on voit considère deux entités homologues qui
+dialoguent, il est effectivement légitime d'utiliser ce
+terme. Cependant, dans une simulation réseau faite avec {\sc ndes}, la
+notion d'entité est bien plus vaste que cela si bien que ce nom est
+finalement mal choisi ! N'empèche que pour le moment, je vais le
+conserver !
+
+   Les {\sc pdu}s sont définies dans le fichier {\tt pdu.h} et
+implantées dans le fichier {\tt pdu.c}. Une {\sc pdu} est une
+structure extrèmement légère, dotée de quelques caractéristiques de
+base : un identifiant, une taille, une date de création (dans le temps
+simulé), et des données privées (un pointeur).
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Création/destruction}
+
+   On la crée avec la fonction
+
+\index{PDU\_create}
+\begin{verbatim}
+struct PDU_t * PDU_create(int size, void * private);
+\end{verbatim}
+
+   Le paramètre {\tt size} est évidemment la taille en octets, et {\tt
+private} peut être un pointeur vers des données privées associées à
+cette {\sc pdu} (il peut être {\tt NULL}, personnellement, je m'en
+fiche).
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Les caractéristiques de base}
+
+   La taille d'une {\sc pdu} est donnée par
+
+\index{PDU\_size}
+\begin{verbatim}
+int PDU_size(struct PDU_t * PDU);
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Les données privées}
+

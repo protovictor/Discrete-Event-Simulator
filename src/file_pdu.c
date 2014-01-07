@@ -8,8 +8,8 @@
 
 #include <file_pdu.h>
 #include <motsim.h>
-
 #include <ndesObject.h>
+#include <log.h>
 
 /*
 struct filePDU_t_elt {
@@ -293,7 +293,7 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
 
       file->nombre++;
       file->size += PDU_size(PDU);
-
+ printf("Coucou\n");
       ndesLog_logLineF(PDU_getObject(PDU), "IN %d", filePDU_getObjectId(file));
 
       /* Gestion des sondes */

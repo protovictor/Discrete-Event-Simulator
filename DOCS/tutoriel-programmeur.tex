@@ -1,0 +1,209 @@
+%========================================================================
+%
+%========================================================================
+\section{Extension du simulateur}
+\label{section:extension}
+
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Réalisation d'un ordonnanceur}
+\label{subsection:tut-ordo}
+
+   À titre d'exemple, nous allons implanter un ordonnanceur {\em Round
+Robin}. Les fichiers source et {\tt Makefile} sont dans le
+répertoire {\tt tuto-prog-1}.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Caractéristiques de l'ordonnanceur}
+
+   Passons sur les {\tt include} et regardons comment caratériser un
+ordonnanceur :
+
+\begin{verbatim}
+#define SCHED_RR_NB_INPUT_MAX 8
+
+struct rrSched_t {
+   // La destination (typiquement un lien)
+   void         * destination;
+   processPDU_t   destProcessPDU;
+
+   // Les sources (files d'entrée)
+   int        nbSources;
+   void     * sources[SCHED_RR_NB_INPUT_MAX];
+   getPDU_t   srcGetPDU[SCHED_RR_NB_INPUT_MAX];
+
+   // La dernière source servie par le tourniquet
+   int lastServed;
+};
+\end{verbatim}
+
+   Il nous faut connaître les entités amont, puisque nous voulons les
+traiter séparément !
+
+   La fonction de création est assez simple :
+
+\index{rrSched\_create}
+\begin{verbatim}
+struct rrSched_t * rrSched_create(void * destination,
+				  processPDU_t destProcessPDU)
+{
+   struct rrSched_t * result = (struct rrSched_t * )sim_malloc(sizeof(struct rrSched_t));
+
+   // Gestion de la destination
+   result->destination = destination;
+   result->destProcessPDU = destProcessPDU;
+
+   // Pas de source définie
+   result->nbSources = 0;
+
+   // On commence quelquepart ...
+   result->lastServed = 0;
+
+   return result;
+}
+\end{verbatim}
+
+   On gère la destination, comme toute entité qui peut fournir des
+{\sc psu}s doit le faire, et on s'occupe de ses spécificités.
+
+    Une source sera par exemple attribuée de la façon suivante :
+
+\index{rrSched\_addSource}
+\begin{verbatim}
+void rrSched_addSource(struct rrSched_t * sched,
+		       void * source,
+		       getPDU_t getPDU)
+{
+   assert(sched->nbSources < SCHED_RR_NB_INPUT_MAX);
+
+   sched->sources[sched->nbSources] = source;
+   sched->srcGetPDU[sched->nbSources++] = getPDU;
+}
+\end{verbatim}
+
+   Attention, ce n'est pas très robuste ! Mais ce n'est pas l'onjectif
+ici, \ldots
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{La fonction {\tt rrSched\_getPDU}}
+
+   C'est cette fonction qui est invoquée par l'entité aval pour
+obtenir une {\sc pdu}. C'est dans cette fonction que nous allons donc
+implanter l'algorithme d'ordonnancement.
+
+   En voici le code
+
+\index{rrSched\_getPDU}
+\begin{verbatim}
+struct PDU_t * rrSched_getPDU(void * s)
+{
+   struct rrSched_t * sched = (struct rrSched_t * )s;
+   struct PDU_t * result = NULL;
+
+   assert(sched->nbSources > 0);
+
+   int next = sched->lastServed;
+
+   // Quelle est la prochaine source à servir ?
+   do {
+      // On cherche depuis la prochaine la première source qui a des
+      // choses à nous donner
+      next = (next + 1)%sched->nbSources;
+      result = sched->srcGetPDU[next](sched->sources[next]);
+   } while ((result == NULL) && (next != sched->lastServed));
+
+   if (result)
+     sched->lastServed = next;
+   return result;
+}
+\end{verbatim}
+
+   En fait, il n'y a pas grand-chose à en dire ! On applique
+l'algorithme d'ordonnancement, et on fournit une {\sc pdu},
+éventuellement {\tt NULL} s'il n'y a rien à ordonnancer.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{La fonction {\tt rrSched\_processPDU}}
+
+   Plus rigolo, passons à la fonction {\tt rrSched\_processPDU} qui
+sera invoquée par une source qui dispose d'une {\sc pdu} et qui
+souhaite la faire passer à l'ordonnanceur.
+
+   Celui-ci devra la traiter s'il le peut, mais ne pas la prendre s'il
+ne peut pas la traiter. Voici le début de la fonction
+
+\index{rrSched\_processPDU}
+\begin{verbatim}
+int rrSched_processPDU(void *s,
+		       getPDU_t getPDU,
+		       void * source)
+{
+   int result;
+   struct rrSched_t * sched = (struct rrSched_t *)s;
+
+   printf_debug(DEBUG_SCHED, "in\n");
+\end{verbatim}
+
+   J'ai utiliser la fonction de débogage à titre d'exemple. Il y en a
+d'autres dans le fichier source. On se contente ici d'un {\em cast}
+pour respecter le prototype des fonctions d'échange.
+
+   La première chose à faire est de vérifier la disponibilité de
+l'entité aval :
+
+\begin{verbatim}
+   // La destination est-elle prete ?
+   int destDispo = sched->destProcessPDU(sched->destination, NULL, NULL);
+\end{verbatim}
+
+   Maintenant nous allons traiter le cas du test (paramètres {\tt
+NULL} pour tester notre disponibilité) :
+
+\begin{verbatim}
+   // Si c'est un test de dispo, je dépend de l'aval
+   if ((getPDU == NULL) || (source == NULL)) {
+      result = destDispo;
+\end{verbatim}
+
+   Et maintenant le c\oe{}ur de la meule ! Si l'entité aval est prête,
+on lui dit de venir chercher une {\sc pdu} (celle-là ou une autre,
+c'est l'algo qui le dira, mais on ne voit pas comment ça pourrait en
+être une autre !). Sinon, on laisse tomber, \ldots
+
+\begin{verbatim}
+   } else {
+      if (destDispo) {
+         // Si l'aval est dispo, on lui dit de venir chercher une PDU, ce
+         // qui déclanchera l'ordonnancement
+         result = sched->destProcessPDU(sched->destination, rrSched_getPDU, sched);
+      } else {
+         // On ne fait rien si l'aval (un support a priori) n'est pas pret
+         result = 0;
+      }
+   }
+\end{verbatim}
+
+   On oublie pas de renvoyer le résultat !
+
+\begin{verbatim}
+
+   printf_debug(DEBUG_SCHED, "out\n");
+   return result;
+}
+\end{verbatim}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Utilisation}
+
+   Ben ça c'est pas m'échant, je te laisse lire les sources !
+

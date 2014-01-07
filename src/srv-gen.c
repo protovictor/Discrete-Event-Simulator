@@ -13,6 +13,7 @@
 #include <date-generator.h>
 #include <srv-gen.h>
 #include <ndesObject.h>
+#include <log.h>
 
 #include <stdlib.h>    // Malloc, NULL, exit...
 

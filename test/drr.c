@@ -10,6 +10,7 @@
 #include <sched_drr.h>
 #include <pdu-sink.h>
 #include <srv-gen.h>
+#include <log.h>
 
 int main() {
   struct dateSize sequence1[] = {

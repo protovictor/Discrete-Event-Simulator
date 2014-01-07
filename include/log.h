@@ -24,6 +24,8 @@
  */
 struct ndesObjectType_t ndesLogEntryType;
 
+#ifdef NDES_USES_LOG
+
 /*
  * @brief Initialisation du log
  */
@@ -54,4 +56,14 @@ void ndesLog_logLineF(struct ndesObject_t * ndesObject, char * fmt, ...);
  */
 int ndesLog_dump(char * fileName);
 
+#else  // Si NDES_USES_LOG n'est pas défini
+
+#define ndesLog_init() 
+#define ndesLog_enable()
+#define ndesLog_disable()
+#define ndesLog_logLine(ndesObject, line)
+#define ndesLog_logLineF(ndesObject, fmt, ...)
+#define ndesLog_dump(fileName)
+
+#endif // ifdef NDES_USES_LOG
 #endif
