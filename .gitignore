@@ -22,3 +22,7 @@
 *.exe
 *.out
 *.app
+
+# Répertoires générés
+DOCS/html
+DOCS/latex
