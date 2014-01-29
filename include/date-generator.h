@@ -19,7 +19,7 @@ struct dateGenerator_t * dateGenerator_create();
 /**
  * @brief Ajout d'une sonde sur les inter-arrivees
  */
-void dateGenerator_setInterArrivalProbe(struct dateGenerator_t * dateGen,
+void dateGenerator_addInterArrivalProbe(struct dateGenerator_t * dateGen,
 					struct probe_t * probe);
 
 /** @brief Obtention de la prochaine date

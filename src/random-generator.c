@@ -671,9 +671,9 @@ void randomGenerator_recordThenReplay(struct randomGenerator_t * rg)
 /*==========================================================================*/
 /*   Probes                                                                 */ 
 /*==========================================================================*/
-void randomGenerator_setValueProbe(struct randomGenerator_t * rg,
+void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
 				   struct probe_t * p)
 {
-   rg->valueProbe = p;
+   rg->valueProbe = probe_chain(p, rg->valueProbe);
 }
 

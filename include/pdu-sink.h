@@ -1,3 +1,7 @@
+/**
+ * @file pdu-sink.h
+ * @brief Définition des puits de PDU
+ */
 #ifndef __DEF_PDU_SINK
 #define __DEF_PDU_SINK
 
@@ -15,9 +19,9 @@ int PDUSink_processPDU(void * pduSink, getPDU_t getPDU, void * source);
 // WARNING faudrait voir à pouvoir faire ça :
 //processPDU_t PDUSink_processPDU;
 
-/*
- * Affectation d'une sonde sur les evenements d'insertion
+/**
+ * @brief Affectation d'une sonde sur les evenements d'insertion
  */
-void PDUSink_setInputProbe(struct PDUSink_t * sink, struct probe_t * insertProbe);
+void PDUSink_addInputProbe(struct PDUSink_t * sink, struct probe_t * insertProbe);
 
 #endif

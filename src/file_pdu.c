@@ -450,8 +450,7 @@ int filePDU_id_PDU_n(struct filePDU_t * file, int n)
  */
 void filePDU_addInsertSizeProbe(struct filePDU_t * file, struct probe_t * insertProbe)
 {
-   probe_chain(insertProbe, file->insertProbe);
-   file->insertProbe = insertProbe;
+   file->insertProbe = probe_chain(insertProbe, file->insertProbe);
 }
 
 /*

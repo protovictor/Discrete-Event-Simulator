@@ -150,13 +150,18 @@ void probe_setPersistent(struct probe_t * p)
    p->persistent = 1;
 }
 
-/*
- * Chaînage des probes p1 et p2, dans cet ordre. Tout échantillon sur
+/**
+ * @brief Chaînage des probes p1 et p2, dans cet ordre.
+ * @param p1 première sonde, doit être non NULL
+ * @param p2 seconde sonde
+ * @result p1
+ *
+ * Tout échantillon sur
  * p1 sera répercuté sur p2. C'est la seule méthode qui soit
  * répercutée en cascade. Les reset, calcul de moyenne, ... doivent
  * être invoquées sur chaque sonde si nécessaire
  */
-void probe_chain(struct probe_t * p1, struct probe_t * p2)
+struct probe_t * probe_chain(struct probe_t * p1, struct probe_t * p2)
 {
    assert(p1 != NULL);
    assert(p1->nextProbe == NULL); // Pour bien faire il faudrait p2->nextProbe <- p1->nextProbe
@@ -165,7 +170,7 @@ void probe_chain(struct probe_t * p1, struct probe_t * p2)
    printf_debug(DEBUG_PROBE, "\"%s\" (%p, type %s) chained after \"%s\" (%p, type %s)\n",
 		p2?probe_getName(p2):"(null)", p2, p2?probeTypeName(p2->probeType):"(null)", 
 		probe_getName(p1), p1, probeTypeName(p1->probeType));
-
+   return p1;
 }
 
 void probe_resetExhaustive(struct probe_t * probe)

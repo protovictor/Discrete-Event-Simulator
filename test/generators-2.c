@@ -33,7 +33,7 @@ int main() {
    iap = probe_createExhaustive();
 
    dateGenExp = dateGenerator_createExp(l);
-   dateGenerator_setInterArrivalProbe(dateGenExp, iap);
+   dateGenerator_addInterArrivalProbe(dateGenExp, iap);
 
    for (n = 0 ; n < NBECH;n++){
       d = dateGenerator_nextDate(dateGenExp, d);

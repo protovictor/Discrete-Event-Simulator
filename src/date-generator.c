@@ -51,14 +51,13 @@ double dateGenerator_nextDate(struct dateGenerator_t * dateGen, double currentTi
 }
 
 /** @brief Insertion d'une sonde sur les inter-arrivees.
- * WARNING, il faut la remplacer par une fonction d'ajout.
  * 
  * @param dateGen le générateur de date sur lequel greffer la sonde
  * @param probe la sonde à y appliquer
  */
-void dateGenerator_setInterArrivalProbe(struct dateGenerator_t * dateGen, struct probe_t * probe)
+void dateGenerator_addInterArrivalProbe(struct dateGenerator_t * dateGen, struct probe_t * probe)
 {
-   dateGen->interArrivalProbe = probe;
+   dateGen->interArrivalProbe = probe_chain(probe, dateGen->interArrivalProbe);
 }
 
 /*-------------------------------------------------------------------------*/

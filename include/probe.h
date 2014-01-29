@@ -80,7 +80,7 @@ void probe_delete(struct probe_t * p);
  * répercutée en cascade. Les reset, calcul de moyenne, ... doivent
  * être invoquées sur chaque sonde si nécessaire
  */
-void probe_chain(struct probe_t * p1, struct probe_t * p2);
+struct probe_t * probe_chain(struct probe_t * p1, struct probe_t * p2);
 
 /*
  * Réinitialisation d'une probe (pour permettre de relancer une

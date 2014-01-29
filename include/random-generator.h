@@ -1,5 +1,6 @@
-/*
- * Les générateurs de nombres aléatoires.
+/**
+ * @file random-generator.h
+ * @brief Les générateurs de nombres aléatoires.
  *
  * Un générateur est caractérisé par plusieurs propriétés
  *
@@ -160,7 +161,11 @@ double randomGenerator_getExpectation(struct randomGenerator_t * rg);
 /*==========================================================================*/
 /*   Probes                                                                 */ 
 /*==========================================================================*/
-void randomGenerator_setValueProbe(struct randomGenerator_t * rg,
+/**
+ * @brief Ajout d'une sonde sur les valeurs g�n�r�es
+ */
+
+void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
 				   struct probe_t * p);
 
 #endif

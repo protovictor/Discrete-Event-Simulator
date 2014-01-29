@@ -59,7 +59,7 @@ void srvGen_setServiceTime(struct srvGen_t * srv,
 			   enum serviceTime_t st,
 			   double parameter);
 
-/*
- * Affectation d'une sonde sur le temps de service
+/**
+ * @brief Ajout d'une sonde sur le temps de service
  */
-void srvGen_setServiceProbe(struct srvGen_t * srv, struct probe_t * serviceProbe);
+void srvGen_addServiceProbe(struct srvGen_t * srv, struct probe_t * serviceProbe);

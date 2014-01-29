@@ -36,7 +36,7 @@ int main() {
 
    /* Les sondes */
    //   sp = probe_create(NULL);
-   //filePDU_setSejournProbe(filePDU, sp);
+   //filePDU_addSejournProbe(filePDU, sp);
 
    /* On active la source */
    PDUSource_start(sourcePDU);

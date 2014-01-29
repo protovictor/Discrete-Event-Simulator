@@ -29,7 +29,7 @@ int main()
 
    /* On place une sonde sur le puits */
    sinkInputProbe = probe_createExhaustive();
-   PDUSink_setInputProbe(sink, sinkInputProbe);
+   PDUSink_addInputProbe(sink, sinkInputProbe);
 
    /* Le multiplexeur */
    mux = muxfcfs_create(sink, PDUSink_processPDU);

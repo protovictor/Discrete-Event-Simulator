@@ -106,13 +106,13 @@ void DVBS2ll_sendPDU(struct DVBS2ll_t * dvbs2ll, struct PDU_t * pdu);
  * Ajout d'une sonde sur la taille de la charge utile des trames émises
  * sur un MODCOD donné
  */
-void DVBS2ll_setActualPayloadBitSizeProbe(struct DVBS2ll_t * dvbs2ll, int mc, struct probe_t * pr);
+void DVBS2ll_addActualPayloadBitSizeProbe(struct DVBS2ll_t * dvbs2ll, int mc, struct probe_t * pr);
 
 /*
  * Ajout de la probe sur les DUMMY. Elle n'échantillonne aucune
  * valeur, juste les dates d'émission de DUMMY frames.
  */
-void DVBS2ll_setDummyFecFrameProbe(struct DVBS2ll_t * dvbs2ll, struct probe_t * pr);
+void DVBS2ll_addDummyFecFrameProbe(struct DVBS2ll_t * dvbs2ll, struct probe_t * pr);
 
 /************************************************************************/
 /*

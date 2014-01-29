@@ -131,12 +131,12 @@ void srvGen_startService(struct srvGen_t * srv, struct PDU_t * pdu)
    motSim_addEvent(event);
 }
 
-/*
- * Affectation d'une sonde sur le temps de service
+/**
+ * @brief Ajout d'une sonde sur le temps de service
  */
-void srvGen_setServiceProbe(struct srvGen_t * srv, struct probe_t * serviceProbe)
+void srvGen_addServiceProbe(struct srvGen_t * srv, struct probe_t * serviceProbe)
 {
-  srv->serviceProbe =  serviceProbe;
+   srv->serviceProbe = probe_chain(serviceProbe, srv->serviceProbe);
 }
 
 /*

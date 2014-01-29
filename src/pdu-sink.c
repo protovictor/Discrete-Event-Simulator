@@ -42,12 +42,12 @@ struct PDUSink_t * PDUSink_create()
    return result;
 }
 
-/*
- * Affectation d'une sonde sur les evenements d'insertion
+/**
+ * @brief Affectation d'une sonde sur les evenements d'insertion
  */
-void PDUSink_setInputProbe(struct PDUSink_t * sink, struct probe_t * insertProbe)
+void PDUSink_addInputProbe(struct PDUSink_t * sink, struct probe_t * insertProbe)
 {
-   sink->insertProbe = insertProbe;
+   sink->insertProbe = probe_chain(insertProbe, sink->insertProbe);
 }
 
 

@@ -16,8 +16,8 @@ sans aucune mesure associée.
    Les sondes peuvent être placées en divers points des outils de
 simulation via des fonctions de la forme
 \lstinline!<type>_add<point>Probe(...)!. Plusieurs sondes peuvent être
-ainsi ``chaînées'' sur un même point de mesure. En revanche, la même
-sonde {\bf ne peut pas} être chaînée plusieurs fois.
+ainsi ``chaînées'' sur un même point de mesure (voir plus loin). En
+revanche, la même sonde {\bf ne peut pas} être chaînée plusieurs fois.
 
    Pour chacun des objets décrit dans ce fabuleux document, je
 tâcherai de lister (dans une section''Les sondes'') les différents
@@ -221,4 +221,24 @@ temporelles sont sautantes donc disjointes):
 struct probe_t * probe_createTimeAverage(double t);
 \end{verbatim}
 
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Le chaînage}
+
+   Il peut être parfois intéressant de positionner plusieurs sondes
+sur un même point. Cette possibilité est intégrée naturellement
+dans{\sc ndes} par la notion de chaînage des sondes.
+
+   Du point de vue de l'utilisateur, chaque fois qu'un module propose
+une fonction du type {\tt module\_addUneProbe()}, cette fonction peut
+être utilisée pour chacune des sondes à associer. Toutes ces sondes
+seront alors traitées à la même enseigne.
+
+   Du point de vue du programmeur, la fonction {\tt
+probe\_chain(p1, p2)}\index{probe\_chain}  permet de chaîner la sonde
+   {\tt p2} après la sonde {\tt p1} de sorte que chaque appel aux
+     fonctions d'échantillonage de la sonde {\tt p1} sera
+     automatiquement suivi par le même appel à la sonde {\tt p2}. On
+     en trouvera des exemples d'utilisation dans la librairie.
 

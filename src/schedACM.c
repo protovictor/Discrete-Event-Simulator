@@ -201,9 +201,9 @@ void schedACM_setInputQueues(struct schedACM_t * sched, int mc, struct filePDU_t
  * Affectation d'une sonde permettant de suivre le débit estimé par
  * l'algorithme pour chaque file
  */
-void schedACM_setThoughputProbe(struct schedACM_t * sched, int m, int q, struct probe_t * bwProbe)
+void schedACM_addThoughputProbe(struct schedACM_t * sched, int m, int q, struct probe_t * bwProbe)
 {
-   sched->qos[m][q].bwProbe = bwProbe;
+   sched->qos[m][q].bwProbe = probe_chain(bwProbe, sched->qos[m][q].bwProbe);
 }
 
 /*

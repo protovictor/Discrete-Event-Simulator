@@ -19,8 +19,6 @@ DANS BRANCHE UNSTABLE
 URGENT
 ======
    . [TOUS]
-      - Il reste des set...Probe à remplacer par des add...Probe (en
-      profiter pour documenter le chainage)
       - Un ordonnanceur DRR
    . EXAMPLES/DEBITS
       - Pourquoi ce n'est pas reproductible ?
@@ -303,6 +301,8 @@ FAIT (et donc à valider/documenter)
       - sondes
          . temps de séjour
    . [SONDES]
+      - Il reste des set...Probe à remplacer par des add...Probe (en
+      profiter pour documenter le chainage)
       - dater les événements
       - sondes par tranches (pour histogramme)
          . Tranches de valeurs

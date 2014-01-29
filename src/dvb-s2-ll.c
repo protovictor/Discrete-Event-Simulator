@@ -195,23 +195,23 @@ double DVBS2ll_bbframeTransmissionTime(struct DVBS2ll_t * dvbs2ll, int mcIdx)
   }
 }
 
-/*
- * Ajout d'une sonde sur la taille de la charge utile des trames émises
+/**
+ * @brief Ajout d'une sonde sur la taille de la charge utile des trames émises
  * sur un MODCOD donné
  */
-void DVBS2ll_setActualPayloadBitSizeProbe(struct DVBS2ll_t * dvbs2ll, int mc, struct probe_t * pr)
+void DVBS2ll_addActualPayloadBitSizeProbe(struct DVBS2ll_t * dvbs2ll, int mc, struct probe_t * pr)
 {
    assert(mc < dvbs2ll->nbModCods);
 
-   dvbs2ll->modcod[mc].actualPayloadBitSizeProbe = pr;
+   dvbs2ll->modcod[mc].actualPayloadBitSizeProbe = probe_chain(pr, dvbs2ll->modcod[mc].actualPayloadBitSizeProbe);
 }
 
-/*
- * Ajout de la probe sur les DUMMY
+/**
+ * @brief Ajout de la probe sur les DUMMY
  */
-void DVBS2ll_setDummyFecFrameProbe(struct DVBS2ll_t * dvbs2ll, struct probe_t * pr)
+void DVBS2ll_addDummyFecFrameProbe(struct DVBS2ll_t * dvbs2ll, struct probe_t * pr)
 {
-   dvbs2ll->dummyFecFrameProbe = pr;
+  dvbs2ll->dummyFecFrameProbe = probe_chain(pr, dvbs2ll->dummyFecFrameProbe);
 }
 
 /*
