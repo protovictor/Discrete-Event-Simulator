@@ -119,10 +119,23 @@ void randomGenerator_delete(struct randomGenerator_t * rg);
  * Choix de la distribution
  */
 
-// Un nombre discret de probabilitÃ©s
+/*
+ * Un nombre discret de probabilitÃ©s
+ */
 void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
 					     int nb,
                                              double * proba);
+
+/**
+ * @brief Création d'une distribution uniforme construite depuis un fichier
+ *
+ * Le fichier doit être un fichier texte orienté ligne où chaque ligne
+ * contient un entier (la valeur) suivi d'un réel (la probabilité associée).
+ */ 
+void randomGenerator_setDistributionDiscreteFromFile(struct randomGenerator_t * rg,
+						     char * fileName);
+
+
 // Choix d'une loi uniforme
 void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
 

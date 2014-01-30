@@ -565,6 +565,33 @@ struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(
    return result;
 }
 
+void readUIntDiscreteProbaFromFile(char * fileName,
+				int * nbValues,
+				unsigned int ** values,
+				   double ** proba);
+/**
+ * @brief Création d'une ditribution d'après un fichier
+ */
+struct randomGenerator_t * randomGenerator_createUIntDiscreteFromFile(char * fileName)
+{
+   struct randomGenerator_t * result ;
+   int nbValues;
+   unsigned int * values;
+   double * proba;
+
+   printf("On y va\n");
+   readUIntDiscreteProbaFromFile(fileName, &nbValues, &values, &proba);
+
+   result = randomGenerator_createUIntDiscreteProba(nbValues, values, proba);
+
+   free(values);
+   free(proba);
+
+   return result;
+}
+
+
+
 struct randomGenerator_t * randomGenerator_createDoubleDiscrete(int nbValues,
                                      double * values)
 {
@@ -677,3 +704,41 @@ void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
    rg->valueProbe = probe_chain(p, rg->valueProbe);
 }
 
+/*==========================================================================*/
+/*   Miscelleanous helper functions                                         */
+/*==========================================================================*/
+
+/** 
+ * @brief Build values and proba arrays from file
+ */
+#define ALLOC_STEP 10
+void readUIntDiscreteProbaFromFile(char * fileName,
+				int * nbValues,
+				unsigned int ** values,
+				double ** proba)
+{
+   *nbValues = 0;
+   *values = NULL;
+   *proba = NULL;
+
+   FILE * f;
+
+   f = fopen(fileName, "r");
+   printf("Fichier ouvert\n");
+   if (f == NULL) {
+      return;
+   }
+ 
+   while (!feof(f)) {
+      if ((*nbValues % ALLOC_STEP) == 0) {
+	*values = realloc(*values, (*nbValues  + ALLOC_STEP)*sizeof(unsigned int));
+	*proba  = realloc(*proba, (*nbValues  + ALLOC_STEP)*sizeof(double));
+      }
+
+      if (fscanf(f, "%d %lf\n", &(*values)[*nbValues], &(*proba)[*nbValues]) == 2) {
+	(*nbValues)++;
+      }
+
+   } 
+   fclose(f);
+}

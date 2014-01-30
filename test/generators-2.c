@@ -1,7 +1,7 @@
 /*
  * Programme de test des divers générateurs
  *
- * generators-1
+ * generators-2
  *
  */
 #include <stdlib.h>    // Malloc, NULL, exit, ...
