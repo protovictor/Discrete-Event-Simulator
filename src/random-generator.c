@@ -1,11 +1,11 @@
 /*
- * Implantation des générateurs aléatoires. C'est encore un beau
- * fouilli ! Il faut arriver à distinguer proprement les divers
- * éléments. Il y a schématiquement trois niveaux dans ces objets : 
+ * Implantation des gÃ©nÃ©rateurs alÃ©atoires. C'est encore un beau
+ * fouilli ! Il faut arriver Ã  distinguer proprement les divers
+ * Ã©lÃ©ments. Il y a schÃ©matiquement trois niveaux dans ces objets : 
  *
- *  - Le type des données renvoyées (entier, réel, ...)
+ *  - Le type des donnÃ©es renvoyÃ©es (entier, rÃ©el, ...)
  *  - La distribution
- *  - La source d'aléa (un PRNG, /dev/random, un fichier, ...)
+ *  - La source d'alÃ©a (un PRNG, /dev/random, un fichier, ...)
  */
 
 #include <stdio.h>     // printf
@@ -22,19 +22,19 @@
 
 
 /*
- * Structure générale d'un générateur aléatoire
+ * Structure gÃ©nÃ©rale d'un gÃ©nÃ©rateur alÃ©atoire
  */
 struct randomGenerator_t {
    int valueType;
    int distribution;
    int source;
-   struct probe_t * values; // Liste des valeurs générées durant la
-  // phase de record, paramètre de la
+   struct probe_t * values; // Liste des valeurs gÃ©nÃ©rÃ©es durant la
+  // phase de record, paramÃ¨tre de la
   // source durant la phase de replay
   // c'est une sonde exhaustive
 
 
-   // Paramètres liés au type des données produites
+   // ParamÃ¨tres liÃ©s au type des donnÃ©es produites
    union {
       struct uLparameter_t {
          unsigned long min;
@@ -44,7 +44,7 @@ struct randomGenerator_t {
          unsigned int min;
          unsigned int max;
       } uir;
-      // Pour un ensemble discret de valeurs entières 
+      // Pour un ensemble discret de valeurs entiÃ¨res 
       struct uIDiscreteParameter_t{
          int nbValues;
          unsigned int * value;
@@ -60,7 +60,7 @@ struct randomGenerator_t {
       } d;
    } param;
 
-   // Paramètres liés à la distribution
+   // ParamÃ¨tres liÃ©s Ã  la distribution
    struct {
       double min, max; // Extreme values
       union {
@@ -72,26 +72,26 @@ struct randomGenerator_t {
          struct probe_t * pdf; // Ce n'est probablement pas le meilleur outil
       } d;
    } distParam; 
-   // Prochaine valeur aléatoire conformément à la distribution
+   // Prochaine valeur alÃ©atoire conformÃ©ment Ã  la distribution
    double (*distGetNext)(struct randomGenerator_t * rg); 
 
 
-   // Paramètres de la source d'aléa utilisée
+   // ParamÃ¨tres de la source d'alÃ©a utilisÃ©e
    union {
       int nextIdx; // Index for next (recorded) value to be generated
       unsigned short xsubi[3]; // for xrand48
    } aleaSrc;
 
-   // La fonction donnant la prochaine valeur aléatoire entre 0 et 1
+   // La fonction donnant la prochaine valeur alÃ©atoire entre 0 et 1
    double (*aleaGetNext)(struct randomGenerator_t * rg); 
 
-   // Une sonde sur les valeurs générées
+   // Une sonde sur les valeurs gÃ©nÃ©rÃ©es
    struct probe_t * valueProbe;
 
 };
 
 /*==========================================================================*/
-/*       Les fonctions liées aux sources.                                   */
+/*       Les fonctions liÃ©es aux sources.                                   */
 /*==========================================================================*/
 /*
  * Next value with erand48
@@ -139,7 +139,7 @@ void randomGenerator_replayInit(struct randomGenerator_t * rg)
 
 
 /*==========================================================================*/
-/*       Les fonctions liées aux distributions.                             */
+/*       Les fonctions liÃ©es aux distributions.                             */
 /*==========================================================================*/
 inline double randomGenerator_noDistGetNext(struct randomGenerator_t * rg)
 {
@@ -152,7 +152,7 @@ inline double randomGenerator_noDistGetNext(struct randomGenerator_t * rg)
  */
 inline double randomGenerator_uniformGetNext(struct randomGenerator_t * rg)
 {
-  return rg->aleaGetNext(rg); //Les sources sont censées être uniformes entre 0 et 1 ...
+  return rg->aleaGetNext(rg); //Les sources sont censÃ©es Ãªtre uniformes entre 0 et 1 ...
 }
 
 /*
@@ -162,7 +162,7 @@ void randomGenerator_uniformInit(struct randomGenerator_t * rg)
 {
    assert(rg->distribution == rGDistUniform); 
 
-   //Les sources sont censées être uniformes entre 0 et 1 ...
+   //Les sources sont censÃ©es Ãªtre uniformes entre 0 et 1 ...
    rg->distParam.min = 0.0;
    rg->distParam.max = 1.0;
 
@@ -177,7 +177,7 @@ double randomGenerator_exponentialGetNext(struct randomGenerator_t * rg)
    double alea;
    double result ;
 
-   //  Les sources sont censées être uniformes ...
+   //  Les sources sont censÃ©es Ãªtre uniformes ...
    alea = rg->aleaGetNext(rg);
 
    result =  - log(alea) /rg->distParam.d.lambda;
@@ -215,7 +215,7 @@ void randomGenerator_setLambda(struct randomGenerator_t * rg, double lambda)
 /*
  * Next value with discrete distribution  
  *
- * On génère une valeur située au milieu de l'intervalle
+ * On gÃ©nÃ¨re une valeur situÃ©e au milieu de l'intervalle
  */
 double randomGenerator_discreteGetNext(struct randomGenerator_t * rg)
 {
@@ -265,26 +265,26 @@ unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg)
    if (rg->valueType == rGTypeUIntConstant) {
       result = rg->param.uir.min;
    } else {
-   // Etape 1 : le générateur donne une nouvelle valeur
-   //   (elle n'apparait pas explicitement ici, elle est réalisée dans
+   // Etape 1 : le gÃ©nÃ©rateur donne une nouvelle valeur
+   //   (elle n'apparait pas explicitement ici, elle est rÃ©alisÃ©e dans
    //    le distGetNext())
-   // Etape 2 : La distribution est appliquée (invocation du
+   // Etape 2 : La distribution est appliquÃ©e (invocation du
    //    distGetNext())
    double alea = rg->distGetNext(rg);
 
-   // Etape 3 : On adapte au type des données !
+   // Etape 3 : On adapte au type des donnÃ©es !
    switch (rg->valueType) {
-      // Pour un unsigned int quelconque, on prend juste la partie entière
-      // Attention, ça peut donner des trucs étrange si la distribution
-      // ne donne pas des résultats sur R+ !
+      // Pour un unsigned int quelconque, on prend juste la partie entiÃ¨re
+      // Attention, Ã§a peut donner des trucs Ã©trange si la distribution
+      // ne donne pas des rÃ©sultats sur R+ !
       case rGTypeUInt :
 	result = (unsigned int)alea;
       break;
 
       // Pour un intervalle, si on a une distribution qui donne un
-      // intervalle (qu'on supposera être [0, 1]), on fait une
-      // correspondance linéaire canonique. Si elle est non bornée
-      // (genre [0, +inf[), on écrète
+      // intervalle (qu'on supposera Ãªtre [0, 1]), on fait une
+      // correspondance linÃ©aire canonique. Si elle est non bornÃ©e
+      // (genre [0, +inf[), on Ã©crÃ¨te
       case rGTypeUIntRange :
          result = rg->param.uir.min + (unsigned int)(alea*(rg->param.uir.max - rg->param.uir.min));
          result = min(result, rg->param.uir.max);
@@ -295,7 +295,7 @@ unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg)
       break;
 
       // Pour un sous ensemble, on fait, en gros, comme pour un
-      // intervalle : on se ramène à l'intervalle [0, nbValues - 1]
+      // intervalle : on se ramÃ¨ne Ã  l'intervalle [0, nbValues - 1]
       case rGTypeUIntEnum :
 	result = rg->param.uid.value[min((int)(rg->param.uid.nbValues*alea), rg->param.uid.nbValues -1)];
       break;
@@ -305,7 +305,7 @@ unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg)
    }
    }
 
-   // On probe éventuellement
+   // On probe Ã©ventuellement
    if (rg->valueProbe) {
      probe_sample(rg->valueProbe, (double)result);
    }
@@ -316,7 +316,7 @@ unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg)
 /*
  * ATTENTION ici gros soucis de normalisation !!!
  * Certaines distributions ont des valeurs discretes, d'autres
- * bornées, d'autres encore illimitées. Comment ramener tout ça à
+ * bornÃ©es, d'autres encore illimitÃ©es. Comment ramener tout Ã§a Ã 
  * l'ensemble de valeurs du type ???
  */
 double randomGenerator_getNextDouble(struct randomGenerator_t * rg)
@@ -339,7 +339,7 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg)
       break;
    }
 
-   // On probe éventuellement
+   // On probe Ã©ventuellement
    if (rg->valueProbe) {
       probe_sample(rg->valueProbe, result);
    }
@@ -411,7 +411,7 @@ struct randomGenerator_t * randomGenerator_createRaw()
 					//mettre une ...
    result->distGetNext = randomGenerator_noDistGetNext;
 
-   // Ajout à la liste des choses à réinitialiser avant une prochaine simu
+   // Ajout Ã  la liste des choses Ã  rÃ©initialiser avant une prochaine simu
    motsim_addToResetList(result, (void (*)(void * data)) randomGenerator_reset);
 
    // Source
@@ -481,7 +481,7 @@ struct randomGenerator_t * randomGenerator_createDoubleRange(double min,
 /*      CREATORS : UINT                                                     */
 /*--------------------------------------------------------------------------*/
 /*
- * Création d'un générateur d'entiers
+ * CrÃ©ation d'un gÃ©nÃ©rateur d'entiers
  */
 struct randomGenerator_t * randomGenerator_createUInt()
 {
@@ -506,7 +506,7 @@ struct randomGenerator_t * randomGenerator_createUIntRange(unsigned int min,
    return result;
 }
 
-// Des entiers non signés tous �gaux !
+// Des entiers non signÃ©s tous égaux !
 struct randomGenerator_t * randomGenerator_createUIntConstant(unsigned int v)
 {
   struct randomGenerator_t * result = randomGenerator_createRaw();
@@ -523,7 +523,7 @@ struct randomGenerator_t * randomGenerator_createUIntConstant(unsigned int v)
 
 
 /*
- * Création d'un générateur aléatoire de nombres entiers.
+ * CrÃ©ation d'un gÃ©nÃ©rateur alÃ©atoire de nombres entiers.
  */
 struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
 							      unsigned int * values)
@@ -546,8 +546,8 @@ struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
 
 
 /*
- * Le nombre de valeurs possibles est passé en paramètre ainsi que la
- * liste de ces valeurs puis la liste de leurs probabilité.
+ * Le nombre de valeurs possibles est passÃ© en paramÃ¨tre ainsi que la
+ * liste de ces valeurs puis la liste de leurs probabilitÃ©.
  */
 struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(
 				int nbValues,
@@ -570,7 +570,7 @@ void readUIntDiscreteProbaFromFile(char * fileName,
 				unsigned int ** values,
 				   double ** proba);
 /**
- * @brief Cr�ation d'une ditribution d'apr�s un fichier
+ * @brief Création d'une ditribution d'après un fichier
  */
 struct randomGenerator_t * randomGenerator_createUIntDiscreteFromFile(char * fileName)
 {
@@ -641,7 +641,7 @@ struct randomGenerator_t * randomGenerator_createFromProbe(struct probe_t * p)
  */
 void randomGenerator_delete(struct randomGenerator_t * rg)
 {
-   printf_debug(DEBUG_TBD, "Pas encore implanté !!!\n");
+   printf_debug(DEBUG_TBD, "Pas encore implantÃ© !!!\n");
 }
 
 
@@ -655,12 +655,12 @@ void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg)
    randomGenerator_uniformInit(rg);
 }
 
-// Un nombre discret de probabilités
+// Un nombre discret de probabilitÃ©s
 void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
 					     int nb,
                                              double * proba)
 {
-   // Spécification de la dist
+   // SpÃ©cification de la dist
    rg->distribution = rGDistDiscrete;
 
    // Initialisation des valeurs
@@ -688,10 +688,10 @@ void randomGenerator_setDistributionExp(struct randomGenerator_t * rg, double la
  */
 void randomGenerator_recordThenReplay(struct randomGenerator_t * rg)
 {
-   // On crée une sonde pour enregistrer les valeurs
+   // On crÃ©e une sonde pour enregistrer les valeurs
    rg->values = probe_createExhaustive();
 
-   // Cette probe, par définition, ne doit pas être resetée
+   // Cette probe, par dÃ©finition, ne doit pas Ãªtre resetÃ©e
    probe_setPersistent(rg->values);
 }
 

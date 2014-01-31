@@ -3,32 +3,32 @@
 #include <ll-simplex.h>
 #include <file_pdu.h>
 /*
- * CaractÈristiques d'une couche liaison simplex
+ * Caract√©ristiques d'une couche liaison simplex
  */
 struct llSimplex_t {
-   // Les caractÈrisques
-   unsigned long throughput; // DÈbit en bits/s
+   // Les caract√©risques
+   unsigned long throughput; // D√©bit en bits/s
    double propagation;       // Temps de propagation en secondes
 
-   // L'Ètat
-   int idle; //  Pret ‡ Èmettre ou pas
+   // L'√©tat
+   int idle; //  Pret √† √©mettre ou pas
 
-   struct PDU_t     * pdu; // La PDU en cours d'Èmission
+   struct PDU_t     * pdu; // La PDU en cours d'√©mission
    struct filePDU_t * flyingPDUs;  // Les PDUs "en vol"
    struct PDU_t     * pduOut; // Une PDU qui vient de sortir
 
-   // L'entitÈ aval
+   // L'entit√© aval
    void * destination;
    processPDU_t destProcessPDU;
 
-   // La derniËre entitÈ amont ‡ se manifester pendant qu'on est occupÈ
+   // La derni√®re entit√© amont √† se manifester pendant qu'on est occup√©
    getPDU_t lastGetPDU;
    void * lastSource;
 };
 
 /*
- * CrÈation d'une entitÈ. Les deux paramËtres importants sont le
- * dÈbits (en bits/s) et le temps de propagation (en secondes).
+ * Cr√©ation d'une entit√©. Les deux param√®tres importants sont le
+ * d√©bits (en bits/s) et le temps de propagation (en secondes).
  */
 struct llSimplex_t * llSimplex_create(void * destination,
 				      processPDU_t destProcessPDU,
@@ -69,7 +69,7 @@ void llSimplex_endOfPropagation(void * l)
 
    printf_debug(DEBUG_PDU, "in\n");
 
-   // On rÈcupËre la premiËre PDU en vol
+   // On r√©cup√®re la premi√®re PDU en vol
    lls->pduOut = filePDU_extract(lls->flyingPDUs);
    printf_debug(DEBUG_PDU, "on recupere la PDU %d\n", PDU_id(lls->pduOut));
 
@@ -84,7 +84,7 @@ void llSimplex_endOfPropagation(void * l)
 }
 
 /*
- * Fin du temps d'Èmission
+ * Fin du temps d'√©mission
  */
 void llSimplex_endOfTransmission(void * l)
 {
@@ -102,7 +102,7 @@ void llSimplex_endOfTransmission(void * l)
    // Elle est partie !
    lls->pdu = NULL;
 
-   // On prÈpare son arrivÈe
+   // On pr√©pare son arriv√©e
    printf_debug(DEBUG_PDU, "On prepare la fin de propagation a %lf\n", motSim_getCurrentTime() + lls->propagation);
    event_add(llSimplex_endOfPropagation,
 	     l,
@@ -135,7 +135,7 @@ int llSimplex_processPDU(void * l,
    } else {
 
       if (lls->idle) {   // Si je suis pret, je traite
-         // C'est pas pour tester, il y a une PDU ‡ traiter
+         // C'est pas pour tester, il y a une PDU √† traiter
          pdu = getPDU(source);
          assert(pdu != NULL);
          lls->idle = 0;   // Je ne suis plus pret !
@@ -168,7 +168,7 @@ struct PDU_t * llSimplex_getPDU(void * l)
 
    struct PDU_t * result = lls->pduOut;
 
-   lls->pduOut = NULL ; // Ce n'est plus ‡ nous de la gÈrer
+   lls->pduOut = NULL ; // Ce n'est plus √† nous de la g√©rer
 
    return result;
 }

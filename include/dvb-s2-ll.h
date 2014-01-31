@@ -7,6 +7,9 @@
  * préventif, cela apparait dans les noms des variables, et des macros
  * permettent d'envisager une modificiation sans conséquences sur le
  * reste.
+ * Autre problème : il faudrait un point d'entrée par MODCOD. Pour le
+ * moment, le MODCOD d'une BBFRAME est passé en private de la PDU
+ * correspondante, ce qui n'est pas terrible du tout !
  */
 
 #ifndef __DEF_DVBS2_LL

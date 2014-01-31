@@ -37,6 +37,7 @@ static struct schedACM_func_t schedUtility_func = {
    .getPDU = NULL,
    .processPDU = NULL,
    .buildBBFRAME = NULL,
+   .batch = 0,
    .schedule = (void (*)(void*))schedulerUtility
 };
 
@@ -172,6 +173,9 @@ void schedulerUtilityMC(struct schedUtility_t * sched, int mc, t_remplissage * r
    printf_debug(DEBUG_SCHED, "--------- %d : v=%d/i=%f ---------\n", mc, remplissage->volumeTotal, remplissage->interet);
 }
 
+/**
+ * @brief La fonction d'ordonnancement fondée sur des fonctions d'utilité
+ */
 void schedulerUtility(struct schedUtility_t * sched)
 {
    t_remplissage remplissage; // Le remplissage construit ici
@@ -218,11 +222,11 @@ void schedulerUtility(struct schedUtility_t * sched)
 	printf_debug(DEBUG_SCHED, "[%d][%d] - %d\n", m, q, schedACM_getSolution(sched->schedACM)->nbrePaquets[m][q]);
       }
    }
-s*/
+*/
 }
 
-/*
- * Version proportionnelle : On sert chaque file au prorata de sa fonction d'utilité
+/**
+ * @brief Version proportionnelle : On sert chaque file au prorata de sa fonction d'utilité
  */
 void schedulerUtilityMCProp(struct schedUtility_t * sched, int mc, t_remplissage * remplissage)
 {
@@ -350,6 +354,10 @@ void schedulerUtilityMCProp(struct schedUtility_t * sched, int mc, t_remplissage
    printf_debug(DEBUG_SCHED, "--------- %d : v=%d/i=%f ---------\n", mc, remplissage->volumeTotal, remplissage->interet);
 }
 
+/**
+ * @brief Ordonnancement d'une BBRRAME unique se fondant sur les
+ * fonctions d'utilité de façon proportionnelle. 
+ */
 void schedulerUtilityProp(struct schedUtility_t * sched)
 {
    t_remplissage remplissage; // Le remplissage construit ici
@@ -403,6 +411,7 @@ static struct schedACM_func_t schedUtilityProp_func = {
    .getPDU = NULL,
    .processPDU = NULL,
    .buildBBFRAME = NULL,
+   .batch = 0,
    .schedule = (void (*)(void*))schedulerUtilityProp
 };
 
@@ -420,6 +429,66 @@ struct schedACM_t * schedUtilityProp_create(struct DVBS2ll_t * dvbs2ll, int nbQo
 
    result->schedACM = schedACM_create(dvbs2ll, nbQoS, declOK, &schedUtilityProp_func);
    schedACM_setPrivate(result->schedACM, result);
+
+   printf_debug(DEBUG_SCHED, "%p created (in schedACM %p)\n", result, result->schedACM);
+
+   return result->schedACM;
+}
+
+/**********************************************************************************************/
+/**********************************************************************************************/
+/************************************    VERSION PAR LOT **************************************/
+/**********************************************************************************************/
+/**********************************************************************************************/
+/**
+ * @brief Ordonnancement d'un lot de BBFRAMEs se fondant sur les
+ * fonctions d'utilité de façon proportionnelle.
+ *
+ * Cet algorithme va chercher une séquence de trames optimale et va
+ * placer le résultat dans le champs sequenceChoisie du scheduler.
+ */
+void schedulerUtilityPropBatch(struct schedUtility_t * sched)
+{
+   t_sequence sequenceChoisie; //! < La séquence que l'on va construire
+   t_sequence sequence; //! < Une séquence générique
+   int m,q;
+
+   sequence_init(&sequence, schedACM_getLgMax(sched->schedACM), nbModCod(sched->schedACM), nbQoS(sched->schedACM));
+
+   // On parcourt l'ensemble des séquences de la façon suivante
+
+   // 1 - On construit une séquence
+   // 2 - Si c'est la meilleure, on la sauvegarde
+}
+
+/**
+ * @brief Version par lot
+ * Ici, on va ordonanncer un certain nombre de trames à chaque fois
+ */
+static struct schedACM_func_t schedUtilityPropBatch_func = {
+   .getPDU = NULL,
+   .processPDU = NULL,
+   .batch = 1,
+   .buildBBFRAME = NULL,
+   .schedule = (void (*)(void*))schedulerUtilityPropBatch
+};
+
+/**
+ * @brief Création d'un scheduler avec sa "destination".
+ * Cette dernière doit
+ * être de type struct DVBS2ll_t  et avoir déjà été complêtement
+ * construite (tous les MODCODS créés).
+ * Le nombre de files de QoS différentes par MODCOD est également
+ * passé en paramètre.
+ */
+struct schedACM_t * schedUtilityPropBatch_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int declOK, int seqLgMax)
+{
+   struct schedUtility_t * result = (struct schedUtility_t * ) sim_malloc(sizeof(struct schedUtility_t));
+   assert(result);
+
+   result->schedACM = schedACM_create(dvbs2ll, nbQoS, declOK, &schedUtilityPropBatch_func);
+   schedACM_setPrivate(result->schedACM, result);
+   schedACM_setSeqLgMax(result->schedACM, seqLgMax);
 
    printf_debug(DEBUG_SCHED, "%p created (in schedACM %p)\n", result, result->schedACM);
 

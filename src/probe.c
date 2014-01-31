@@ -853,14 +853,14 @@ double probe_EMAThroughput(struct probe_t * probe)
 
 void probe_sample(struct probe_t * probe, double value)
 {
-   printf_debug(DEBUG_PROBE_VERB, "about to sample %f in \"%s\" (%p, type %s, %d samples)\n",
+   printf_debug(DEBUG_PROBE_VERB, "about to sample %f in \"%s\" (%p, type %s, %lu samples)\n",
 		value,
 		probe_getName(probe), probe,
 		probeTypeName(probe->probeType),
 		probe->nbSamples);
 #ifdef DEBUG_NDES
    if (!strncmp(probe_getName(probe), "[DB]", 4)) {
-     printf_debug(DEBUG_ALWAYS, "about to sample %f in \"%s\" (%p, type %s, %d samples)\n",
+     printf_debug(DEBUG_ALWAYS, "about to sample %f in \"%s\" (%p, type %s, %lu samples)\n",
 		  value,
 		  probe_getName(probe), probe,
 		  probeTypeName(probe->probeType),
@@ -1060,13 +1060,13 @@ void probe_exhaustiveDumpFd(struct probe_t * ep, int fd, int format)
 
 #ifdef DEBUG_NDES
    if (!strncmp(probe_getName(ep), "[DB]", 4)) {
-      printf_debug(DEBUG_ALWAYS, "about to dump %s (type \"%s\") : %d samples\n",
+      printf_debug(DEBUG_ALWAYS, "about to dump %s (type \"%s\") : %lu samples\n",
 	   	probe_getName(ep), 
 		probeTypeName(ep->probeType),
 		ep->nbSamples);
    }
 #endif
-   printf_debug(DEBUG_PROBE, "about to dump %s (type \"%s\") : %d samples\n",
+   printf_debug(DEBUG_PROBE, "about to dump %s (type \"%s\") : %lu samples\n",
 		probe_getName(ep), 
 		probeTypeName(ep->probeType),
 		ep->nbSamples);
@@ -1110,7 +1110,7 @@ void probe_periodicProbeDumpFd(struct probe_t * p, int fd, int format)
 void probe_dumpFd(struct probe_t * probe, int fd, int format)
 {
 
-   printf_debug(DEBUG_PROBE, "about to dump %s (type \"%s\") : %d samples\n",
+   printf_debug(DEBUG_PROBE, "about to dump %s (type \"%s\") : %lu samples\n",
 		probe_getName(probe), 
 		probeTypeName(probe->probeType),
 		probe->nbSamples);
@@ -1162,7 +1162,7 @@ double probe_graphBarThroughput(struct probe_t * probe)
  */
 double probe_timeSliceThroughput(struct probe_t * probe)
 {
-   double result;
+   double result = 0.0;
 
    motSim_error(MS_FATAL, "A FAIRE !\n");
    //   result = probe->data.timeSlice->averageProbe->lastSample/probe->data.timeSlice->period;

@@ -14,7 +14,7 @@ unsigned long nbRemplissageAlloc = 0 ;
 unsigned long nbRemplissageFree = 0;
 
 /*
- * A chaque file est associée une QoS
+ * A chaque file est associÃ©e une QoS
  */
 struct fileQoS {
    struct filePDU_t * file;
@@ -22,22 +22,22 @@ struct fileQoS {
 };
 
 /**
- * @brief Caractérisation générale d'un ordonnanceur sur ACM
+ * @brief CaractÃ©risation gÃ©nÃ©rale d'un ordonnanceur sur ACM
  */
 struct schedACM_t {
    int nbQoS;      //!< Le nombre de files de QoS
    int nbModCod;    //!< Le nombre de MODCOD en aval
 
-   // Les sources sont forcément des files, mais il serait 
-   // bon de les utiliser de façon cohérente avec le modèle I/O
+   // Les sources sont forcÃ©ment des files, mais il serait 
+   // bon de les utiliser de faÃ§on cohÃ©rente avec le modÃ¨le I/O
    struct filePDU_t *** files;  //!< Les files d'attentes
    t_qosMgt          ** qos;
    int                  declassement;
 
    // La destination est forcement un lien DVBS2, mais il serait 
-   // bon de l'utiliser de façon cohérente avec le modèle I/O
-   // De plus, on pourra généraliser sans trop de difficultés (?)
-   // à un ACM
+   // bon de l'utiliser de faÃ§on cohÃ©rente avec le modÃ¨le I/O
+   // De plus, on pourra gÃ©nÃ©raliser sans trop de difficultÃ©s (?)
+   // Ã  un ACM
    struct DVBS2ll_t * dvbs2ll; // Le lien sur lequel on transmet
 
    struct probe_t **** pqFromMQinMC;
@@ -49,30 +49,33 @@ struct schedACM_t {
    int paquetsEnAttente; //!< Ai-je au moins un pq en attente ?
 
    // Dans la version la plus simple, l'algorithme d'ordonnancenemt
-   // doit d�terminer un remplissage pour la prochaine BBFRAME. Il
+   // doit déterminer un remplissage pour la prochaine BBFRAME. Il
    // place alors sa solution dans le champ suivant
    t_remplissage solutionChoisie; //!< La solution choisie lors du
 				  //!dernier ordonnancement
 
-   int nbSol; //!< Le nombre de solutions envisagées
+   int nbSol; //!< Le nombre de solutions envisagÃ©es
    struct probe_t * nbSolProbe;
 
-   // Dans la version plus �volu�e, l'ordonnanceur est amen� �
-   // calculer plusieurs BBFRAMEs d'un coup. Il sera donc invoquer
+   // Dans la version plus évoluée, l'ordonnanceur est amené à
+   // calculer plusieurs BBFRAMEs d'un coup. Il sera donc invoqué
    // plus rarement et proposera le remplissage de plusieurs BBFRAMEs
-   // qui seront utilis�es par autant d'appels cons�cutifs �
-   // getPDU. La liste des remplissages est stock�e dans le champ
+   // qui seront utilisées par autant d'appels consécutifs à
+   // getPDU. La liste des remplissages est stockée dans le champ
    // suivant.
    t_sequence sequenceChoisie;
+   int        seqLgMax;  //!< La longueur maximale d'une séquence 
 
    void * private;
 };
-/*
- * Création d'un scheduler avec sa "destination". Cette dernière doit
- * être de type struct DVBS2ll_t  et avoir déjà été complêtement
- * construite (tous les MODCODS créés).
- * Le nombre de files de QoS différentes par MODCOD est également
- * passé en paramètre.
+
+/**
+ * @brief Création d'un scheduler avec sa "destination"
+ * Cette derniÃ¨re doit
+ * Ãªtre de type struct DVBS2ll_t  et avoir dÃ©jÃ  Ã©tÃ© complÃªtement
+ * construite (tous les MODCODS crÃ©Ã©s).
+ * Le nombre de files de QoS diffÃ©rentes par MODCOD est Ã©galement
+ * passÃ© en paramÃ¨tre.
  */
 struct schedACM_t * schedACM_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int declOK,
 				    struct schedACM_func_t * func)
@@ -92,7 +95,7 @@ struct schedACM_t * schedACM_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int d
    result->nbQoS = nbQoS;
    result->nbModCod = DVBS2ll_nbModcod(dvbs2ll);
 
-   // Allocation des tableaux de files, qos et paramètres
+   // Allocation des tableaux de files, qos et paramÃ¨tres
    result->files = (struct filePDU_t ***)sim_malloc(sizeof(struct filePDU_t **)*result->nbModCod);
    assert(result->files);
    result->qos = (t_qosMgt **)sim_malloc(sizeof(t_qosMgt *)*result->nbModCod);
@@ -112,7 +115,7 @@ struct schedACM_t * schedACM_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int d
       }
    }
 
-   // Allocation des tableaux de probes pour la répartition des paquets
+   // Allocation des tableaux de probes pour la rÃ©partition des paquets
    result->pqFromMQinMC = (struct probe_t ****)sim_malloc(result->nbModCod*sizeof(struct probe_t ***));
    for (i = 0; i < result->nbModCod; i++) {
       result->pqFromMQinMC[i] = (struct probe_t ***)sim_malloc(result->nbQoS*sizeof(struct probe_t **));
@@ -124,6 +127,8 @@ struct schedACM_t * schedACM_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int d
       }
    }
    remplissage_init(&(result->solutionChoisie), DVBS2ll_nbModcod(dvbs2ll), nbQoS);
+
+   result->seqLgMax = 1; // Pas de batch par défaut
 
    result->nbSol = 0;
    result->nbSolProbe = NULL;
@@ -139,7 +144,7 @@ struct schedACM_t * schedACM_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int d
 }
 
 /*
- * Y a-t-il des paquets en attente ? Le résultat est booléen
+ * Y a-t-il des paquets en attente ? Le rÃ©sultat est boolÃ©en
  */
 int schedACM_getPacketsWaiting(struct schedACM_t * sched)
 {
@@ -147,9 +152,9 @@ int schedACM_getPacketsWaiting(struct schedACM_t * sched)
 }
 
 /*
- * Si les fonctions getPDU et processPDU sont redéfinies, la présence
- * de paquets en attente n'est plus mise à jour. Il faut donc
- * l'assurer par des appels à la fonction suivante.
+ * Si les fonctions getPDU et processPDU sont redÃ©finies, la prÃ©sence
+ * de paquets en attente n'est plus mise Ã  jour. Il faut donc
+ * l'assurer par des appels Ã  la fonction suivante.
  */
 void schedACM_setPacketsWaiting(struct schedACM_t * sched, int b)
 {
@@ -157,7 +162,7 @@ void schedACM_setPacketsWaiting(struct schedACM_t * sched, int b)
 }
 
 /*
- * Modification des données privées.
+ * Modification des donnÃ©es privÃ©es.
  */
 void schedACM_setPrivate(struct schedACM_t * sched, void * private)
 {
@@ -165,7 +170,7 @@ void schedACM_setPrivate(struct schedACM_t * sched, void * private)
 }
 
 /*
- * Obtention des données privées
+ * Obtention des donnÃ©es privÃ©es
  */
 void * schedACM_getPrivate(struct schedACM_t * sched)
 {
@@ -173,8 +178,8 @@ void * schedACM_getPrivate(struct schedACM_t * sched)
 }
 
 /*
- * Ajout d'une sonde pour compter les paquets d'une file (m, q) émis par un
- * MODCOD mc (mc peut être < m en cas de reclassement)
+ * Ajout d'une sonde pour compter les paquets d'une file (m, q) Ã©mis par un
+ * MODCOD mc (mc peut Ãªtre < m en cas de reclassement)
  */
 void schedACM_setPqFromMQinMC(struct schedACM_t * sched, int m, int q, int mc, struct probe_t * pr)
 {
@@ -182,10 +187,10 @@ void schedACM_setPqFromMQinMC(struct schedACM_t * sched, int m, int q, int mc, s
 }
 
 /*
- * Attribution des files d'attente d'entrée pour un MODCOD donné dans
- * le paramètre mc. Le paramètre files est un tableau de pointeurs sur
+ * Attribution des files d'attente d'entrÃ©e pour un MODCOD donnÃ© dans
+ * le paramÃ¨tre mc. Le paramÃ¨tre files est un tableau de pointeurs sur
  * des files de PDU. Il doit en contenir au moins nbQoS. Les nbQoS
- * premières seront utilisées ici.
+ * premiÃ¨res seront utilisÃ©es ici.
  */
 void schedACM_setInputQueues(struct schedACM_t * sched, int mc, struct filePDU_t * files[])
 {
@@ -198,7 +203,7 @@ void schedACM_setInputQueues(struct schedACM_t * sched, int mc, struct filePDU_t
 }
 
 /*
- * Affectation d'une sonde permettant de suivre le débit estimé par
+ * Affectation d'une sonde permettant de suivre le dÃ©bit estimÃ© par
  * l'algorithme pour chaque file
  */
 void schedACM_addThoughputProbe(struct schedACM_t * sched, int m, int q, struct probe_t * bwProbe)
@@ -207,9 +212,9 @@ void schedACM_addThoughputProbe(struct schedACM_t * sched, int m, int q, struct 
 }
 
 /*
- * Attribution du type de QoS d'une file. La file est identififée par
- * (mc, qos), le type de QoS voulue est passée en paramètre, ainsi
- * qu'un éventuel paramètre de pondération.
+ * Attribution du type de QoS d'une file. La file est identififÃ©e par
+ * (mc, qos), le type de QoS voulue est passÃ©e en paramÃ¨tre, ainsi
+ * qu'un Ã©ventuel paramÃ¨tre de pondÃ©ration.
  */
 void schedACM_setFileQoSType(struct schedACM_t * sched, int mc, int qos, int qosType, double beta, double rmin)
 {
@@ -243,7 +248,7 @@ inline struct filePDU_t * schedACM_getInputQueue(struct schedACM_t * sched, int 
 }
 
 /*
- * Peut-on faire du "déclassement" ?
+ * Peut-on faire du "dÃ©classement" ?
  */
 inline int schedACM_getReclassification(struct schedACM_t * sched)
 {
@@ -283,7 +288,7 @@ t_remplissage * schedACM_getSolution(struct schedACM_t * sched)
 }
 
 /*
- *   Fonction à invoquer par l'ordonnanceur pour décompter les solutions
+ *   Fonction Ã  invoquer par l'ordonnanceur pour dÃ©compter les solutions
  */
 void schedACM_tryingNewSolution(struct schedACM_t * sched)
 {
@@ -291,29 +296,47 @@ void schedACM_tryingNewSolution(struct schedACM_t * sched)
 }
 
 /*
- * Ajout d'une sonde permettant de mesurer le nombre de solutions testées
+ * Ajout d'une sonde permettant de mesurer le nombre de solutions testÃ©es
  */
 void schedACM_addNbSolProbe(struct schedACM_t * sched, struct probe_t * probe)
 {
    probe_chain(probe, sched->nbSolProbe);
    sched->nbSolProbe = probe;
 }
-/*
- * Combien de solutions testées ?
+
+/**
+ * @brief Combien de solutions testÃ©es ?
  */
 int schedACM_getNbSolutions(struct schedACM_t * sched)
 {
   return sched->nbSol;
 };
 
+/**
+ * @brief Choix de la longureur maximale d'une séquence
+ */
+void schedACM_setSeqLgMax(struct schedACM_t * sched, int seqLgMax)
+{
+   assert(sched->func->batch != 0);
+   sched->seqLgMax = seqLgMax;
+}
+
+/**
+ * @brief Lecture de la longureur maximale d'une séquence
+ */
+int schedACM_getSeqLgMax(struct schedACM_t * sched)
+{
+   return sched->seqLgMax;
+}
+
 /********************************************************************************/
-/*   La dérivée de la fonction d'utilité                                        */
+/*   La dÃ©rivÃ©e de la fonction d'utilitÃ©                                        */
 /********************************************************************************/
 
 /*
- * Calcul de la valeur en x de la derivee d'une fonction d'utilité
- * Le paramètre dvbs2ll est ici nécessaire pour certaines fonctions
- * Il faudra envisager de mettre ces info (le débit du lien en gros
+ * Calcul de la valeur en x de la derivee d'une fonction d'utilitÃ©
+ * Le paramÃ¨tre dvbs2ll est ici nÃ©cessaire pour certaines fonctions
+ * Il faudra envisager de mettre ces info (le dÃ©bit du lien en gros
  * pour le moment) dans la structure t_qosMgt, ou pas !)
  */
 double utiliteDerivee(t_qosMgt * qos, double x, struct DVBS2ll_t * dvbs2ll)
@@ -323,10 +346,10 @@ double utiliteDerivee(t_qosMgt * qos, double x, struct DVBS2ll_t * dvbs2ll)
 
    switch (qos->typeQoS) {
       case kseQoS_log :
-         result = qos->beta/x;   // 2012-02-07 : remplacement de 1.0 au numérateur
+         result = qos->beta/x;   // 2012-02-07 : remplacement de 1.0 au numÃ©rateur
       break;
 
-      case kseQoS_lin :             // Utilité linéaire
+      case kseQoS_lin :             // UtilitÃ© linÃ©aire
          result = qos->beta;
       break;
 
@@ -341,18 +364,18 @@ double utiliteDerivee(t_qosMgt * qos, double x, struct DVBS2ll_t * dvbs2ll)
       break;
 
       default : 
-         motSim_error(MS_FATAL, "QoS de type %d non implantée\n", qos->typeQoS);
+         motSim_error(MS_FATAL, "QoS de type %d non implantÃ©e\n", qos->typeQoS);
    }
 
    return result;
 }
 
 /********************************************************************************/
-/*   Les fonctions liées au modèle d'entrée/sortie                              */
+/*   Les fonctions liÃ©es au modÃ¨le d'entrÃ©e/sortie                              */
 /********************************************************************************/
 
 /*
- * L'ordonnanceur lui-même
+ * L'ordonnanceur lui-mÃªme
  */
 void schedACM_schedule(struct schedACM_t * sched)
 {
@@ -371,12 +394,11 @@ void schedACM_schedule(struct schedACM_t * sched)
    }
 }
 
-
 /**
- * @brief Construction g�n�rique d'une BBFRAME
+ * @brief Construction générique d'une BBFRAME
  *
  * Construction d'une BBFRAME avec les paquets en attente dans les
- * files s'il y en a suffisemment. Sinon, un pointeur NULL est retourné.
+ * files s'il y en a suffisemment. Sinon, un pointeur NULL est retournÃ©.
  */
 struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
 {
@@ -396,10 +418,10 @@ struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
       printf_debug(DEBUG_ACM, "Volume propose : %d\n", sched->solutionChoisie.volumeTotal);
 
 
-      // Si on trouve au moins un paquet à envoyer
+      // Si on trouve au moins un paquet Ã  envoyer
       if (sched->solutionChoisie.volumeTotal) {
          vol = 0;
-         // On extrait les paquets concernés depuis les files d'entré
+         // On extrait les paquets concernÃ©s depuis les files d'entrÃ©
          for (m = 0; m < nbModCod(sched); m++) {
             for (q = 0; q < nbQoS(sched); q++) {
                s = 0;
@@ -411,7 +433,7 @@ struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
                   PDU_free(pdu);
                }
 	       vol += s;
-               // Mise à jour des débits (utilisés pour le calcul du gain)
+               // Mise Ã  jour des dÃ©bits (utilisÃ©s pour le calcul du gain)
                alphaMaaike = pow(alpha, 1000.0*DVBS2ll_bbframeTransmissionTime(schedACM_getACMLink(sched),
 									       sched->solutionChoisie.modcod));
 	       schedACM_getQoS(sched, m, q)->debit = calculeEMA(schedACM_getQoS(sched, m, q)->debit,
@@ -429,10 +451,14 @@ struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
 
          printf_debug(DEBUG_ACM, "Construction d'une BBFRAME du modcod %d\n", sched->solutionChoisie.modcod);
 
+
          // On construit une BBFRAME
          assert(sched->solutionChoisie.modcod >= 0);
          assert(sched->solutionChoisie.modcod < nbModCod(sched));
 
+         // Attention, on passe l'indice du MODCOD en champs privé de la PDU
+         // récupéré en particulier dans DVBS2ll_sendPDU. C'est pas
+         // top, il  faudra plutôt faire une file par MODCOD
          pdu = PDU_create(vol, (void *)sched->solutionChoisie.modcod);
       }
    }
@@ -440,12 +466,28 @@ struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
    return pdu;
 }
 
+/**
+ * @brief Construction générique d'une BBFRAME avec un ordonnanceur
+ * "par lot" 
+ *
+ * Construction d'une BBFRAME avec les paquets en attente dans les
+ * files s'il y en a suffisemment. Sinon, un pointeur NULL est retournÃ©.
+ */
+struct PDU_t * schedACM_buildBBFRAMEGenericBatch(struct schedACM_t * sched)
+{
+   motSim_error(MS_FATAL, "Pas implanté !");
+
+   // Tant que la séquence calculée n'est pas vide, on prend la
+   // première trame de cette séquence.
+
+   return NULL;
+}
 
 /**
  * @brief Construction d'une BBFRAME
  * 
  * Construction d'une BBFRAME avec les paquets en attente dans les
- * files s'il y en a suffisemment. Sinon, un pointeur NULL est retourné.
+ * files s'il y en a suffisemment. Sinon, un pointeur NULL est retournÃ©.
  */
 struct PDU_t * schedACM_buildBBFRAME(struct schedACM_t * sched)
 {
@@ -453,18 +495,23 @@ struct PDU_t * schedACM_buildBBFRAME(struct schedACM_t * sched)
       printf_debug(DEBUG_ACM, "calling dedicated facility ...\n");
       return sched->func->buildBBFRAME(sched->private);
    } else {
-      printf_debug(DEBUG_ACM, "calling generic facility ...\n");
-      return schedACM_buildBBFRAMEGeneric(sched);
+      if (sched->func->batch) {
+         printf_debug(DEBUG_ACM, "calling generic batch facility ...\n");
+         return schedACM_buildBBFRAMEGenericBatch(sched);
+      } else {
+         printf_debug(DEBUG_ACM, "calling generic facility ...\n");
+         return schedACM_buildBBFRAMEGeneric(sched);
+      }
    }
 }
 
 /*
- * Fonction invoquée lors de la disponibilité d'un paquet dans une des
+ * Fonction invoquÃ©e lors de la disponibilitÃ© d'un paquet dans une des
  * files.
- * En fait, ici on ne fait rien. L'activitée sera dictée par la
- * disponibilité du support. C'est uniquement sur des événements
+ * En fait, ici on ne fait rien. L'activitÃ©e sera dictÃ©e par la
+ * disponibilitÃ© du support. C'est uniquement sur des Ã©vÃ©nements
  * de l'aval que l'on agit, ...
- * WARNING c'est pas g�nial, � revoir !
+ * WARNING c'est pas génial, à revoir !
  */
 int schedACM_processPDUGeneric(struct schedACM_t * sched,
                                 getPDU_t getPDU, void * source)
@@ -473,7 +520,7 @@ int schedACM_processPDUGeneric(struct schedACM_t * sched,
 
    // Si c'est juste pour tester si je suis pret
    if ((getPDU == NULL) || (source == NULL)) {
-      return 1; // On fait comme si on �tait pret puisque on g�re nous m�me
+      return 1; // On fait comme si on était pret puisque on gère nous même
    }
 
    printf_debug(DEBUG_ACM, "Un paquet dispo pour %p\n", sched);
@@ -484,25 +531,26 @@ int schedACM_processPDUGeneric(struct schedACM_t * sched,
    if (DVBS2ll_available(schedACM_getACMLink(sched))) {
       printf_debug(DEBUG_ACM, "Support libre\n");
       pdu = schedACM_buildBBFRAME(sched);
-      // WARNING TBD remplacer par le modèle classique (destination, ...)
+      // WARNING TBD remplacer par le modÃ¨le classique (destination, ...)
       DVBS2ll_sendPDU(schedACM_getACMLink(sched), pdu);
-   } else { // Je me le note pour être prêt lorsque le support sera dispo
+   } else { // Je me le note pour Ãªtre prÃªt lorsque le support sera dispo
       sched->paquetsEnAttente = 1;    //WARNING, pourquoi uniquement dans ce cas !?
       printf_debug(DEBUG_ACM, "Support occupe\n");
    }
+   return 0; // ?
 }
 
 /**
- * @brief Fonction g�n�rique de production d'une PDU
+ * @brief Fonction générique de production d'une PDU
  *
  * @param sched L'ordonnanceur qui doit fournir la PDU
- * @result la PDU cr��e (NULL si rien n'est disponible)
+ * @result la PDU créée (NULL si rien n'est disponible)
  *
- * Fonction à invoquer lorsque le support est libre afin de solliciter
- * la construction d'une nouvelle BBFRAME. Cette fonction g�n�rique
- * sera utilis�e si l'ordonnanceur n'en implante pas une version
- * sp�cifique.
- * Elle se contente de faire appel � la fonction de cr�ation d'une
+ * Fonction Ã  invoquer lorsque le support est libre afin de solliciter
+ * la construction d'une nouvelle BBFRAME. Cette fonction générique
+ * sera utilisée si l'ordonnanceur n'en implante pas une version
+ * spécifique.
+ * Elle se contente de faire appel à la fonction de création d'une
  * BBFRAME.
  */
 struct PDU_t * schedACM_getPDUGeneric(struct schedACM_t * sched)
@@ -519,7 +567,7 @@ struct PDU_t * schedACM_getPDUGeneric(struct schedACM_t * sched)
 
 
 /*
- * Fonction à invoquer lorsque le support est libre afin de solliciter
+ * Fonction Ã  invoquer lorsque le support est libre afin de solliciter
  * la construction d'une nouvelle BBFRAME
  */
 struct PDU_t * schedACM_getPDU(struct schedACM_t * sched)
@@ -534,10 +582,10 @@ struct PDU_t * schedACM_getPDU(struct schedACM_t * sched)
 }
 
 /*
- * Fonction invoquée lors de la disponibilité d'un paquet dans une des
+ * Fonction invoquÃ©e lors de la disponibilitÃ© d'un paquet dans une des
  * files.
- * En fait, ici on ne fait rien. L'activitée sera dictée par la
- * disponibilité du support. C'est uniquement sur des événements
+ * En fait, ici on ne fait rien. L'activitÃ©e sera dictÃ©e par la
+ * disponibilitÃ© du support. C'est uniquement sur des Ã©vÃ©nements
  * de l'aval que l'on agit, ...
  */
 int schedACM_processPDU(struct schedACM_t * sched,
@@ -556,8 +604,8 @@ int schedACM_processPDU(struct schedACM_t * sched,
 
 
 /*
- * Affichage de l'état du système des files d'attente avec l'interet de
- * chaque paquet étant donné le MODCOD envisagé 'mc'.
+ * Affichage de l'Ã©tat du systÃ¨me des files d'attente avec l'interet de
+ * chaque paquet Ã©tant donnÃ© le MODCOD envisagÃ© 'mc'.
  */
 void schedACM_afficherFiles(struct schedACM_t * sched, int mc)
 {
@@ -586,7 +634,7 @@ void schedACM_afficherFiles(struct schedACM_t * sched, int mc)
 /**********************************************************************************/
 
 /*
- * Remise à zéro. On doit pouvoir faire plus efficace (tout n'est pas utilisé)
+ * Remise Ã  zÃ©ro. On doit pouvoir faire plus efficace (tout n'est pas utilisÃ©)
  */
 void remplissage_raz(t_remplissage * tr, int nbModCod, int nbQoS)
 {
@@ -606,7 +654,7 @@ void remplissage_raz(t_remplissage * tr, int nbModCod, int nbQoS)
 }
 
 /*
- * Initialisation (création) d'une solution de remplissage
+ * Initialisation (crÃ©ation) d'une solution de remplissage
  */
 void remplissage_init(t_remplissage * tr, int nbModCod, int nbQoS)
 {
@@ -641,8 +689,21 @@ void remplissage_free(t_remplissage * tr, int nbModCod)
    }
 }
 
+
+/**
+ * @brief Nombre de paquets d'une file prévus dans un remplissage
+ * @param tr pointeur sur le remplissage observé
+ * @param m l'identifiant du MODCOD concerné
+ * @param q L'identifiant de file de QoS concerné
+ * @result Le nombre de paquets prévus dans cette file
+ */
+int remplissage_nbPackets(t_remplissage * tr, int m, int q)
+{
+   return tr->nbrePaquets[m][q];
+}
+
 /*
- * Initialisation (création) d'un tableau de solutions
+ * Initialisation (crÃ©ation) d'un tableau de solutions
  */
 void tabRemplissage_init(t_remplissage * tr, int nbR, int nbModCod, int nbQoS)
 {
@@ -663,8 +724,8 @@ void tabRemplissage_raz(t_remplissage * tr, int nbR, int nbModCod, int nbQoS)
 }
 
 /*
- * Copie d'une stratégie de remplissage dans une autre. La destination
- * doit être initialisée
+ * Copie d'une stratÃ©gie de remplissage dans une autre. La destination
+ * doit Ãªtre initialisÃ©e
  */
 void remplissage_copy(t_remplissage * src, t_remplissage * dst, int nbModCod, int nbQoS)
 {
@@ -673,7 +734,7 @@ void remplissage_copy(t_remplissage * src, t_remplissage * dst, int nbModCod, in
    dst->modcod = src->modcod;
    dst->volumeTotal = src->volumeTotal;
    dst->interet = src->interet;
-   dst->nbChoix = src->nbChoix;   // Attention au piège
+   dst->nbChoix = src->nbChoix;   // Attention au piÃ¨ge
    dst->casTraite = src->casTraite;
    for (m = 0; m < nbModCod; m++) {
       assert(src->nbrePaquets[m]);
@@ -682,6 +743,36 @@ void remplissage_copy(t_remplissage * src, t_remplissage * dst, int nbModCod, in
          dst->nbrePaquets[m][q] = src->nbrePaquets[m][q];
       }
    }
+}
+/**
+ * @brief Initialisation d'une séquence
+ */
+void sequence_init(t_sequence * seq, int lgMax, int nbModCod, int nbQoS)
+{
+   seq->longueur = lgMax;
+   seq->remplissages = (t_remplissage *)malloc(lgMax * sizeof(t_remplissage));
+   seq->positionActuelle = 0;
+   tabRemplissage_init(seq->remplissages, lgMax, nbModCod, nbQoS);
+}
+
+
+/**
+ * @brief Nombre de paquets d'une file prévus dans une séquence
+ * @param tr pointeur sur le remplissage observé
+ * @param m l'identifiant du MODCOD concerné
+ * @param q L'identifiant de file de QoS concerné
+ * @result Le nombre de paquets prévus dans cette file
+ */
+int sequencee_nbPackets(t_sequence * seq, int m, int q)
+{
+   int result = 0;
+   int r;
+   
+   for (r=0 ; r <= seq->positionActuelle ; r++) {
+      result += seq->remplissages[r].nbrePaquets[m][q];
+   };
+
+   return result ;
 }
 
 /**********************************************************************************/

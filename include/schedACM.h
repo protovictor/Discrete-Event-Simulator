@@ -100,15 +100,9 @@ typedef struct {
  */
 typedef struct {
    int longueur; //!< Nombre maximal de trames consécutives
-
-   /* Les champs suivants sont à la dispo de l'ordonnanceur. Il
-   faudrait surement faire plus propre, avec un  pointeur sur prive
-   ou une union, ... */
-
+   t_remplissage * remplissages ; //!< La séquence des remplissages envisagés
    int       positionActuelle; //!< Identification de la BBFRAME en
                                //!cours d'analyse
-   double    interet;
-   int       casTraite;        //!< Pour éviter de retraiter un cas
 } t_sequence ;
 
 /**
@@ -141,6 +135,7 @@ struct schedACM_func_t {
    struct PDU_t * (* buildBBFRAME)(void * private);
 
    void (*schedule)(void * private);
+   int batch;    //! < Une valeur non nulle stipule un ordonnanceur par lot
 };
 
 struct schedACM_t;
@@ -293,8 +288,6 @@ void schedACM_afficherFiles(struct schedACM_t * sched, int mc);
  */
 t_remplissage * schedACM_getSolution(struct schedACM_t * sched);
 
-
-
 /*
  *   Fonction à invoquer par l'ordonnanceur pour décompter les solutions
  */
@@ -310,24 +303,51 @@ void schedACM_addNbSolProbe(struct schedACM_t * sched, struct probe_t * probe);
  */
 int schedACM_getNbSolutions(struct schedACM_t * sched);
 
+/**
+ * @brief Choix de la longureur maximale d'une séquence
+ */
+void schedACM_setSeqLgMax(struct schedACM_t * sched, int seqLgMax);
+
+/**
+ * @brief Lecture de la longureur maximale d'une séquence
+ */
+int schedACM_getSeqLgMax(struct schedACM_t * sched);
+
 /**********************************************************************************/
 /*   Gestion des remplissages                                                     */
 /**********************************************************************************/
 
-/*
- * Initialisation (création) d'une solution de remplissage
+/**
+ * @brief Initialisation (création) d'une solution de remplissage
  */
 void remplissage_init(t_remplissage * tr, int nbModCod, int nbQoS);
 
-/*
- * Remise à zéro.
+/**
+ * @brief Remise à zéro d'un remplissage
  */
 void remplissage_raz(t_remplissage * tr, int nbModCod, int nbQoS);
 
+/**
+ * @brief Destruction d'un remplissage
+ */
 void remplissage_free(t_remplissage * tr, int nbModCod);
+
+/**
+ * @brief Nombre de paquets d'une file prévus dans un remplissage
+ * @param tr pointeur sur le remplissage observé
+ * @param m l'identifiant du MODCOD concerné
+ * @param q L'identifiant de file de QoS concerné
+ * @result Le nombre de paquets prévus dans cette file
+ */
+int remplissage_nbPackets(t_remplissage * tr, int m, int q);
 
 void tabRemplissage_init(t_remplissage * tr, int nbR, int nbModCod, int nbQoS);
 void tabRemplissage_raz(t_remplissage * tr, int nbR, int nbModCod, int nbQoS);
 void remplissage_copy(t_remplissage * src, t_remplissage * dst, int nbModCod, int nbQoS);
+
+/**
+ * @brief Initialisation d'une séquence
+ */
+void sequence_init(t_sequence * seq, int lgMax, int nbModCod, int nbQoS);
 
 #endif

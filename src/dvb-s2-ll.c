@@ -273,11 +273,11 @@ void  DVBS2ll_endPropagation(struct DVBS2ll_t * dvbs2ll)
 void DVBS2ll_sendPDU(struct DVBS2ll_t * dvbs2ll, struct PDU_t * pdu)
 {
    double transmissionTime;
-   double propagationTime = 0.0; // WARNING on ne peut pas mettre plus, on ne sait pas garder plus d'une PDU !!!
+   //   double propagationTime = 0.0; // WARNING on ne peut pas mettre plus, on ne sait pas garder plus d'une PDU !!!
 
    int mc = dvbs2ll->nbModCods; // Représente une DUMMY PLFRAME
    unsigned int bitLength;
-   unsigned int bitsPerSymbol;
+   //   unsigned int bitsPerSymbol;
 
    // On doit être dispo
    assert(dvbs2ll->available);
@@ -285,10 +285,10 @@ void DVBS2ll_sendPDU(struct DVBS2ll_t * dvbs2ll, struct PDU_t * pdu)
    // Le cas pdu == NULL est toléré et correspond à une
    // demande d'émission d'une trame de bourage (DUMMY PLFRAME)
    if (pdu) {
-      mc  = (int)PDU_private(pdu);
+     mc  = (int)(long)PDU_private(pdu);
   
       bitLength = dvbs2ll->modcod[mc].bitLength;
-      bitsPerSymbol = dvbs2ll->modcod[mc].bitsPerSymbol;
+      //bitsPerSymbol = dvbs2ll->modcod[mc].bitsPerSymbol;
 
       // Les tailles de PDU sont en octets, celle du DVB en bits
       assert(8*PDU_size(pdu) <= bitLength);
