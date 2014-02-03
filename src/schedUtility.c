@@ -226,7 +226,20 @@ void schedulerUtility(struct schedUtility_t * sched)
 }
 
 /**
- * @brief Version proportionnelle : On sert chaque file au prorata de sa fonction d'utilité
+ * @brief Version proportionnelle : On sert chaque file au prorata de
+ * sa fonction d'utilité
+ * @param sched L'ordonnanceur étudié
+ * @param mc Le MODCOD à étudier dans cette fonction
+ * @param remplissage La solution trouvée par cette fonction (en
+ * entrée il doit avoir été mis à zéro, sauf son MODCOD).
+ *
+ * Cette fonction recherche donc, pour un MODCOD donné, le "meilleur"
+ * remplissage possible. Elle place son résultat dans la variable
+ * remplissage.
+ * Le meilleur remplissage est choisi ainsi. Chaque file est servie au
+ * prorata de la dérivé de sa fonction d'utilité. Comme on sert des
+ * paquets entiers, on complète marginalement en ajoutant dans une
+ * seconde phase des paquets depuis les files prises dans l'ordre.
  */
 void schedulerUtilityMCProp(struct schedUtility_t * sched, int mc, t_remplissage * remplissage)
 {
@@ -451,14 +464,55 @@ void schedulerUtilityPropBatch(struct schedUtility_t * sched)
 {
    t_sequence sequenceChoisie; //! < La séquence que l'on va construire
    t_sequence sequence; //! < Une séquence générique
-   int m,q;
+   int BBFRAMECourante = 0;
 
-   sequence_init(&sequence, schedACM_getLgMax(sched->schedACM), nbModCod(sched->schedACM), nbQoS(sched->schedACM));
+   int mc;
 
-   // On parcourt l'ensemble des séquences de la façon suivante
+   sequence_init(&sequence,
+                 schedACM_getLgMax(sched->schedACM),
+                 nbModCod(sched->schedACM),
+                 nbQoS(sched->schedACM));
 
-   // 1 - On construit une séquence
-   // 2 - Si c'est la meilleure, on la sauvegarde
+   /* On parcourt l'ensemble des séquences de la façon suivante.
+      La variable BBFRAMECourante pointe sur l'indice de la prochaine
+      trame à calculer. On étudie sur elle tous les MODCODs non encore
+      explorés et, pour chacun d'entre eux, on avance à la BBFRAME
+      suivante. Lorsqu'on les a tous explorés, on revient en arrière
+      d'une trame. Si on en arrive à 0, c'est qu'on a tout exploré.
+   */
+   while (on na pas fini) {
+      // 1 - On construit la première séquence à partir de la
+      // position actuelle
+      while (sequence non complete) {
+         // On prépare le remplissage et on évalue la trame actuelle
+  	 mc = sequence.remplissages[sequence.positionActuelle].modcod;
+         remplissage_raz(&(sequence.remplissages[sequence.positionActuelle])
+			 nbModCod(sched->schedACM),
+			 nbQoS(sched->schedACM));
+  	 sequence.remplissages[sequence.positionActuelle].modcod = mc;
+ 	 schedulerUtilityMCProp(sched,
+				mc
+				&(sequence.remplissages[sequence.positionActuelle]));
+
+  	 // On avance d'une trame
+         sequence.positionActuelle++;
+
+         // C'est la fin de la séquence si 
+         //    OU positionActuelle == seqLgMax
+         //    OU filesVides
+
+         // S'il n'y a plus rien à évaluer, c'est que la séquence est
+         // complète 
+      }
+      // 2 - Si c'est la meilleure, on la sauvegarde
+
+      // 3 - On avance d'un cran pour aller chercher la suivante en 1
+      while () {
+         // On incrémente le MODCOD de la dernière et on le raz
+         sequence.remplissages[sequence.positionActuelle].modcod < 
+	   // Si on est au bout, on recule à la précédente
+      }
+   }
 }
 
 /**
