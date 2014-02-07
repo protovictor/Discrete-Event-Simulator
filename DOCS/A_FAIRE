@@ -1,23 +1,8 @@
-DANS BRANCHE UNSTABLE
-=====================
-   . [TOUS]
-      - Enrichir les fonctions malloc/free pour (de façon optionnelle
-      !) être capable de mieux suivre les fuites mémoire.
-
-   . [PDU]
-      - Des sondes sur les PDUs pour suivre leur parcours ? Le
-      problème est qu'on ne peut pas le faire pour toutes les PDU. Ou
-      alors si, dans la mesure où on a décrété qu'on le fait dans une
-      simu ... vu que du coup il faut garder des tas de choses, à
-      commencer par la PDU ...
-      Ce qui serait tentant c'est une seule sonde "événements", mais
-      alors il faut les typer (entrée, sortie, ...). Est-ce qu'on lie
-      ça aux événements du simulateur, et ce sont ces événements qui
-      sont typés ? Dans ce cas là il ne faut plus les détruire, ... ni
-      les PDUs d'ailleurs !
-
 URGENT
 ======
+   . [PDU-SOURCE]
+        la date de création n'est pas la date d'envoi, ce qui peut
+	être trompeur. Voir si on ne peut pas faire mieux
    . [TOUS]
       - Un ordonnanceur DRR
    . EXAMPLES/DEBITS
@@ -98,6 +83,11 @@ transistoires, comme une date d'entrée.
       - Un mix des deux précédentes peut-être ? Par exemple en
 fonction de la façon de construire.
 
+
+A FAIRE
+=======
+   . Supprimer les tests de pointeur NULL avant de sampler sur une
+   sonde puisque c'est accepté !
 EN COURS
 ========
    . Un canal de propagation

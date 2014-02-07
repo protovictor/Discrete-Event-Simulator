@@ -110,8 +110,12 @@ void probe_setName(struct probe_t * p, char * name);
  */
 char * probe_getName(struct probe_t * p);
 
-/*
- * Echantillonage d'une valeur
+/**
+ * @brief Echantillonage d'une valeur
+ * @param probe La sonde dans laquelle on veut enregistrer
+ * @param value La valeur à enregistrer
+ * La probe peut être NULL, auquel cas rien n'est enregistrer,
+ * naturellement 
  */
 void probe_sample(struct probe_t * probe, double value);
 

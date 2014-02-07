@@ -293,7 +293,7 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
 
       file->nombre++;
       file->size += PDU_size(PDU);
- printf("Coucou\n");
+
       ndesLog_logLineF(PDU_getObject(PDU), "IN %d", filePDU_getObjectId(file));
 
       /* Gestion des sondes */
@@ -366,13 +366,20 @@ int filePDU_length(struct filePDU_t * file)
    return file->nombre;
 }
 
-/*
- * Taille des n premiers paquets de la file (n>=1)
+/**
+ * @brief Taille cumulée des n premières PDUs
+ * @param file la file 
+ * @param n le nombre (positif ou nul) de PDUs
+ * @return le cumul des tailles des n premières PDUs de la file
  */
 int filePDU_size_n_PDU(struct filePDU_t * file, int n)
 {
    int i = 1;
    int result;
+   if (n == 0) {
+      return 0;
+   }
+
    struct PDU_t * pq = file->premier;
 
    assert(pq);

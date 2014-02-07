@@ -10,7 +10,7 @@
  * schedACM_getPDU. Ces deux fonctions invoquent une fonction
  * générique (schedACM_processPDUGeneric et schedACM_getPDUGeneric
  * respectivement), mais chaque ordonnanceur peut redéfinir sa propre
- * fonction (a déclaer dans le champ func).
+ * fonction (a déclarer dans le champ func).
  *
  * Fonction d'entrée
  * 
@@ -43,6 +43,11 @@
  * construit une solution. C'est la seule fonction à définir. 
  * Si la structure ne suffit pas, il faut redéfinir éventuellement la
  * fonction de création d'une BBFRAME, voire la fonction getPDU.
+ *
+ * A FAIRE : 
+ * - mettre les nbQoS et nbMODCOD dans les remplissage et
+ * sequence. 
+ * - Pourquoie le modcod des remplissage est initialisé à -1 ?
  */
 #ifndef __SCHED_ACM
 #define __SCHED_ACM
@@ -103,6 +108,8 @@ typedef struct {
    t_remplissage * remplissages ; //!< La séquence des remplissages envisagés
    int       positionActuelle; //!< Identification de la BBFRAME en
                                //!cours d'analyse
+   int nextFrameToSend ; //!< Afin de permettre d'utiliser la séquence
+			 //!pour émettre effectivement
 } t_sequence ;
 
 /**
@@ -135,7 +142,8 @@ struct schedACM_func_t {
    struct PDU_t * (* buildBBFRAME)(void * private);
 
    void (*schedule)(void * private);
-   int batch;    //! < Une valeur non nulle stipule un ordonnanceur par lot
+   int batch;    //! < Une valeur non nulle stipule un ordonnanceur
+		 //! par lot ATTENTION a mettre dans schedACM
 };
 
 struct schedACM_t;
@@ -226,13 +234,13 @@ void schedACM_setFileQoSType(struct schedACM_t * sched, int mc, int qos, int qos
 /*
  * Consultation du nombre de ModCod
  */
-int nbModCod(struct schedACM_t * sched);
+int schedACM_getNbModCod(struct schedACM_t * sched);
 
 
 /*
  * Consultation du nombre de QoS par MODCOD
  */
-int nbQoS(struct schedACM_t * sched);
+int schedACM_getNbQoS(struct schedACM_t * sched);
 
 /*
  * Obtention d'un pointeur sur une des files
@@ -283,10 +291,21 @@ void schedACM_setPacketsWaiting(struct schedACM_t * sched, int b);
 
 void schedACM_afficherFiles(struct schedACM_t * sched, int mc);
 
+/**
+ * @brief Un affichage synthétique des files
+ */
+void schedACM_printFilesSummary(struct schedACM_t * sched);
+
 /*
  * Obtention d'un pointeur sur la solution choisie
  */
 t_remplissage * schedACM_getSolution(struct schedACM_t * sched);
+
+/**
+ * @brief Obtention d'un pointeur sur la séquence choisie
+ * C'est vraiment pas propre, mais le type est opaque, ...
+ */
+t_sequence * schedACM_getSequenceChoisie(struct schedACM_t * sched);
 
 /*
  *   Fonction à invoquer par l'ordonnanceur pour décompter les solutions
@@ -309,9 +328,24 @@ int schedACM_getNbSolutions(struct schedACM_t * sched);
 void schedACM_setSeqLgMax(struct schedACM_t * sched, int seqLgMax);
 
 /**
- * @brief Lecture de la longureur maximale d'une séquence
+ * @brief Lecture de la longueur maximale d'une séquence
  */
 int schedACM_getSeqLgMax(struct schedACM_t * sched);
+
+/**
+ * @brief Initialisation de la durée max d'une époque dans le cas d'un
+ * ordonnancement par lot
+ * @param sched L'ordonnanceur à paramétrer
+ * @param minDur La durée minimale
+ */
+void schedACM_setEpochMinDuration(struct schedACM_t * sched, double minDur);
+
+/**
+ * @brief Consultation de la durée min de l'époque
+ * @param sched Le scheduler concerné
+ * @result La durée minimale d'une époque
+ */
+double schedACM_getEpochMinDuration(struct schedACM_t * sched);
 
 /**********************************************************************************/
 /*   Gestion des remplissages                                                     */
@@ -349,5 +383,63 @@ void remplissage_copy(t_remplissage * src, t_remplissage * dst, int nbModCod, in
  * @brief Initialisation d'une séquence
  */
 void sequence_init(t_sequence * seq, int lgMax, int nbModCod, int nbQoS);
+
+/**
+ * @brief Les files sont-elles (virtuellement) vides ?
+ * @param seq Une séquences de trames calculée par un ordonnanceur
+ * @param sched Un ordonannceur
+ * @result Suite à une telle séquence, les files sont-elles vides ?
+ * Attention, la trame définie par la position actuelle n'est pas
+ * prise en compte (elle est en cours de calcul, donc risque d'être
+ * fausse). 
+ */
+int sequence_filesVides(t_sequence * seq, struct schedACM_t * sched);
+
+/**
+ * @brief Nombre de paquets d'une file prévus dans une séquence
+ * @param tr pointeur sur le remplissage observé
+ * @param m L'identifiant du MODCOD concerné
+ * @param q L'identifiant de file de QoS concerné
+ * @result Le nombre de paquets prévus dans cette file
+ * La positionActuelle n'est pas comptabilisée
+ */
+int sequence_nbPackets(t_sequence * seq, int m, int q);
+
+/**
+ * @brief Détermination de l'intérêt cumulé sur une séquence
+ * @param seq Une séquence de trames envisagée par un ordonnanceur
+ * @result L'intérêt cumulé sur toutes les trames avant la courante
+ * Attention, cette fonction cumule l'intérêt sur toutes les BBFRAMES
+ * qui ont été calculées. Elle ne compte donc pas cemui de la
+ * positionActuelle. L'intérêt doit avoir été calculé sur chacun des
+ * remplissages envisagés.
+ */
+double sequence_getInteret(t_sequence * seq);
+
+/**
+ * @brief Taille cumulée sur une séquence
+ * @param seq La séquence calculée par un ordonnanceur
+ * @param sched La structure d'ordonnanceur
+ * @result La somme des tailles de tous les paquets prévus dans la
+ * séquence, hors position actuelle
+ */ 
+int sequence_getTotalSize(t_sequence * seq, struct schedACM_t * sched);
+
+/**
+ * @brief Copie d'une séquence
+ * @param src Une séquence source (in)
+ * @param dts Une séquence destination (out)
+ * @param nbModCod Nombre de MODCODs des séquences
+ * @param nbQoS Nombre de files de QoS par MODCODs des séquences
+ * La séquence source est copiée dans la destination, jusqu'à la
+ * position actuelle (exclue)
+ */
+void sequence_copy(t_sequence * src, t_sequence * dst, int nbModCod, int nbQoS);
+
+/**
+ * @brief Un affichage synthétique d'une séquence
+ */
+void schedACM_printSequenceSummary(struct schedACM_t * sched, t_sequence * sequence);
+
 
 #endif

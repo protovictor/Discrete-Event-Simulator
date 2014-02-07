@@ -103,9 +103,9 @@ int filePDU_length(struct filePDU_t * file);
 int filePDU_size(struct filePDU_t * file);
 
 /**
- * @brief Taille cumulÃ©e des n premiÃ¨res PDUs
+ * @brief Taille cumulée des n premières PDUs
  * @param file la file 
- * @param n le nombre (strictement positif) de PDUs
+ * @param n le nombre (positif ou nul) de PDUs
  * @return le cumul des tailles des n premières PDUs de la file
  */
 int filePDU_size_n_PDU(struct filePDU_t * file, int n);

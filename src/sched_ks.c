@@ -105,9 +105,9 @@ void KS_afficherFiles(struct sched_kse_t * sched, int mc)
    int taille, id;
    double gain ;
    printf_debug(DEBUG_KS, "Etat des files considerees: \n");
-   for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)); m++) {
+   for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?schedACM_getNbModCod(sched->schedACM):(mc+1)); m++) {
       printf_debug(DEBUG_KS, "  MODCOD %d\n", m);
-      for (q = 0; q < nbQoS(sched->schedACM); q++) {
+      for (q = 0; q < schedACM_getNbQoS(sched->schedACM); q++) {
 	printf_debug(DEBUG_KS, "    QoS %d (%d PDUs)\n", q, filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)));
 	 for (n = 1; n <= filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)); n++) {
             id = filePDU_id_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), n);
@@ -152,8 +152,8 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
       printf_debug(DEBUG_KS_VERB, "       ---< Solution %d en cours d'analyse (volume %d / interet %5.2e) >---\n",
 		   rCourant, sched->remplissage[rCourant].volumeTotal, sched->remplissage[rCourant].interet);
       printf_debug(DEBUG_KS_VERB, "--repartition envisagee--\n");
-      for (m = 0; m < nbModCod(sched->schedACM); m++) {
-         for (q = 0; q < nbQoS(sched->schedACM); q++) {
+      for (m = 0; m < schedACM_getNbModCod(sched->schedACM); m++) {
+         for (q = 0; q < schedACM_getNbQoS(sched->schedACM); q++) {
 	   printf_debug(DEBUG_KS_VERB, "  [m=%d][q=%d] : %2d\n", m, q, sched->remplissage[rCourant].nbrePaquets[m][q]);
 	 }
       }
@@ -161,10 +161,10 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
 
       // Recherche de tous les sched->remplissages atteignables 
       // Pour chaque file d'attente du MODCOD mc ou d'un MODCOD permettant le déclassement ...
-      for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?nbModCod(sched->schedACM):(mc+1)); m++) {
-         qb = random()%nbQoS(sched->schedACM);
-         for (qa = 0; qa < nbQoS(sched->schedACM); qa++) {
-            q = (qa + qb)%nbQoS(sched->schedACM);
+      for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?schedACM_getNbModCod(sched->schedACM):(mc+1)); m++) {
+         qb = random()%schedACM_getNbQoS(sched->schedACM);
+         for (qa = 0; qa < schedACM_getNbQoS(sched->schedACM); qa++) {
+            q = (qa + qb)%schedACM_getNbQoS(sched->schedACM);
 
             printf_debug(DEBUG_KS_VERB, "m/q = %d/%d, rCourant = %d (v %d, i %5.2e)\n", m, q, rCourant, sched->remplissage[rCourant].volumeTotal, sched->remplissage[rCourant].interet);
 	    printf_debug(DEBUG_KS_VERB, "  Paquet de taille %d de q[%d][%d] (%d/%d paquets) dans BBF de %d oqp/%d ?\n",
@@ -200,8 +200,8 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
 		     if (sched->remplissage[rS].volumeTotal == volume) {
                        doublon = 1; // C'est la même jusqu'à preuve du contraire
                        // On compare file par file 
-		       for (mt = 0; mt < nbModCod(sched->schedACM); mt++) {
-                          for (qt = 0; qt < nbQoS(sched->schedACM); qt++) {
+		       for (mt = 0; mt < schedACM_getNbModCod(sched->schedACM); mt++) {
+                          for (qt = 0; qt < schedACM_getNbQoS(sched->schedACM); qt++) {
 			    if ((mt==m) && (qt==q)) {
                                doublon = doublon 
 				 && (sched->remplissage[rCourant].nbrePaquets[mt][qt] +1
@@ -224,7 +224,7 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
                      if (rDispo < NB_SOUS_CAS_MAX)  {
                         schedACM_tryingNewSolution(sched->schedACM);
                         printf_debug(DEBUG_KS_VERB, "             Nouvel etat cree bis [id %d, taille %d]\n", rDispo, volume);
-		        remplissage_copy(&(sched->remplissage[rCourant]), &(sched->remplissage[rDispo]), nbModCod(sched->schedACM), nbQoS(sched->schedACM));
+		        remplissage_copy(&(sched->remplissage[rCourant]), &(sched->remplissage[rDispo]), schedACM_getNbModCod(sched->schedACM), schedACM_getNbQoS(sched->schedACM));
                         sched->remplissage[rDispo].volumeTotal = volume;
                         sched->remplissage[rDispo].interet = interet;
                         sched->remplissage[rDispo].nbChoix = 1;
@@ -236,8 +236,8 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
 				     schedACM_getNbSolutions(sched->schedACM));
 		        for (rS=0; rS<NB_SOUS_CAS_MAX; rS++){
 		 	  printf("[%d] %d ", rS, sched->remplissage[rS].volumeTotal);
-		 	  for(mt = 0; mt < nbModCod(sched->schedACM); mt++) {
-                             for (qt = 0; qt < nbQoS(sched->schedACM); qt++) {
+		 	  for(mt = 0; mt < schedACM_getNbModCod(sched->schedACM); mt++) {
+                             for (qt = 0; qt < schedACM_getNbQoS(sched->schedACM); qt++) {
 			       printf("%d ", sched->remplissage[rS].nbrePaquets[mt][qt]);
 			     }
                              printf("- ");
@@ -281,7 +281,7 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
 		          ){
                         printf_debug(DEBUG_KS_VERB, "            Mieux que %5.2f\n", sched->remplissage[rS].interet);
                         // Si oui, on remplace 
-		        remplissage_copy(&(sched->remplissage[rCourant]), &(sched->remplissage[rS]), nbModCod(sched->schedACM), nbQoS(sched->schedACM));
+		        remplissage_copy(&(sched->remplissage[rCourant]), &(sched->remplissage[rS]), schedACM_getNbModCod(sched->schedACM), schedACM_getNbQoS(sched->schedACM));
                         sched->remplissage[rS].volumeTotal = volume;
                         sched->remplissage[rS].interet = interet;
                         sched->remplissage[rS].nbrePaquets[m][q]++;
@@ -292,7 +292,7 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
 	          } else if (rDispo < NB_SOUS_CAS_MAX)  {
                      schedACM_tryingNewSolution(sched->schedACM);
                      printf_debug(DEBUG_KS_VERB, "             Nouvel etat cree [id %d, taille %d]\n", rDispo, volume);
-		     remplissage_copy(&(sched->remplissage[rCourant]), &(sched->remplissage[rDispo]), nbModCod(sched->schedACM), nbQoS(sched->schedACM));
+		     remplissage_copy(&(sched->remplissage[rCourant]), &(sched->remplissage[rDispo]), schedACM_getNbModCod(sched->schedACM), schedACM_getNbQoS(sched->schedACM));
                      sched->remplissage[rDispo].volumeTotal = volume;
                      sched->remplissage[rDispo].interet = interet;
                      sched->remplissage[rDispo].nbChoix = 1;
@@ -350,12 +350,12 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
 
    if (sched->remplissage[rMeilleur].interet > schedACM_getSolution(sched->schedACM)->interet) {
       remplissage_copy(&(sched->remplissage[rMeilleur]), schedACM_getSolution(sched->schedACM),
-		       nbModCod(sched->schedACM), nbQoS(sched->schedACM));
+		       schedACM_getNbModCod(sched->schedACM), schedACM_getNbQoS(sched->schedACM));
       schedACM_getSolution(sched->schedACM)->modcod = mc;
    };
 
    // On nettoie le tableau des remplissages
-   tabRemplissage_raz(sched->remplissage, NB_SOUS_CAS_MAX, nbModCod(sched->schedACM), nbQoS(sched->schedACM));
+   tabRemplissage_raz(sched->remplissage, NB_SOUS_CAS_MAX, schedACM_getNbModCod(sched->schedACM), schedACM_getNbQoS(sched->schedACM));
 }
 
 /**
@@ -379,15 +379,15 @@ void scheduler_knapsack_exhaustif(struct sched_kse_t * sched)
    /** On met à zéro la solution choisie
     */
    remplissage_raz(schedACM_getSolution(sched->schedACM),
-		   nbModCod(sched->schedACM),
-		   nbQoS(sched->schedACM));
+		   schedACM_getNbModCod(sched->schedACM),
+		   schedACM_getNbQoS(sched->schedACM));
 
    /*
     * Resolution pour tous les MODCODs
     */
    printf_debug(DEBUG_KS, "********************DEBUT KNAPSACK****************************\n");
    //   KS_afficherFiles(sched, 0);
-   for (mc = 0; mc < nbModCod(sched->schedACM); mc++) {
+   for (mc = 0; mc < schedACM_getNbModCod(sched->schedACM); mc++) {
       printf_debug(DEBUG_KS, "-------====< MODCOD %d >====-------\n", mc);
 #ifdef DEBUG_NDES
       if (debug_mask&DEBUG_ALWAYS)
@@ -399,9 +399,9 @@ void scheduler_knapsack_exhaustif(struct sched_kse_t * sched)
 		   schedACM_getSolution(sched->schedACM)->modcod);
       printf_debug(DEBUG_KS, "Nombre de solutions testées : %d\n",
 		   schedACM_getNbSolutions(sched->schedACM));
-      for (m = 0; m < nbModCod(sched->schedACM); m++) {
+      for (m = 0; m < schedACM_getNbModCod(sched->schedACM); m++) {
          printf_debug(DEBUG_KS, "  MODCOD %d\n", m);
-         for (q = 0; q < nbQoS(sched->schedACM); q++) {
+         for (q = 0; q < schedACM_getNbQoS(sched->schedACM); q++) {
             printf_debug(DEBUG_KS, "   Ord[m=%d][q=%d] = %2d\n",
 			 m, q, schedACM_getSolution(sched->schedACM)->nbrePaquets[m][q]);
          }

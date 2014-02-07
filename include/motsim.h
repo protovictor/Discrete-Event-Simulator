@@ -131,26 +131,26 @@ void motSim_exit(int retValue);
 
 static unsigned long debug_mask = 0x00000000
   //     | DEBUG_EVENT     // Les événements (lourd !)
-  //       | DEBUG_MOTSIM    // Le moteur
+  //     | DEBUG_MOTSIM    // Le moteur
   //     | DEBUG_GENE      // Les générateurs de nombre/date/...
   //     | DEBUG_SRV       // Le serveur
   //     | DEBUG_SRC       // La source
-        | DEBUG_FILE      // La gestion des files
-  //      | DEBUG_GNUPLOT
+  //     | DEBUG_FILE      // La gestion des files
+  //     | DEBUG_GNUPLOT
   //     | DEBUG_MUX
-  //         | DEBUG_PROBE
-  //          | DEBUG_PROBE_VERB
+  //     | DEBUG_PROBE
+  //     | DEBUG_PROBE_VERB
   //     | DEBUG_DVB       // Les outils DVB
-  //      | DEBUG_KS        // L'algorithme Knapsack
-  //   | DEBUG_KS_VERB   // L'algorithme Knapsack verbeux
+  //     | DEBUG_KS        // L'algorithme Knapsack
+  //     | DEBUG_KS_VERB   // L'algorithme Knapsack verbeux
   //     | DEBUG_WARN      // Des infos qui peuvent aider à debuger la SIMU
-  //       | DEBUG_ACM
-     | DEBUG_SCHED  // Les ordonnanceurs
-  //       | DEBUG_PDU
-       | DEBUG_OBJECT
+  //     | DEBUG_ACM
+  //     | DEBUG_SCHED  // Les ordonnanceurs
+  //     | DEBUG_PDU
+  //     | DEBUG_OBJECT
   //     | DEBUG_MALLOC    // L'utilisation de malloc
        | DEBUG_TBD       // Le code pas implanté
-  //       | DEBUG_ALWAYS
+  //         | DEBUG_ALWAYS
   ;
 
 #else

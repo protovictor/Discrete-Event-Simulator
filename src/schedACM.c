@@ -4,6 +4,7 @@
  *
  */
 #include <math.h>      // exp, pow, ...
+#include <string.h>    // strcat
 
 #include <schedACM.h>
 
@@ -22,7 +23,7 @@ struct fileQoS {
 };
 
 /**
- * @brief CaractÃ©risation gÃ©nÃ©rale d'un ordonnanceur sur ACM
+ * @brief Caractérisation générale d'un ordonnanceur sur ACM
  */
 struct schedACM_t {
    int nbQoS;      //!< Le nombre de files de QoS
@@ -65,6 +66,11 @@ struct schedACM_t {
    // suivant.
    t_sequence sequenceChoisie;
    int        seqLgMax;  //!< La longueur maximale d'une séquence 
+   double     epochMinDuration; //!< La durée minimale entre deux
+				//!calculs 
+   double    currentEpochStartTime ; //!< Ce n'est pas nécessairement
+				     //!périodique
+   struct probe_t * epochDurationProbe;
 
    void * private;
 };
@@ -110,7 +116,13 @@ struct schedACM_t * schedACM_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int d
          result->files[i][j] = NULL;
 	 result->qos[i][j].typeQoS = -1;  // WARNING bof
 	 result->qos[i][j].beta    = 0.0; // WARNING bof
-	 result->qos[i][j].debit   = 0.0; // WARNING bof
+	 result->qos[i][j].debit   = 0.00001; // WARNING bof !!! Le
+					      // soucis c'est que la
+					      // valeur 0.0 pose de
+					      // gros problèmes
+					      // (certaines fonctions
+					      // ou dérivées n'y sont
+					      // pas définies !!)
          result->qos[i][j].bwProbe = NULL;
       }
    }
@@ -128,7 +140,11 @@ struct schedACM_t * schedACM_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int d
    }
    remplissage_init(&(result->solutionChoisie), DVBS2ll_nbModcod(dvbs2ll), nbQoS);
 
-   result->seqLgMax = 1; // Pas de batch par défaut
+   // Pas de batch par défaut
+   result->seqLgMax = 1;
+   result->epochMinDuration = 0.0;
+   result->currentEpochStartTime = 0.0;
+   result->epochDurationProbe = NULL;
 
    result->nbSol = 0;
    result->nbSolProbe = NULL;
@@ -226,7 +242,7 @@ void schedACM_setFileQoSType(struct schedACM_t * sched, int mc, int qos, int qos
 /*
  * Consultation du nombre de ModCod
  */
-inline int nbModCod(struct schedACM_t * sched)
+inline int schedACM_getNbModCod(struct schedACM_t * sched)
 {
    return sched->nbModCod;
 }
@@ -234,7 +250,7 @@ inline int nbModCod(struct schedACM_t * sched)
 /*
  * Consultation du nombre de QoS par MODCOD
  */
-inline int nbQoS(struct schedACM_t * sched)
+inline int schedACM_getNbQoS(struct schedACM_t * sched)
 {
    return sched->nbQoS;
 }
@@ -279,16 +295,26 @@ struct probe_t *  schedACM_getPqFromMQinMC(struct schedACM_t * sched, int m, int
   return sched->pqFromMQinMC[m][q][mc];
 }
 
-/*
- * Obtention d'un pointeur sur la solution choisie
+/**
+ * @brief Obtention d'un pointeur sur la solution choisie
+ * C'est vraiment pas propre, mais le type est opaque, ...
  */
 t_remplissage * schedACM_getSolution(struct schedACM_t * sched)
 {
    return &sched->solutionChoisie;
 }
 
+/**
+ * @brief Obtention d'un pointeur sur la séquence choisie
+ * C'est vraiment pas propre, mais le type est opaque, ...
+ */
+t_sequence * schedACM_getSequenceChoisie(struct schedACM_t * sched)
+{
+   return &sched->sequenceChoisie;
+}
+
 /*
- *   Fonction Ã  invoquer par l'ordonnanceur pour dÃ©compter les solutions
+ *   Fonction à invoquer par l'ordonnanceur pour décompter les solutions
  */
 void schedACM_tryingNewSolution(struct schedACM_t * sched)
 {
@@ -296,7 +322,7 @@ void schedACM_tryingNewSolution(struct schedACM_t * sched)
 }
 
 /*
- * Ajout d'une sonde permettant de mesurer le nombre de solutions testÃ©es
+ * Ajout d'une sonde permettant de mesurer le nombre de solutions testées
  */
 void schedACM_addNbSolProbe(struct schedACM_t * sched, struct probe_t * probe)
 {
@@ -319,6 +345,7 @@ void schedACM_setSeqLgMax(struct schedACM_t * sched, int seqLgMax)
 {
    assert(sched->func->batch != 0);
    sched->seqLgMax = seqLgMax;
+   sequence_init(&(sched->sequenceChoisie), seqLgMax, schedACM_getNbModCod(sched), schedACM_getNbQoS(sched));
 }
 
 /**
@@ -329,8 +356,35 @@ int schedACM_getSeqLgMax(struct schedACM_t * sched)
    return sched->seqLgMax;
 }
 
+/**
+ * @brief Initialisation de la durée max d'une époque dans le cas d'un
+ * ordonnancement par lot
+ * @param sched L'ordonnanceur à paramétrer
+ * @param minDur La durée minimale
+ */
+void schedACM_setEpochMinDuration(struct schedACM_t * sched, double minDur)
+{
+   sched->epochMinDuration = minDur;
+   sched->currentEpochStartTime = -minDur -1.0; // Pour être certain de
+					     // faire un premier ordonnancement
+}
+/**
+ * @brief Consultation de la durée min de l'époque
+ * @param sched Le scheduler concerné
+ * @result La durée minimale d'une époque
+ */
+double schedACM_getEpochMinDuration(struct schedACM_t * sched)
+{
+   return sched->epochMinDuration;
+}
+
+void schedACM_addEpochTimeDurationProbe(struct schedACM_t * sched, struct probe_t * epochDurationProbe)
+{
+   sched->epochDurationProbe = probe_chain(epochDurationProbe, sched->epochDurationProbe);
+}
+
 /********************************************************************************/
-/*   La dÃ©rivÃ©e de la fonction d'utilitÃ©                                        */
+/*   La dérivée de la fonction d'utilitÃ©                                        */
 /********************************************************************************/
 
 /*
@@ -364,7 +418,7 @@ double utiliteDerivee(t_qosMgt * qos, double x, struct DVBS2ll_t * dvbs2ll)
       break;
 
       default : 
-         motSim_error(MS_FATAL, "QoS de type %d non implantÃ©e\n", qos->typeQoS);
+         motSim_error(MS_FATAL, "QoS de type %d non implantée\n", qos->typeQoS);
    }
 
    return result;
@@ -375,11 +429,11 @@ double utiliteDerivee(t_qosMgt * qos, double x, struct DVBS2ll_t * dvbs2ll)
 /********************************************************************************/
 
 /*
- * L'ordonnanceur lui-mÃªme
+ * L'ordonnanceur lui-même
  */
 void schedACM_schedule(struct schedACM_t * sched)
 {
-   remplissage_raz(&(sched->solutionChoisie), nbModCod(sched), nbQoS(sched));
+   remplissage_raz(&(sched->solutionChoisie), schedACM_getNbModCod(sched), schedACM_getNbQoS(sched));
 
    sched->nbSol = 0;
 
@@ -395,15 +449,85 @@ void schedACM_schedule(struct schedACM_t * sched)
 }
 
 /**
- * @brief Construction générique d'une BBFRAME
- *
- * Construction d'une BBFRAME avec les paquets en attente dans les
- * files s'il y en a suffisemment. Sinon, un pointeur NULL est retournÃ©.
+ * @brief Création d'une BBFRAME en fonction d'un remplissage calculé
+ * par un ordonnanceur
+ * @param sched L'ordonnanceur qui doit émettre
+ * @param solution Le remplissage calculé préalablement
+ * Cette fonction positionne également le champs
+ * sched->paquetsEnAttente en fonction de ce qu'elle laisse dans les
+ * files. 
  */
-struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
+struct PDU_t * schedACM_buildBBRFRAMEFromRemplissage(struct schedACM_t * sched, t_remplissage * solution)
 {
    int q, m, p, vol, s;
    double alphaMaaike;
+   struct PDU_t * pdu = NULL;
+
+   // Si on trouve au moins un paquet à envoyer
+   if (solution->volumeTotal) {
+         vol = 0;
+         // On extrait les paquets concernés depuis les files d'entrÃ©
+         for (m = 0; m < schedACM_getNbModCod(sched); m++) {
+            for (q = 0; q < schedACM_getNbQoS(sched); q++) {
+               s = 0;
+               for (p = 0 ; p < solution->nbrePaquets[m][q]; p++){
+                  pdu = filePDU_extract(schedACM_getInputQueue(sched, m, q));
+                  s += PDU_size(pdu);
+	          printf_debug(DEBUG_ACM, "Sortie du paquet %d de taille %d de la file (%d, %d)\n", PDU_id(pdu), PDU_size(pdu), m, q);
+		  probe_sample(schedACM_getPqFromMQinMC(sched, m, q, solution->modcod), PDU_size(pdu));
+                  PDU_free(pdu);
+               }
+	       vol += s;
+               // Mise à jour des débits (utilisés pour le calcul du
+               // gain). ATTENTION : est-il normal que ce soit fait
+               // ici !? On ne peut pas utiliser le débit observé par
+               // la file elle-même (en environnement réel, ce n'est
+               // pas disponible), c'est le scheduler qui doit le
+               // calculer. 
+               alphaMaaike = pow(alpha, 1000.0*DVBS2ll_bbframeTransmissionTime(schedACM_getACMLink(sched),
+									       solution->modcod));
+	       schedACM_getQoS(sched, m, q)->debit = calculeEMA(schedACM_getQoS(sched, m, q)->debit,
+						   8.0*s/DVBS2ll_bbframeTransmissionTime(schedACM_getACMLink(sched),
+											 solution->modcod),
+						   alphaMaaike); 
+	       if (schedACM_getQoS(sched, m, q)->bwProbe)
+                  probe_sample(schedACM_getQoS(sched, m, q)->bwProbe, schedACM_getQoS(sched, m, q)->debit);
+
+               // Reste-t-il au moins un paquet pour une prochaine
+               // BBFRAME ? ATTENTION, on pourrait mettre ça dans
+               // schedACM_buildBBFRAMEGeneric 
+	       sched->paquetsEnAttente = sched->paquetsEnAttente || (filePDU_length(schedACM_getInputQueue(sched, m, q)) > 0);
+            }
+         }
+         assert(vol == solution->volumeTotal);
+
+         printf_debug(DEBUG_ACM, "Construction d'une BBFRAME du modcod %d\n", solution->modcod);
+
+
+         // On construit une BBFRAME
+         assert(solution->modcod >= 0);
+         assert(solution->modcod < schedACM_getNbModCod(sched));
+
+         // Attention, on passe l'indice du MODCOD en champs privé de la PDU
+         // récupéré en particulier dans DVBS2ll_sendPDU. C'est pas
+         // top, il  faudra plutôt faire une file par MODCOD
+         pdu = PDU_create(vol, (void *)(long)solution->modcod);
+      }
+      return pdu;
+}
+
+/**
+ * @brief Construction générique d'une BBFRAME
+ *
+ * Construction d'une BBFRAME avec les paquets en attente dans les
+ * files s'il y en a suffisemment. Sinon, un pointeur NULL est retourné.
+ */
+struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
+{
+  /*
+   int q, m, p, vol, s;
+   double alphaMaaike;
+  */
    struct PDU_t * pdu = NULL;
 
    printf_debug(DEBUG_ACM, "Packets waiting ? %s \n", sched->paquetsEnAttente?"Oui":"non");
@@ -417,13 +541,18 @@ struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
       schedACM_schedule(sched);
       printf_debug(DEBUG_ACM, "Volume propose : %d\n", sched->solutionChoisie.volumeTotal);
 
-
-      // Si on trouve au moins un paquet Ã  envoyer
+      // Une solution a été calculée dans le champs
+      // solutionChoisie. On construit une PDU fondée sur cette
+      // solution
+      pdu = schedACM_buildBBRFRAMEFromRemplissage(sched, &sched->solutionChoisie);
+       
+      /*
+      // Si on trouve au moins un paquet à envoyer
       if (sched->solutionChoisie.volumeTotal) {
          vol = 0;
-         // On extrait les paquets concernÃ©s depuis les files d'entrÃ©
-         for (m = 0; m < nbModCod(sched); m++) {
-            for (q = 0; q < nbQoS(sched); q++) {
+         // On extrait les paquets concernés depuis les files d'entrÃ©
+         for (m = 0; m < schedACM_getNbModCod(sched); m++) {
+            for (q = 0; q < schedACM_getNbQoS(sched); q++) {
                s = 0;
                for (p = 0 ; p < sched->solutionChoisie.nbrePaquets[m][q]; p++){
                   pdu = filePDU_extract(schedACM_getInputQueue(sched, m, q));
@@ -433,7 +562,12 @@ struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
                   PDU_free(pdu);
                }
 	       vol += s;
-               // Mise Ã  jour des dÃ©bits (utilisÃ©s pour le calcul du gain)
+               // Mise à jour des débits (utilisés pour le calcul du
+               // gain). ATTENTION : est-il normal que ce soit fait
+               // ici !? On ne peut pas utiliser le débit observé par
+               // la file elle-même (en environnement réel, ce n'est
+               // pas disponible), c'est le scheduler qui doit le
+               // calculer. 
                alphaMaaike = pow(alpha, 1000.0*DVBS2ll_bbframeTransmissionTime(schedACM_getACMLink(sched),
 									       sched->solutionChoisie.modcod));
 	       schedACM_getQoS(sched, m, q)->debit = calculeEMA(schedACM_getQoS(sched, m, q)->debit,
@@ -454,15 +588,16 @@ struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
 
          // On construit une BBFRAME
          assert(sched->solutionChoisie.modcod >= 0);
-         assert(sched->solutionChoisie.modcod < nbModCod(sched));
+         assert(sched->solutionChoisie.modcod < schedACM_getNbModCod(sched));
 
          // Attention, on passe l'indice du MODCOD en champs privé de la PDU
          // récupéré en particulier dans DVBS2ll_sendPDU. C'est pas
          // top, il  faudra plutôt faire une file par MODCOD
          pdu = PDU_create(vol, (void *)sched->solutionChoisie.modcod);
       }
+      */
    }
-
+      
    return pdu;
 }
 
@@ -471,16 +606,55 @@ struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
  * "par lot" 
  *
  * Construction d'une BBFRAME avec les paquets en attente dans les
- * files s'il y en a suffisemment. Sinon, un pointeur NULL est retournÃ©.
+ * files s'il y en a suffisemment. Sinon, un pointeur NULL est retourné.
  */
 struct PDU_t * schedACM_buildBBFRAMEGenericBatch(struct schedACM_t * sched)
 {
-   motSim_error(MS_FATAL, "Pas implanté !");
+   struct PDU_t * pdu = NULL;
+
+   printf_debug(DEBUG_ACM, "IN\n");
+
+   assert(sched->func->batch == 1);
+
+   // Si la séquence calculée est vide, c'est qu'il est temps de s'y
+   // mettre ! ATTENTION, sur du périodique, il faut peut-être
+   // attendre ...
+   if (sched->sequenceChoisie.positionActuelle == 0) {
+      // On ne peut ordonnancer que si l'époque précédente est finie
+      if (motSim_getCurrentTime() >= sched->currentEpochStartTime + sched->epochMinDuration) {
+         // Recherche de l'ordonnancement par application de l'algo
+         printf_debug(DEBUG_ACM, "On schedule ...\n");
+         schedACM_schedule(sched);
+         printf_debug(DEBUG_ACM, "Sequence proposee de %d trames\n", sched->sequenceChoisie.positionActuelle);
+
+         if ( sched->currentEpochStartTime > 0.0) {
+            probe_sample(sched->epochDurationProbe, motSim_getCurrentTime() - sched->currentEpochStartTime);
+	 }
+	 sched->currentEpochStartTime = motSim_getCurrentTime();
+      }
+   }
+   printf_debug(DEBUG_ACM, "Looking for a frame\n");
 
    // Tant que la séquence calculée n'est pas vide, on prend la
-   // première trame de cette séquence.
-
-   return NULL;
+   // prochaine trame de cette séquence.
+   if (sched->sequenceChoisie.nextFrameToSend < sched->sequenceChoisie.positionActuelle) {
+      printf_debug(DEBUG_ACM, "There is one ...\n");
+      pdu = schedACM_buildBBRFRAMEFromRemplissage(sched, &(sched->sequenceChoisie.remplissages[sched->sequenceChoisie.nextFrameToSend]));
+      printf_debug(DEBUG_ACM, "On incremente pour plus tard ...\n");
+      sched->sequenceChoisie.nextFrameToSend++;
+      // Si on vient de consommer la dernière, il faut invalider la
+      // séquence afin d'en forcer le recalcul 
+      if (sched->sequenceChoisie.nextFrameToSend == sched->sequenceChoisie.positionActuelle ){
+         printf_debug(DEBUG_ACM, "End of epoch ...\n");
+         sched->sequenceChoisie.nextFrameToSend = 0;
+         sched->sequenceChoisie.positionActuelle = 0; //!< Ca suffit pour
+						   //!déclancher
+						   //!l'ordonnancement
+						   //!(cf plus haut) 
+      }
+   }
+   
+   return pdu;
 }
 
 /**
@@ -533,7 +707,7 @@ int schedACM_processPDUGeneric(struct schedACM_t * sched,
       pdu = schedACM_buildBBFRAME(sched);
       // WARNING TBD remplacer par le modÃ¨le classique (destination, ...)
       DVBS2ll_sendPDU(schedACM_getACMLink(sched), pdu);
-   } else { // Je me le note pour Ãªtre prÃªt lorsque le support sera dispo
+   } else { // Je me le note pour êre prêt lorsque le support sera dispo
       sched->paquetsEnAttente = 1;    //WARNING, pourquoi uniquement dans ce cas !?
       printf_debug(DEBUG_ACM, "Support occupe\n");
    }
@@ -604,8 +778,8 @@ int schedACM_processPDU(struct schedACM_t * sched,
 
 
 /*
- * Affichage de l'Ã©tat du systÃ¨me des files d'attente avec l'interet de
- * chaque paquet Ã©tant donnÃ© le MODCOD envisagÃ© 'mc'.
+ * Affichage de l'état du système des files d'attente avec l'interet de
+ * chaque paquet étant donné le MODCOD envisagé 'mc'.
  */
 void schedACM_afficherFiles(struct schedACM_t * sched, int mc)
 {
@@ -613,9 +787,9 @@ void schedACM_afficherFiles(struct schedACM_t * sched, int mc)
    int taille, id;
 
    printf_debug(DEBUG_ALWAYS, "Etat des files considerees: \n");
-   for (m = mc; m < (schedACM_getReclassification(sched)?nbModCod(sched):(mc+1)); m++) {
+   for (m = mc; m < (schedACM_getReclassification(sched)?schedACM_getNbModCod(sched):(mc+1)); m++) {
       printf_debug(DEBUG_ALWAYS, "  MODCOD %d\n", m);
-      for (q = 0; q < nbQoS(sched); q++) {
+      for (q = 0; q < schedACM_getNbQoS(sched); q++) {
 	printf_debug(DEBUG_ALWAYS, "    QoS %d (%d PDUs)\n", q, filePDU_length(schedACM_getInputQueue(sched, m, q)));
 	 for (n = 1; n <= filePDU_length(schedACM_getInputQueue(sched, m, q)); n++) {
             id = filePDU_id_PDU_n(schedACM_getInputQueue(sched, m, q), n);
@@ -627,7 +801,27 @@ void schedACM_afficherFiles(struct schedACM_t * sched, int mc)
    }
 }
 
+/**
+ * @brief Un affichage synthétique des files
+ */
+#define _MY_BUFF_SIZE_ 1024
+void schedACM_printFilesSummary(struct schedACM_t * sched)
+{
+   int m, q;
+   char buffer[_MY_BUFF_SIZE_];
+   char bufferq[_MY_BUFF_SIZE_];
 
+   printf_debug(DEBUG_ALWAYS, "-------------File status-------------\n");
+   for (m = 0; m < schedACM_getNbModCod(sched); m++) {
+      sprintf(buffer, " M%d ", m);
+      for (q = 0; q < schedACM_getNbQoS(sched); q++) {
+	sprintf(bufferq, " F%d[%d]", q, filePDU_length(schedACM_getInputQueue(sched, m, q)));
+	 strcat(buffer, bufferq);
+      }
+      printf_debug(DEBUG_ALWAYS, "%s\n", buffer);
+   }
+   printf_debug(DEBUG_ALWAYS, "-------------------------------------\n");
+}
 
 /**********************************************************************************/
 /*   Gestion des remplissages                                                     */
@@ -724,25 +918,29 @@ void tabRemplissage_raz(t_remplissage * tr, int nbR, int nbModCod, int nbQoS)
 }
 
 /*
- * Copie d'une stratÃ©gie de remplissage dans une autre. La destination
- * doit Ãªtre initialisÃ©e
+ * Copie d'une stratégie de remplissage dans une autre. La destination
+ * doit être initialisée
  */
 void remplissage_copy(t_remplissage * src, t_remplissage * dst, int nbModCod, int nbQoS)
 {
    int m, q;
 
+   //   printf_debug(DEBUG_SCHED, "IN\n");
    dst->modcod = src->modcod;
    dst->volumeTotal = src->volumeTotal;
    dst->interet = src->interet;
-   dst->nbChoix = src->nbChoix;   // Attention au piÃ¨ge
+   dst->nbChoix = src->nbChoix;   // Attention au piège
    dst->casTraite = src->casTraite;
    for (m = 0; m < nbModCod; m++) {
+     //      printf_debug(DEBUG_SCHED, "  m = %d\n", m);
       assert(src->nbrePaquets[m]);
       assert(dst->nbrePaquets[m]);
       for (q = 0; q < nbQoS; q++) {
+	//         printf_debug(DEBUG_SCHED, "     q = %d\n", q);
          dst->nbrePaquets[m][q] = src->nbrePaquets[m][q];
       }
    }
+   //   printf_debug(DEBUG_SCHED, "OUT\n");
 }
 /**
  * @brief Initialisation d'une séquence
@@ -752,27 +950,188 @@ void sequence_init(t_sequence * seq, int lgMax, int nbModCod, int nbQoS)
    seq->longueur = lgMax;
    seq->remplissages = (t_remplissage *)malloc(lgMax * sizeof(t_remplissage));
    seq->positionActuelle = 0;
+   seq->nextFrameToSend = 0;
    tabRemplissage_init(seq->remplissages, lgMax, nbModCod, nbQoS);
 }
 
+/**
+ * @brief Copie d'une séquence
+ * @param src Une séquence source (in)
+ * @param dst Une séquence destination (out)
+ * @param nbModCod Nombre de MODCODs des séquences
+ * @param nbQoS Nombre de files de QoS par MODCODs des séquences
+ * La séquence source est copiée dans la destination, jusqu'à la
+ * position actuelle (exclue). Attention, la séquence dst doit avoir
+ * été intégralement allouée !
+ */
+void sequence_copy(t_sequence * src, t_sequence * dst, int nbModCod, int nbQoS)
+{
+   int r;
+
+   //   printf_debug(DEBUG_SCHED, "IN\n");
+   dst->longueur = src->longueur;
+   dst->positionActuelle = src->positionActuelle;
+   /*
+   printf_debug(DEBUG_SCHED, "l%d, p%d (m%d, q%d)\n",
+		dst->longueur,
+		dst->positionActuelle,
+		nbModCod,
+		nbQoS);
+   */
+   for (r = 0 ; r < dst->positionActuelle ; r++) {
+     //      printf_debug(DEBUG_SCHED, "copie de %d\n", r);
+      remplissage_copy(&(src->remplissages[r]), &(dst->remplissages[r]), nbModCod, nbQoS);
+   }   
+   //   printf_debug(DEBUG_SCHED, "OUT\n");
+}
 
 /**
  * @brief Nombre de paquets d'une file prévus dans une séquence
  * @param tr pointeur sur le remplissage observé
- * @param m l'identifiant du MODCOD concerné
+ * @param m L'identifiant du MODCOD concerné
  * @param q L'identifiant de file de QoS concerné
  * @result Le nombre de paquets prévus dans cette file
+ * La positionActuelle n'est pas comptabilisée
  */
-int sequencee_nbPackets(t_sequence * seq, int m, int q)
+int sequence_nbPackets(t_sequence * seq, int m, int q)
 {
    int result = 0;
    int r;
    
-   for (r=0 ; r <= seq->positionActuelle ; r++) {
+   for (r=0 ; r < seq->positionActuelle ; r++) {
       result += seq->remplissages[r].nbrePaquets[m][q];
    };
 
    return result ;
+}
+
+/**
+ * @brief Les files sont-elles (virtuellement) vides ?
+ * @param seq Une séquences de trames calculée par un ordonnanceur
+ * @param sched Un ordonannceur
+ * @result Suite à une telle séquence, les files sont-elles vides ?
+ * Attention, la trame définie par la position actuelle n'est pas
+ * prise en compte (elle est en cours de calcul, donc risque d'être
+ * fausse). 
+ */
+int sequence_filesVides(t_sequence * seq, struct schedACM_t * sched)
+{
+   int m, q;
+   int nb;
+   int r;
+
+   //   printf_debug(DEBUG_SCHED, "IN\n");
+   // Pour chaque MODCOD, ...
+   for (m = 0; m < sched->nbModCod; m++) {
+      // ... et pour chaque file ...
+      for (q = 0; q < sched->nbQoS; q++) {
+         // ... il reste nb paquets réellement présents ...
+         nb = filePDU_length(sched->files[m][q]);
+	 //	 printf_debug(DEBUG_SCHED, "m = %d, q = %d -> %d\n", m, q, nb);
+         r = 0;
+         // ... dont on enlève ceux prévus dans les BBFRAMES
+         while ((nb>0) && (r<seq->positionActuelle)) {
+	   //            printf_debug(DEBUG_SCHED, "    - %d\n", seq->remplissages[r].nbrePaquets[m][q]);;
+	    nb -= seq->remplissages[r].nbrePaquets[m][q];
+	    r++;
+	 }
+         // S'il en reste un, c'est pas vide !
+         if (nb>0){
+	   //            printf_debug(DEBUG_SCHED, "OUT 0\n");
+            return 0;
+	 }
+      }
+   }
+
+   // Si on en est là, c'est que toutes les files sont vides.
+   //   printf_debug(DEBUG_SCHED, "OUT 1\n");
+   return 1;
+}
+
+/**
+ * @brief Détermination de l'intérêt cumulé sur une séquence
+ * @param seq Une séquence de trames envisagée par un ordonnanceur
+ * @result L'intérêt cumulé sur toutes les trames avant la courante
+ * Attention, cette fonction cumule l'intérêt sur toutes les BBFRAMES
+ * qui ont été calculées. Elle ne compte donc pas cemui de la
+ * positionActuelle. L'intérêt doit avoir été calculé sur chacun des
+ * remplissages envisagés.
+ */
+double sequence_getInteret(t_sequence * seq)
+{
+   double result = 0.0;
+
+   int r;
+
+   for (r= 0 ; r<seq->positionActuelle; r++) {
+      result += seq->remplissages[r].interet;
+   }
+
+   return result;
+}
+
+/**
+ * @brief Taille cumulée sur une séquence
+ * @param seq La séquence calculée par un ordonnanceur
+ * @param sched La structure d'ordonnanceur
+ * @result La somme des tailles de tous les paquets prévus dans la
+ * séquence, hors position actuelle
+ */ 
+int sequence_getTotalSize(t_sequence * seq, struct schedACM_t * sched)
+{
+   int result = 0;
+   int m, q;
+   //   printf_debug(DEBUG_SCHED, " 0\n");
+   // Pour chaque MODCOD, ...
+   for (m = 0; m < sched->nbModCod; m++) {
+     // 	printf_debug(DEBUG_SCHED, "  (m%d)\n", m);
+      // ... et pour chaque file ...
+      for (q = 0; q < sched->nbQoS; q++) {
+	// 	printf_debug(DEBUG_SCHED, "   [q%d]\n", q);
+	// 	printf_debug(DEBUG_SCHED, "     + (%d, %d) (nb %d)\n", m, q, sequence_nbPackets(seq, m, q));
+         result += filePDU_size_n_PDU(sched->files[m][q], sequence_nbPackets(seq, m, q));
+	 // 	printf_debug(DEBUG_SCHED, "     -> %d\n", result);
+      }
+   }
+   //   printf_debug(DEBUG_SCHED, " = %d\n", result);
+
+   return result;
+}
+
+/**
+ * @brief Un affichage synthétique d'une séquence
+ */
+#define _MY_BUFF_SIZE_ 1024
+void schedACM_printSequenceSummary(struct schedACM_t * sched, t_sequence * sequence)
+{
+   int m, q;
+   char buffer[_MY_BUFF_SIZE_];
+   char bufferq[_MY_BUFF_SIZE_];
+   int r;
+
+   printf_debug(DEBUG_ALWAYS, "-------------Sequence (lg%d/%d)-------------\n",
+		sequence->positionActuelle,
+		sequence->longueur);
+
+   for (r = 0; r < sequence->positionActuelle; r++){
+     sprintf(buffer, " Tr-%d (M%d) : ", r, sequence->remplissages[r].modcod);
+      for (m = 0; m < schedACM_getNbModCod(sched); m++) {
+         for (q = 0; q < schedACM_getNbQoS(sched); q++) {   
+	    if (sequence->remplissages[r].nbrePaquets[m][q]) { 
+               sprintf(bufferq, " M%dQ%d[%d/%d]", m, q,
+                    sequence->remplissages[r].nbrePaquets[m][q],
+		    filePDU_length(schedACM_getInputQueue(sched, m, q)));
+	    } else {
+               sprintf(bufferq, " .");
+	    }
+	    strcat(buffer, bufferq);
+	    bufferq[0]=0;
+         }
+      }
+      printf_debug(DEBUG_ALWAYS, "%s\n", buffer);
+      buffer[0]=0;
+   }
+   printf_debug(DEBUG_ALWAYS, "-----------------------------------\n");
 }
 
 /**********************************************************************************/
