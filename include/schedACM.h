@@ -45,9 +45,10 @@
  * fonction de création d'une BBFRAME, voire la fonction getPDU.
  *
  * A FAIRE : 
+ * - Arendre plus agnostique de la couche liaison
  * - mettre les nbQoS et nbMODCOD dans les remplissage et
  * sequence. 
- * - Pourquoie le modcod des remplissage est initialisé à -1 ?
+ * - Pourquoi le modcod des remplissage est initialisé à -1 ?
  */
 #ifndef __SCHED_ACM
 #define __SCHED_ACM
@@ -61,14 +62,26 @@
    (al) * (ema) + (1.0 - (al))*(sample) 
 
 
-/*
- * Les éléments de gestion de la QoS d'une file
+/**
+ * @brief La structure définissant gestion de la QoS d'une file
+ * Cette structure comporte deux classes de paramètres 
+ *
+ * . Les paramètres "statiques" correspondent aux exigences de qualité
+ * de service du flux.
+ * . Les paramètres dynamiques sont des mesures réalisées au cours du
+ * service. Ils sont modifiés et éventuellement utilisés par
+ * l'ordonnanceur pour assurer le respect des autres paramètres.
  */
 typedef struct {
+   // Paramètres "statiques"
    int typeQoS;              // Quelle QoS ?
    double beta;              // Un paramètre lié au type de QoS
    double rmin;              // Un paramètre lié au type de QoS (débit "min")
+
+   // Paramètres dynamiques
    double debit;             // Une mesure du débit
+
+   // Sondes
    struct probe_t * bwProbe; // Une sonde sur le débit évalué par et pour l'algo
 } t_qosMgt;
 
@@ -183,7 +196,7 @@ void schedACM_setFileQoSType(struct schedACM_t * sched, int mc, int qos, int qos
 #define kseQoS_BB  7
 
 /*
- * Calcul de la valeur en x de la derivee d'une fonction d'utilité
+ * Calcu de la valeur en x de la derivee d'une fonction d'utilité
  * Le paramètre dvbs2ll est ici nécessaire pour certaines fonctions
  * Il faudra envisager de mettre ces info (le débit du lien en gros
  * pour le moment) dans la structure t_qosMgt, ou pas !)
@@ -323,7 +336,7 @@ void schedACM_addNbSolProbe(struct schedACM_t * sched, struct probe_t * probe);
 int schedACM_getNbSolutions(struct schedACM_t * sched);
 
 /**
- * @brief Choix de la longureur maximale d'une séquence
+ * @brief Choix de la longreur maximale d'une séquence
  */
 void schedACM_setSeqLgMax(struct schedACM_t * sched, int seqLgMax);
 
@@ -346,6 +359,20 @@ void schedACM_setEpochMinDuration(struct schedACM_t * sched, double minDur);
  * @result La durée minimale d'une époque
  */
 double schedACM_getEpochMinDuration(struct schedACM_t * sched);
+
+/**
+ * @brief Combien d'époques calculées ?
+ * @param sched L'ordonnanceur visé
+ * @result Le nombre d'époques qui ont été calculées
+ */
+int schedACM_getNbEpoch(struct schedACM_t * sched);
+
+/**
+ * @brief Combien d'époques en famine calculées ?
+ * @param sched L'ordonnanceur visé
+ * @result Le nombre d'époques en famine qui ont été calculées
+ */
+int schedACM_getNbEpochStarvation(struct schedACM_t * sched);
 
 /**********************************************************************************/
 /*   Gestion des remplissages                                                     */
@@ -383,6 +410,11 @@ void remplissage_copy(t_remplissage * src, t_remplissage * dst, int nbModCod, in
  * @brief Initialisation d'une séquence
  */
 void sequence_init(t_sequence * seq, int lgMax, int nbModCod, int nbQoS);
+
+/**
+ * @brief Remise à zéro d'une séquence
+ */
+void sequence_raz(t_sequence * seq, int lgMax, int nbModCod, int nbQoS);
 
 /**
  * @brief Les files sont-elles (virtuellement) vides ?
@@ -424,6 +456,26 @@ double sequence_getInteret(t_sequence * seq);
  * séquence, hors position actuelle
  */ 
 int sequence_getTotalSize(t_sequence * seq, struct schedACM_t * sched);
+
+/**
+ * @brief Taille cumulée sur une séquence par une file
+ * @param seq La séquence calculée par un ordonnanceur
+ * @param sched La structure d'ordonnanceur
+ * @param m Le MODCOD concerné
+ * @param q La file concernée
+ * @result La somme des tailles de tous les paquets prévus dans la
+ * séquence, hors position actuelle, sur la file donnée
+ */ 
+int sequence_getFileSize(t_sequence * seq, struct schedACM_t * sched, int m, int q);
+
+/**
+ * @brief Durée d'une séquence
+ * @param sched L'ordonnanceur concerné
+ * @param sequence La séquence à mesurer
+ * Détermination de la durée cumulée de toutes les trames d'une
+ * séquence hors positionActuelle.
+ */
+double sequence_getDuration(struct schedACM_t * sched, t_sequence * sequence);
 
 /**
  * @brief Copie d'une séquence

@@ -33,6 +33,10 @@ struct schedUtility_t {
 
 void schedulerUtility(struct schedUtility_t * sched);
 
+/**
+ * @brief Caractéristiques d'un ordonnanceur fondé sur les fonctions
+ * d'utilité.
+ */
 static struct schedACM_func_t schedUtility_func = {
    .getPDU = NULL,
    .processPDU = NULL,
@@ -41,7 +45,9 @@ static struct schedACM_func_t schedUtility_func = {
    .schedule = (void (*)(void*))schedulerUtility
 };
 
-/*
+/**
+ * @brief Création d'un ordonnanceur simple fondé sur les fonctions
+ * d'utilité 
  * Création d'un scheduler avec sa "destination". Cette dernière doit
  * être de type struct DVBS2ll_t  et avoir déjà été complêtement
  * construite (tous les MODCODS créés).
@@ -89,8 +95,22 @@ void schedUtil_afficherFiles(struct schedUtility_t * sched, int mc)
    }
 }
 
-/*
- * La fonction d'ordonnancement appliquée au ModCod donné
+/**
+ * @brief La fonction d'ordonnancement par fonction d'utilité
+ * appliquée au ModCod donné 
+ * @param sched L'ordonnanceur
+ * @param mc Le MODCOD sur lequel on cherche le meilleur
+ * ordonnancenment
+ * @param remplissage (out) Le remplisssage de BBFRAME proposé par
+ * cette fonction
+ * 
+ * L'algorithme est le suivant. On cherche la file avec la plus forte
+ * contribution à l'utilité globale et on envoie tout ce que l'on peut
+ * depuis cette file. Le cas échéant, on complète avec les autres
+ * files dans l'ordre décroissant de la la contribution à l'utilité.
+ * Attention, ce n'est pas véritablement la contribution à l'utilité
+ * qui est prise en compte, puisque elle n'est pas multipliée par la
+ * taille de la file. On ne favorise donc pas les gros débits.
  */
 void schedulerUtilityMC(struct schedUtility_t * sched, int mc, t_remplissage * remplissage)
 {
@@ -544,9 +564,8 @@ void schedulerUtilityMCPropBatch(struct schedUtility_t * sched, int mc, t_sequen
             printf_debug(DEBUG_SCHED, "DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8 = %d ...\n", (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8));
 	 }
 	*/
-         // Tant que (1) il reste un paquet  (2) qui tient dans la trame (3) que j'ai le droit d'émettre
 
-
+        // Tant que (1) il reste un paquet  (2) qui tient dans la trame (3) que j'ai le droit d'émettre
 	while ((remplissage->nbrePaquets[m][q] < filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)) - sequence_nbPackets(sequence, m, q)) // (1)
                &&  (remplissage->volumeTotal +filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+sequence_nbPackets(sequence, m, q)+1) // (2)
 		    <= (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8))
@@ -561,6 +580,7 @@ void schedulerUtilityMCPropBatch(struct schedUtility_t * sched, int mc, t_sequen
 		)){
 	  remplissage->nbrePaquets[m][q]++;
           remplissage->volumeTotal += filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+sequence_nbPackets(sequence, m, q));
+	  remplissage->interet += (double)(filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+sequence_nbPackets(sequence, m, q))) * poids[m][q]*sommePoids;
 	  /*
           printf_debug(DEBUG_SCHED, "   %d pq de %d/%d (volume %d -> cumul %d, reste %d sur %d)\n",
 		       remplissage->nbrePaquets[m][q],
@@ -571,7 +591,6 @@ void schedulerUtilityMCPropBatch(struct schedUtility_t * sched, int mc, t_sequen
 		       (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8) - remplissage->volumeTotal,
 		       (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8));
 	  */
-	  remplissage->interet += (double)(filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q), remplissage->nbrePaquets[m][q]+sequence_nbPackets(sequence, m, q))) * poids[m][q]*sommePoids;
 	}
       }
    }
@@ -657,6 +676,7 @@ void schedulerUtilityPropBatch(struct schedUtility_t * sched)
    if (DEBUG_SCHED&debug_mask) {
       schedACM_printFilesSummary(sched->schedACM);
    }
+   // Bouclons sur l'ensemble des séquences réalisables
    do {
       printf_debug(DEBUG_SCHED, "sequence.positionActuelle = %d\n", sequence.positionActuelle);
       printf_debug(DEBUG_SCHED, "seq.lgMax = %d\n", schedACM_getSeqLgMax(sched->schedACM));
@@ -669,13 +689,15 @@ void schedulerUtilityPropBatch(struct schedUtility_t * sched)
       // pourra pas être plus longue
       //    OU (b) positionActuelle == seqLgMax : la séquence a
       // atteint la longueur maximale tolérée 
-      //    OU (c) la dernière étape n'a pas trouvé de paquet à
+      //    OU (c) la durée minimale de l'époque est atteinte
+      //    OU (d) la dernière étape n'a pas trouvé de paquet à
       // ordonnancer, donc il faut tester un autre MODCOD (pour ça, on
       // sort et on laisse l'étape 3 s'en charger)
       punkIsNotDead = 1;
       while (   (!sequence_filesVides(&sequence, sched->schedACM))    // (a)
 		&& (sequence.positionActuelle < schedACM_getSeqLgMax(sched->schedACM))  // (b)
-		&& (punkIsNotDead)
+                && (sequence_getDuration(sched->schedACM, &sequence) < schedACM_getEpochMinDuration(sched->schedACM))  // (c)
+		&& (punkIsNotDead) // (d)
             ){
 
          // On prépare le remplissage
@@ -718,9 +740,10 @@ void schedulerUtilityPropBatch(struct schedUtility_t * sched)
          // BBFRAME est vide)
       }
 
-      printf_debug(DEBUG_SCHED, "complete sequence (%s, position %d/max %d)\n",
+      printf_debug(DEBUG_SCHED, "complete sequence (%s, position %d/max %d - dur %f/%f min)\n",
 		   sequence_filesVides(&sequence, sched->schedACM)?"empty files":"packets waiting",
-		   sequence.positionActuelle, schedACM_getSeqLgMax(sched->schedACM));
+		   sequence.positionActuelle, schedACM_getSeqLgMax(sched->schedACM),
+		   sequence_getDuration(sched->schedACM, &sequence), schedACM_getEpochMinDuration(sched->schedACM));
       if (DEBUG_SCHED&debug_mask) {
          schedACM_printSequenceSummary(sched->schedACM, &sequence);
       }
@@ -730,6 +753,7 @@ void schedulerUtilityPropBatch(struct schedUtility_t * sched)
       // si elle vide les files)
       if (  (sequence_filesVides(&sequence, sched->schedACM))
 	    ||(sequence.positionActuelle >= schedACM_getSeqLgMax(sched->schedACM))
+	    ||(sequence_getDuration(sched->schedACM, &sequence) >= schedACM_getEpochMinDuration(sched->schedACM))
 	  ) { 
          printf_debug(DEBUG_SCHED, "sequence candidate\n");
          // 2 - Si c'est la meilleure, on la sauvegarde

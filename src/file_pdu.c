@@ -397,6 +397,9 @@ int filePDU_size_n_PDU(struct filePDU_t * file, int n)
    return result;
 }
 
+/**
+ * @brief Taille cumulée des PDU d'une file
+ */
 int filePDU_size(struct filePDU_t * file)
 {
    return filePDU_size_n_PDU(file, filePDU_length(file));

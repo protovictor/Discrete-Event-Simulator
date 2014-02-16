@@ -95,11 +95,14 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file);
  */
 struct PDU_t * filePDU_getPDU(void * file);
 
-/*
- * Nombre de PDU dans la file
+/**
+ * @brief Nombre de PDU dans la file
  */
 int filePDU_length(struct filePDU_t * file);
 
+/**
+ * @brief Taille cumulée des PDU d'une file
+ */
 int filePDU_size(struct filePDU_t * file);
 
 /**

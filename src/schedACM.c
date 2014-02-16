@@ -16,11 +16,11 @@ unsigned long nbRemplissageFree = 0;
 
 /*
  * A chaque file est associÃ©e une QoS
- */
 struct fileQoS {
    struct filePDU_t * file;
    t_qosMgt           qos;
 };
+ */
 
 /**
  * @brief Caractérisation générale d'un ordonnanceur sur ACM
@@ -35,8 +35,8 @@ struct schedACM_t {
    t_qosMgt          ** qos;
    int                  declassement;
 
-   // La destination est forcement un lien DVBS2, mais il serait 
-   // bon de l'utiliser de faÃ§on cohÃ©rente avec le modÃ¨le I/O
+   // La destination est forcément un lien DVBS2, mais il serait 
+   // bon de l'utiliser de façon cohérente avec le modèle I/O
    // De plus, on pourra gÃ©nÃ©raliser sans trop de difficultÃ©s (?)
    // Ã  un ACM
    struct DVBS2ll_t * dvbs2ll; // Le lien sur lequel on transmet
@@ -71,7 +71,10 @@ struct schedACM_t {
    double    currentEpochStartTime ; //!< Ce n'est pas nécessairement
 				     //!périodique
    struct probe_t * epochDurationProbe;
+   int nbEpoch;
+   int nbEpochStarvation;
 
+   // Données privées
    void * private;
 };
 
@@ -145,6 +148,8 @@ struct schedACM_t * schedACM_create(struct DVBS2ll_t * dvbs2ll, int nbQoS, int d
    result->epochMinDuration = 0.0;
    result->currentEpochStartTime = 0.0;
    result->epochDurationProbe = NULL;
+   result->nbEpoch = 0;
+   result->nbEpochStarvation = 0;
 
    result->nbSol = 0;
    result->nbSolProbe = NULL;
@@ -339,7 +344,7 @@ int schedACM_getNbSolutions(struct schedACM_t * sched)
 };
 
 /**
- * @brief Choix de la longureur maximale d'une séquence
+ * @brief Choix de la longueur maximale d'une séquence
  */
 void schedACM_setSeqLgMax(struct schedACM_t * sched, int seqLgMax)
 {
@@ -383,6 +388,26 @@ void schedACM_addEpochTimeDurationProbe(struct schedACM_t * sched, struct probe_
    sched->epochDurationProbe = probe_chain(epochDurationProbe, sched->epochDurationProbe);
 }
 
+/**
+ * @brief Combien d'époques calculées ?
+ * @param sched L'ordonnanceur visé
+ * @result Le nombre d'époques qui ont été calculées
+ */
+int schedACM_getNbEpoch(struct schedACM_t * sched)
+{
+   return sched->nbEpoch;
+}
+
+/**
+ * @brief Combien d'époques en famine calculées ?
+ * @param sched L'ordonnanceur visé
+ * @result Le nombre d'époques en famine qui ont été calculées
+ */
+int schedACM_getNbEpochStarvation(struct schedACM_t * sched)
+{
+   return sched->nbEpochStarvation;
+}
+
 /********************************************************************************/
 /*   La dérivée de la fonction d'utilitÃ©                                        */
 /********************************************************************************/
@@ -401,6 +426,7 @@ double utiliteDerivee(t_qosMgt * qos, double x, struct DVBS2ll_t * dvbs2ll)
    switch (qos->typeQoS) {
       case kseQoS_log :
          result = qos->beta/x;   // 2012-02-07 : remplacement de 1.0 au numÃ©rateur
+         printf_debug(DEBUG_NEVER, "x=%f, beta=%f, result(log)=%f\n", x, qos->beta, result);
       break;
 
       case kseQoS_lin :             // UtilitÃ© linÃ©aire
@@ -611,22 +637,32 @@ struct PDU_t * schedACM_buildBBFRAMEGeneric(struct schedACM_t * sched)
 struct PDU_t * schedACM_buildBBFRAMEGenericBatch(struct schedACM_t * sched)
 {
    struct PDU_t * pdu = NULL;
+   int r;
 
    printf_debug(DEBUG_ACM, "IN\n");
 
    assert(sched->func->batch == 1);
 
    // Si la séquence calculée est vide, c'est qu'il est temps de s'y
-   // mettre ! ATTENTION, sur du périodique, il faut peut-être
-   // attendre ...
+   // mettre ! 
    if (sched->sequenceChoisie.positionActuelle == 0) {
       // On ne peut ordonnancer que si l'époque précédente est finie
       if (motSim_getCurrentTime() >= sched->currentEpochStartTime + sched->epochMinDuration) {
          // Recherche de l'ordonnancement par application de l'algo
          printf_debug(DEBUG_ACM, "On schedule ...\n");
          schedACM_schedule(sched);
-         printf_debug(DEBUG_ACM, "Sequence proposee de %d trames\n", sched->sequenceChoisie.positionActuelle);
-
+	 // On compte les époques et les époques non pleines
+         sched->nbEpoch ++;
+	 if (sequence_getDuration(sched, &sched->sequenceChoisie) < sched->epochMinDuration){
+            sched->nbEpochStarvation++;
+	 }
+         if (DEBUG_SCHED&debug_mask) {
+            printf_debug(DEBUG_SCHED, "Sequence proposee de %d trames : ", sched->sequenceChoisie.positionActuelle);
+            for (r = 0 ; r < sched->sequenceChoisie.positionActuelle; r++){
+               printf("%d ", sched->sequenceChoisie.remplissages[r].modcod);
+            }
+            printf("\n");
+	 }
          if ( sched->currentEpochStartTime > 0.0) {
             probe_sample(sched->epochDurationProbe, motSim_getCurrentTime() - sched->currentEpochStartTime);
 	 }
@@ -786,15 +822,15 @@ void schedACM_afficherFiles(struct schedACM_t * sched, int mc)
    int m, q, n;
    int taille, id;
 
-   printf_debug(DEBUG_ALWAYS, "Etat des files considerees: \n");
+   printf_debug(DEBUG_SCHED, "Etat des files considerees: \n");
    for (m = mc; m < (schedACM_getReclassification(sched)?schedACM_getNbModCod(sched):(mc+1)); m++) {
-      printf_debug(DEBUG_ALWAYS, "  MODCOD %d\n", m);
+      printf_debug(DEBUG_SCHED, "  MODCOD %d\n", m);
       for (q = 0; q < schedACM_getNbQoS(sched); q++) {
-	printf_debug(DEBUG_ALWAYS, "    QoS %d (%d PDUs)\n", q, filePDU_length(schedACM_getInputQueue(sched, m, q)));
+	printf_debug(DEBUG_SCHED, "    QoS %d (%d PDUs)\n", q, filePDU_length(schedACM_getInputQueue(sched, m, q)));
 	 for (n = 1; n <= filePDU_length(schedACM_getInputQueue(sched, m, q)); n++) {
             id = filePDU_id_PDU_n(schedACM_getInputQueue(sched, m, q), n);
             taille = filePDU_size_PDU_n(schedACM_getInputQueue(sched, m, q), n);
-            printf_debug(DEBUG_ALWAYS, "      [%d] : PDU %d (taille %d)\n", n, id, 
+            printf_debug(DEBUG_SCHED, "      [%d] : PDU %d (taille %d)\n", n, id, 
 			 taille);
          }
       }
@@ -811,16 +847,16 @@ void schedACM_printFilesSummary(struct schedACM_t * sched)
    char buffer[_MY_BUFF_SIZE_];
    char bufferq[_MY_BUFF_SIZE_];
 
-   printf_debug(DEBUG_ALWAYS, "-------------File status-------------\n");
+   printf_debug(DEBUG_SCHED, "-------------File status-------------\n");
    for (m = 0; m < schedACM_getNbModCod(sched); m++) {
       sprintf(buffer, " M%d ", m);
       for (q = 0; q < schedACM_getNbQoS(sched); q++) {
 	sprintf(bufferq, " F%d[%d]", q, filePDU_length(schedACM_getInputQueue(sched, m, q)));
 	 strcat(buffer, bufferq);
       }
-      printf_debug(DEBUG_ALWAYS, "%s\n", buffer);
+      printf_debug(DEBUG_SCHED, "%s\n", buffer);
    }
-   printf_debug(DEBUG_ALWAYS, "-------------------------------------\n");
+   printf_debug(DEBUG_SCHED, "-------------------------------------\n");
 }
 
 /**********************************************************************************/
@@ -953,6 +989,19 @@ void sequence_init(t_sequence * seq, int lgMax, int nbModCod, int nbQoS)
    seq->nextFrameToSend = 0;
    tabRemplissage_init(seq->remplissages, lgMax, nbModCod, nbQoS);
 }
+
+/**
+ * @brief Remise à zéro d'une séquence
+ */
+void sequence_raz(t_sequence * seq, int lgMax, int nbModCod, int nbQoS)
+{
+   assert(seq->longueur == lgMax);
+   seq->positionActuelle = 0;
+   seq->nextFrameToSend = 0;
+   tabRemplissage_raz(seq->remplissages, lgMax, nbModCod, nbQoS);
+
+}
+
 
 /**
  * @brief Copie d'une séquence
@@ -1099,6 +1148,39 @@ int sequence_getTotalSize(t_sequence * seq, struct schedACM_t * sched)
 }
 
 /**
+ * @brief Taille cumulée sur une séquence par une file
+ * @param seq La séquence calculée par un ordonnanceur
+ * @param sched La structure d'ordonnanceur
+ * @param m Le MODCOD concerné
+ * @param q La file concernée
+ * @result La somme des tailles de tous les paquets prévus dans la
+ * séquence, hors position actuelle, sur la file donnée
+ */ 
+int sequence_getFileSize(t_sequence * seq, struct schedACM_t * sched, int m, int q)
+{
+   return filePDU_size_n_PDU(sched->files[m][q], sequence_nbPackets(seq, m, q));
+}
+
+/**
+ * @brief Durée d'une séquence
+ * @param sched L'ordonnanceur concerné
+ * @param sequence La séquence à mesurer
+ * Détermination de la durée cumulée de toutes les trames d'une
+ * séquence hors positionActuelle.
+ */
+double sequence_getDuration(struct schedACM_t * sched, t_sequence * seq)
+{
+   double result = 0.0;
+   int r;
+
+   for (r= 0 ; r<seq->positionActuelle; r++) {
+      result += DVBS2ll_bbframeTransmissionTime(schedACM_getACMLink(sched), seq->remplissages[r].modcod);
+   }
+
+   return result;
+}
+
+/**
  * @brief Un affichage synthétique d'une séquence
  */
 #define _MY_BUFF_SIZE_ 1024
@@ -1113,8 +1195,11 @@ void schedACM_printSequenceSummary(struct schedACM_t * sched, t_sequence * seque
 		sequence->positionActuelle,
 		sequence->longueur);
 
-   for (r = 0; r < sequence->positionActuelle; r++){
-     sprintf(buffer, " Tr-%d (M%d) : ", r, sequence->remplissages[r].modcod);
+   for (r = 0; r <= ((sequence->positionActuelle<sequence->longueur-1)?sequence->positionActuelle:sequence->longueur-1); r++){
+      if ((r<sequence->positionActuelle) || (sequence->remplissages[r].modcod >= 0)) {
+         sprintf(buffer, "%cTr-%d (M%d) : ",
+		 (r==sequence->positionActuelle)?'#':' ',
+		 r, sequence->remplissages[r].modcod);
       for (m = 0; m < schedACM_getNbModCod(sched); m++) {
          for (q = 0; q < schedACM_getNbQoS(sched); q++) {   
 	    if (sequence->remplissages[r].nbrePaquets[m][q]) { 
@@ -1128,6 +1213,7 @@ void schedACM_printSequenceSummary(struct schedACM_t * sched, t_sequence * seque
 	    bufferq[0]=0;
          }
       }
+     }
       printf_debug(DEBUG_ALWAYS, "%s\n", buffer);
       buffer[0]=0;
    }
