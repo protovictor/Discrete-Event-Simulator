@@ -9,8 +9,11 @@
 #include <schedACM.h>
 
 #define schedBatchModeLength 1
-#define schedBatchModeUtil 2
-#define schedBatchModeUtilThenLength 3
+#define schedBatchModeDuration 2
+#define schedBatchModeUtil 3
+#define schedBatchModeUtilThenLength  4
+#define schedBatchModeUtilThenDuration 5
+#define schedBatchModeDurationThenLength 6
 
 /**
  * @brief Création d'un scheduler avec sa "destination".

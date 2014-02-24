@@ -84,14 +84,18 @@ void schedulerBatchOnePass(struct schedACMBatch_t * sched, int mode)
 				     schedACM_getACMLink(sched->schedACM)),
 		      schedACM_getQoS(sched->schedACM, m, q)->debit);
 
-           if (mode == schedBatchModeUtil){
+            if (mode == schedBatchModeUtil){
                poids[m][q] = utiliteDerivee(schedACM_getQoS(sched->schedACM, m, q),
 				      schedACM_getQoS(sched->schedACM, m, q)->debit,
 				      schedACM_getACMLink(sched->schedACM));
 	    } else if (mode == schedBatchModeLength) {
                poids[m][q] = filePDU_size(schedACM_getInputQueue(sched->schedACM, m, q));
+	    } else if (mode == schedBatchModeDuration) {
+	       poids[m][q] = filePDU_size(schedACM_getInputQueue(sched->schedACM, m, q))
+		            / DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), m)
+                            * DVBS2ll_bbframeTransmissionTime(schedACM_getACMLink(sched->schedACM), m);
 	    } else {
-	      motSim_error(MS_FATAL, "Mode de calcul de poids inconnu !");
+	       motSim_error(MS_FATAL, "Mode de calcul de poids inconnu !");
 	    }
 
             printf_debug(DEBUG_SCHED, "Poids[%d, %d] = %f (débit = %lf)\n", m, q,  poids[m][q], schedACM_getQoS(sched->schedACM, m, q)->debit);
@@ -104,7 +108,7 @@ void schedulerBatchOnePass(struct schedACMBatch_t * sched, int mode)
 
    // 2 - On normalise 
    //    Pour chaque modcod envisageable
-   printf_debug(DEBUG_ALWAYS, "--------------------AVANT----------------------\n");
+   printf_debug(DEBUG_SCHED, "--------------------AVANT----------------------\n");
    for (m = 0; m < schedACM_getNbModCod(sched->schedACM); m++) {
       cumulSurMC = 0;
       //    Pour chaque file du modcod
@@ -113,23 +117,24 @@ void schedulerBatchOnePass(struct schedACMBatch_t * sched, int mode)
 	 if (filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)) > 0) {
             // On a droit au débit de notre MODCOD multiplié par le temps
             // de l'époque. Tout ça multiplié par le poids.
-	    deficitBitSize[m][q] = (int)(poids[m][q]
-                              * DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), m)
+            deficitBitSize[m][q] = (int)(poids[m][q]
 	                      * schedACM_getEpochMinDuration(sched->schedACM)
-				      / DVBS2ll_bbframeTransmissionTime(schedACM_getACMLink(sched->schedACM), m));
+                              * DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), m)
+                              / DVBS2ll_bbframeTransmissionTime(schedACM_getACMLink(sched->schedACM), m)
+                                        );
 	    printf_debug(DEBUG_SCHED, "Poids [%d, %d] = %f\n", m, q,  poids[m][q]);
 	    printf_debug(DEBUG_SCHED, "Volume[%d, %d] = %d\n", m, q,  deficitBitSize[m][q]);
 	 } else {
             poids[m][q] = 0.0;
             deficitBitSize[m][q] = 0;
 	 }
-	 printf_debug(DEBUG_ALWAYS, "Deficit[%d, %d] = %d (%d pq)\n", m, q, deficitBitSize[m][q]/8, filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)));
+	 printf_debug(DEBUG_SCHED, "Deficit[%d, %d] = %d (%d pq)\n", m, q, deficitBitSize[m][q]/8, filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)));
 	 cumulSurMC += deficitBitSize[m][q];
       }
       nbTrames = (double)cumulSurMC / (double)DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), m);
-      printf_debug(DEBUG_ALWAYS, "Il faudrait %f trames %d (%d)\n", nbTrames, m,  DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), m)/8);
+      printf_debug(DEBUG_SCHED, "Il faudrait %f trames %d (%d)\n", nbTrames, m,  DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), m)/8);
    }
-   printf_debug(DEBUG_ALWAYS, "-----------------------------------------------\n");
+   printf_debug(DEBUG_SCHED, "-----------------------------------------------\n");
 
    // 3 - Pour chaque file, on envisage de prendre un volume
    //     correspondant au poids multiplié par la taille que la
@@ -316,18 +321,18 @@ void schedulerBatchOnePass(struct schedACMBatch_t * sched, int mode)
                && (sequence->remplissages[sequence->positionActuelle].modcod != -1)   // (2)
            );
    printf_debug(DEBUG_SCHED, "           -------<Resultat>-------\n");
-   if (DEBUG_ALWAYS&debug_mask) {
+   if (DEBUG_SCHED&debug_mask) {
        schedACM_printSequenceSummary(sched->schedACM, sequence);
    }
    printf_debug(DEBUG_SCHED, "OUT----------------------------------------------------\n");
-   printf_debug(DEBUG_ALWAYS, "--------------------APRES----------------------\n");
+   printf_debug(DEBUG_SCHED, "--------------------APRES----------------------\n");
    for (m = 0; m < schedACM_getNbModCod(sched->schedACM); m++) {
       //    Pour chaque file du modcod
       for (q = 0; q < schedACM_getNbQoS(sched->schedACM); q++) {
-	printf_debug(DEBUG_ALWAYS, "Deficit[%d, %d] = %d (rest %d pq)\n", m, q,  deficitBitSize[m][q]/8, filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)));
+	printf_debug(DEBUG_SCHED, "Deficit[%d, %d] = %d (rest %d pq)\n", m, q,  deficitBitSize[m][q]/8, filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)));
       }
    }
-   printf_debug(DEBUG_ALWAYS, "-----------------------------------------------\n");
+   printf_debug(DEBUG_SCHED, "-----------------------------------------------\n");
 }
 
 /**
@@ -339,8 +344,16 @@ void schedulerACMBatch(struct schedACMBatch_t * sched)
      schedulerBatchOnePass(sched, schedBatchModeLength);
   } else if (sched->mode == schedBatchModeUtil){
      schedulerBatchOnePass(sched, schedBatchModeUtil);
+  } else if (sched->mode == schedBatchModeDuration){
+     schedulerBatchOnePass(sched, schedBatchModeDuration);
+  } else if (sched->mode == schedBatchModeUtilThenDuration){
+     schedulerBatchOnePass(sched, schedBatchModeUtil);
+     schedulerBatchOnePass(sched, schedBatchModeDuration);
   } else if (sched->mode == schedBatchModeUtilThenLength){
      schedulerBatchOnePass(sched, schedBatchModeUtil);
+     schedulerBatchOnePass(sched, schedBatchModeLength);
+  } else if (sched->mode == schedBatchModeDurationThenLength){
+     schedulerBatchOnePass(sched, schedBatchModeDuration);
      schedulerBatchOnePass(sched, schedBatchModeLength);
   }
 }

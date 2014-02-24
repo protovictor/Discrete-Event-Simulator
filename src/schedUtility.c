@@ -22,7 +22,7 @@
 #define propModDirect         1
 #define propModProp           2
 #define propModPropThenDirect 3
-#define propMod               propModProp
+#define propMod               propModDirect
 
 /*
  * Les caractéristiques d'un tel ordonnanceur
@@ -236,13 +236,6 @@ void schedulerUtility(struct schedUtility_t * sched)
 		schedACM_getSolution(sched->schedACM)->modcod,
 		schedACM_getSolution(sched->schedACM)->volumeTotal,
 		schedACM_getSolution(sched->schedACM)->interet);
-/*
-   for (m = 0; m < schedACM_getNbModCod(sched->schedACM); m++) {
-      for (q = 0; q < schedACM_getNbQoS(sched->schedACM); q++) {
-	printf_debug(DEBUG_SCHED, "[%d][%d] - %d\n", m, q, schedACM_getSolution(sched->schedACM)->nbrePaquets[m][q]);
-      }
-   }
-*/
 }
 
 /**
@@ -316,7 +309,9 @@ void schedulerUtilityMCProp(struct schedUtility_t * sched, int mc, t_remplissage
    for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?schedACM_getNbModCod(sched->schedACM):(mc+1)); m++) {
      //      printf_debug(DEBUG_SCHED, "Lets try m = %d ...\n", m);
       //    Pour chaque file du modcod
-      for (q = 0; q < schedACM_getNbQoS(sched->schedACM); q++) {
+      qb = random()%schedACM_getNbQoS(sched->schedACM);
+      for (qa = 0; qa < schedACM_getNbQoS(sched->schedACM); qa++) {
+         q = (qa + qb)%schedACM_getNbQoS(sched->schedACM);
 	/*
          printf_debug(DEBUG_SCHED, "Lets see q = %d ...\n", q);
          printf_debug(DEBUG_SCHED, "remplissage->nbrePaquets[m][q] = %d ...\n", remplissage->nbrePaquets[m][q]);
@@ -366,7 +361,7 @@ void schedulerUtilityMCProp(struct schedUtility_t * sched, int mc, t_remplissage
    mb = bestMC;
    //   printf_debug(DEBUG_SCHED, "mb = %d\n", mb);
    for (ma = 0; ma < (schedACM_getReclassification(sched->schedACM)?schedACM_getNbModCod(sched->schedACM):(mc+1)) - mc; ma++) {
-     //printf_debug(DEBUG_SCHED, "   ma = %d, mb = %d, mc = %d, MOD = %d\n", ma, mb, mc, ((schedACM_getReclassification(sched->schedACM)?schedACM_getNbModCod(sched->schedACM):(mc+1))-mc));
+      //printf_debug(DEBUG_SCHED, "   ma = %d, mb = %d, mc = %d, MOD = %d\n", ma, mb, mc, ((schedACM_getReclassification(sched->schedACM)?schedACM_getNbModCod(sched->schedACM):(mc+1))-mc));
       m = mc+((mb+ma-mc) % ((schedACM_getReclassification(sched->schedACM)?schedACM_getNbModCod(sched->schedACM):(mc+1))-mc));
       //printf_debug(DEBUG_SCHED, "   m = %d\n", m);
       qb = bestQoS;
@@ -381,10 +376,10 @@ void schedulerUtilityMCProp(struct schedUtility_t * sched, int mc, t_remplissage
 	  && (remplissage->volumeTotal + filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM, m, q),
 							   remplissage->nbrePaquets[m][q]+1)
                     <= (DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), mc)/8))) {
-	 remplissage->volumeTotal += 
+	    remplissage->volumeTotal += 
             filePDU_size_PDU_n(schedACM_getInputQueue(sched->schedACM,
 						      m, q), remplissage->nbrePaquets[m][q]+1);
-         remplissage->nbrePaquets[m][q]++;
+            remplissage->nbrePaquets[m][q]++;
          }
       }
    }
@@ -552,7 +547,9 @@ void schedulerUtilityMCPropBatch(struct schedUtility_t * sched, int mc, t_sequen
    for (m = mc; m < (schedACM_getReclassification(sched->schedACM)?schedACM_getNbModCod(sched->schedACM):(mc+1)); m++) {
      //      printf_debug(DEBUG_SCHED, "Lets try m = %d ...\n", m);
       //    Pour chaque file du modcod
-      for (q = 0; q < schedACM_getNbQoS(sched->schedACM); q++) {
+      qb = random()%schedACM_getNbQoS(sched->schedACM);
+      for (qa = 0; qa < schedACM_getNbQoS(sched->schedACM); qa++) {
+         q = (qa + qb)%schedACM_getNbQoS(sched->schedACM);
 	/*
          printf_debug(DEBUG_SCHED, "Lets see q = %d ...\n", q);
          printf_debug(DEBUG_SCHED, "remplissage->nbrePaquets[m][q] = %d ...\n", remplissage->nbrePaquets[m][q]);
@@ -777,11 +774,13 @@ void schedulerUtilityPropBatch(struct schedUtility_t * sched)
       printf_debug(DEBUG_SCHED, "sequence suivante\n");
       // 3 - On avance d'un cran pour aller chercher la suivante avant
       // de reprendre au point 1.
-      // Si on est ici, on est rentré au moins une fois (grâce qux
+      // Si on est ici, on est rentré au moins une fois (grâce aux
       // hypothèses initiales) dans la boucle du point 1. Il faut donc
       // reculer la position actuelle au moins une fois 
       do {
          sequence.positionActuelle -- ;
+	 printf_debug(DEBUG_SCHED, "sequence actuelle = %d\n", sequence.positionActuelle);
+
          // On incrémente le MODCOD de la dernière et on le raz
          mc = sequence.remplissages[sequence.positionActuelle].modcod + 1;
          mc = mc % schedACM_getNbModCod(sched->schedACM);
