@@ -84,14 +84,18 @@ void schedulerBatchOnePass(struct schedACMBatch_t * sched, int mode)
 				     schedACM_getACMLink(sched->schedACM)),
 		      schedACM_getQoS(sched->schedACM, m, q)->debit);
 
-           if (mode == schedBatchModeUtil){
+            if (mode == schedBatchModeUtil){
                poids[m][q] = utiliteDerivee(schedACM_getQoS(sched->schedACM, m, q),
 				      schedACM_getQoS(sched->schedACM, m, q)->debit,
 				      schedACM_getACMLink(sched->schedACM));
 	    } else if (mode == schedBatchModeLength) {
                poids[m][q] = filePDU_size(schedACM_getInputQueue(sched->schedACM, m, q));
+	    } else if (mode == schedBatchModeDuration) {
+	       poids[m][q] = filePDU_size(schedACM_getInputQueue(sched->schedACM, m, q))
+		            / DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), m)
+                            * DVBS2ll_bbframeTransmissionTime(schedACM_getACMLink(sched->schedACM), m);
 	    } else {
-	      motSim_error(MS_FATAL, "Mode de calcul de poids inconnu !");
+	       motSim_error(MS_FATAL, "Mode de calcul de poids inconnu !");
 	    }
 
             printf_debug(DEBUG_SCHED, "Poids[%d, %d] = %f (débit = %lf)\n", m, q,  poids[m][q], schedACM_getQoS(sched->schedACM, m, q)->debit);
@@ -113,10 +117,11 @@ void schedulerBatchOnePass(struct schedACMBatch_t * sched, int mode)
 	 if (filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q)) > 0) {
             // On a droit au débit de notre MODCOD multiplié par le temps
             // de l'époque. Tout ça multiplié par le poids.
-	    deficitBitSize[m][q] = (int)(poids[m][q]
-                              * DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), m)
+            deficitBitSize[m][q] = (int)(poids[m][q]
 	                      * schedACM_getEpochMinDuration(sched->schedACM)
-				      / DVBS2ll_bbframeTransmissionTime(schedACM_getACMLink(sched->schedACM), m));
+                              * DVBS2ll_bbframePayloadBitSize(schedACM_getACMLink(sched->schedACM), m)
+                              / DVBS2ll_bbframeTransmissionTime(schedACM_getACMLink(sched->schedACM), m)
+                                        );
 	    printf_debug(DEBUG_SCHED, "Poids [%d, %d] = %f\n", m, q,  poids[m][q]);
 	    printf_debug(DEBUG_SCHED, "Volume[%d, %d] = %d\n", m, q,  deficitBitSize[m][q]);
 	 } else {
@@ -339,8 +344,16 @@ void schedulerACMBatch(struct schedACMBatch_t * sched)
      schedulerBatchOnePass(sched, schedBatchModeLength);
   } else if (sched->mode == schedBatchModeUtil){
      schedulerBatchOnePass(sched, schedBatchModeUtil);
+  } else if (sched->mode == schedBatchModeDuration){
+     schedulerBatchOnePass(sched, schedBatchModeDuration);
+  } else if (sched->mode == schedBatchModeUtilThenDuration){
+     schedulerBatchOnePass(sched, schedBatchModeUtil);
+     schedulerBatchOnePass(sched, schedBatchModeDuration);
   } else if (sched->mode == schedBatchModeUtilThenLength){
      schedulerBatchOnePass(sched, schedBatchModeUtil);
+     schedulerBatchOnePass(sched, schedBatchModeLength);
+  } else if (sched->mode == schedBatchModeDurationThenLength){
+     schedulerBatchOnePass(sched, schedBatchModeDuration);
      schedulerBatchOnePass(sched, schedBatchModeLength);
   }
 }
