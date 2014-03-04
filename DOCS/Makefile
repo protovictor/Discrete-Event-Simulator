@@ -7,7 +7,7 @@ MAKEINDEX=makeindex
 BIBTEX=bibtex
 RM=rm -f
 
-all : ndes.pdf doxy
+all : ndes.pdf ndes-en.pdf doxy
 
 doxy :
 	${DOXYGEN} ${DOXYFILE}
@@ -19,4 +19,4 @@ doxy :
 	${PDFLATEX}  $<
 
 clean :
-	${RM} ndes.pdf  *.idx *.log *.aux *.bbl *.blg *.brf *.cb *.ind *.ilg *.inx  *.toc *.out
+	${RM} ndes.pdf ndes-en.pdf *.idx *.log *.aux *.bbl *.blg *.brf *.cb *.ind *.ilg *.inx  *.toc *.out

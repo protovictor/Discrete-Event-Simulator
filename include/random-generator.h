@@ -2,14 +2,14 @@
  * @file random-generator.h
  * @brief Les générateurs de nombres aléatoires.
  *
- * Un générateur est caractérisé par plusieurs propriétés
+ * Un gÃ©nÃ©rateur est caractÃ©risÃ© par plusieurs propriÃ©tÃ©s
  *
- * - Le type des valeurs générées.
- * - La distribution des probabilités
- *    . Les paramètres de cette distribution : min, max, moyenne, ...
- * - La source d'aléa. Certaines permettent un rejeu (rand unix)
- *   d'autres sont "vraiment aléatoires" (/dev/random)
- *    . Les paramètres de cette source (seed, ...)
+ * - Le type des valeurs gÃ©nÃ©rÃ©es.
+ * - La distribution des probabilitÃ©s
+ *    . Les paramÃ¨tres de cette distribution : min, max, moyenne, ...
+ * - La source d'alÃ©a. Certaines permettent un rejeu (rand unix)
+ *   d'autres sont "vraiment alÃ©atoires" (/dev/random)
+ *    . Les paramÃ¨tres de cette source (seed, ...)
  */
 
 #ifndef __DEF_RANDOM_GENERATOR
@@ -55,38 +55,38 @@ struct randomGenerator_t;
 /*  Creators                                                                */
 /*==========================================================================*/
 
-// Des entiers non signés quelconques
+// Des entiers non signÃ©s quelconques
 struct randomGenerator_t * randomGenerator_createUInt();
 
-// Des entiers non signés entre min et max  (inclus)
+// Des entiers non signÃ©s entre min et max  (inclus)
 struct randomGenerator_t * randomGenerator_createUIntRange(unsigned int min,
 						      unsigned int max);
 
-// Des entiers non signés tous �gaux !
+// Des entiers non signÃ©s tous égaux !
 struct randomGenerator_t * randomGenerator_createUIntConstant(unsigned int v);
 
-// Des entiers non signés listés
+// Des entiers non signÃ©s listÃ©s
 struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
 							      unsigned int * values);
 /*
- * Le nombre de valeurs possibles est passé en paramètre ainsi que la
- * liste de ces valeurs puis la liste de leurs probabilité.
+ * Le nombre de valeurs possibles est passÃ© en paramÃ¨tre ainsi que la
+ * liste de ces valeurs puis la liste de leurs probabilitÃ©.
  */
 struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(int nbValues,
                                      unsigned int * values, double * proba);
  
-// Des entiers longs non signés
+// Des entiers longs non signÃ©s
 struct randomGenerator_t * randomGenerator_createULong(int distribution,
 						       unsigned long min,
 						       unsigned long max);
-// Des réels double précision
+// Des rÃ©els double prÃ©cision
 struct randomGenerator_t * randomGenerator_createDouble();
 
-// Des réels double précision, avec une distribution exp de paramètre lambda
+// Des rÃ©els double prÃ©cision, avec une distribution exp de paramÃ¨tre lambda
 struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda);
 
 /* 
- * A double range [min .. max}
+ * A double range [min .. max]
  */
 struct randomGenerator_t * randomGenerator_createDoubleRange(double min,
 							     double max);
@@ -120,17 +120,17 @@ void randomGenerator_delete(struct randomGenerator_t * rg);
  */
 
 /*
- * Un nombre discret de probabilités
+ * Un nombre discret de probabilitÃ©s
  */
 void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
 					     int nb,
                                              double * proba);
 
 /**
- * @brief Cr�ation d'une distribution uniforme construite depuis un fichier
+ * @brief Création d'une distribution uniforme construite depuis un fichier
  *
- * Le fichier doit �tre un fichier texte orient� ligne o� chaque ligne
- * contient un entier (la valeur) suivi d'un r�el (la probabilit� associ�e).
+ * Le fichier doit être un fichier texte orienté ligne où chaque ligne
+ * contient un entier (la valeur) suivi d'un réel (la probabilité associée).
  */ 
 void randomGenerator_setDistributionDiscreteFromFile(struct randomGenerator_t * rg,
 						     char * fileName);
@@ -165,9 +165,9 @@ unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg);
 double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
 
 /*
- * Obtention de certains paramètres. Il s'agit ici de valeurs
- * théoriques, pour obtenir leurs équivalents sur une série
- * d'expériences, on utilisera des sondes.
+ * Obtention de certains paramÃ¨tres. Il s'agit ici de valeurs
+ * thÃ©oriques, pour obtenir leurs Ã©quivalents sur une sÃ©rie
+ * d'expÃ©riences, on utilisera des sondes.
  */
 double randomGenerator_getExpectation(struct randomGenerator_t * rg);
 
@@ -175,7 +175,7 @@ double randomGenerator_getExpectation(struct randomGenerator_t * rg);
 /*   Probes                                                                 */ 
 /*==========================================================================*/
 /**
- * @brief Ajout d'une sonde sur les valeurs g�n�r�es
+ * @brief Ajout d'une sonde sur les valeurs générées
  */
 
 void randomGenerator_addValueProbe(struct randomGenerator_t * rg,

@@ -69,7 +69,7 @@ struct randomGenerator_t {
             int nbProba;
             double * proba;
          } discrete;
-         struct probe_t * pdf; // Ce n'est probablement pas le meilleur outil
+	//         struct probe_t * pdf; // Ce n'est probablement pas le meilleur outil
       } d;
    } distParam; 
    // Prochaine valeur alÃ©atoire conformÃ©ment Ã  la distribution
@@ -328,7 +328,7 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg)
          result = rg->distGetNext(rg);
       break;
       case rGTypeDoubleRange :
-   // ATTENTION, il faudrait normaliser entre distParam.min et max 
+        // ATTENTION, il faudrait normaliser entre distParam.min et max 
 	result = rg->param.d.min + rg->distGetNext(rg) * (rg->param.d.max - rg->param.d.min);
       break;
       case rGTypeDoubleEnum :
