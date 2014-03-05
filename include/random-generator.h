@@ -40,6 +40,7 @@ struct randomGenerator_t;
 #define rGDistUniform      1
 #define rGDistExponential  2
 #define rGDistDiscrete     3
+#define rGDistITS          4
 
 #define rGDistDefault rGDistUniform
 /*
@@ -142,10 +143,46 @@ void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
 // Choix d'une loi exponentielle
 void randomGenerator_setDistributionExp(struct randomGenerator_t * rg, double lambda);
 
+/**
+ * @brief Set a pareto distribution
+ * @param rg The random generator to be modified
+ * @param alpha The shape of the pareto distribution
+ * @param xmin The scale of the pareto distribution
+ */
+#define randomGenerator_setDistributionPareto(rg, alpha, xmin) \
+   randomGenerator_setQuantile2Param(rg, randomGenerator_paretoDistQ, alpha, xmin)
 
-//void randomGenerator_setUniformDistribution(struct randomGenerator_t * rg);
+/**
+ * @brief Define a distribution by its quantile function for inverse
+ * transform sampling
+ * @param rg The random generator
+ * @param q The inverse cumulative density (quantile) function
+ * @param p1 The single parameter of the quantile function
+ */
+void randomGenerator_setQuantile1Param(struct randomGenerator_t * rg,
+				       double (*q)(double x, double p),
+				       double p);
 
-//void randomGenerator_setUniformMinMaxDouble(struct randomGenerator_t * rg, double min, double max);
+/**
+ * @brief Define a distribution by its quantile function for inverse
+ * transform sampling
+ * @param rg The random generator
+ * @param q The inverse cumulative density (quantile) function
+ * @param p1 The first parameter of the quantile function
+ * @param p2 The second parameter of the quantile function
+ */
+void randomGenerator_setQuantile2Param(struct randomGenerator_t * rg,
+				       double (*q)(double x, double p1, double p2),
+				       double p1, double p2);
+/**
+ * @brief Inverse of CDF for exponential distribution
+ */
+double randomGenerator_expDistQ(double x, double lambda);
+
+/**
+ * @brief Inverse of CDF for pareto distribution
+ */
+double randomGenerator_paretoDistQ(double x, double alpha, double xmin);
 
 /*
  * Change lambda
