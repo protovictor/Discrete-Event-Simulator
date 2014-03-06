@@ -193,7 +193,7 @@ void randomGenerator_delete(struct randomGenerator_t * rg);
 %------------------------------------------------------------------------
 %
 %------------------------------------------------------------------------
-\subsection{Choix de la loi}
+\subsection{Choix de la distribution}
 
    Avant de pouvoir être utilisé, un générateur aléatoire doit être
 caractérisé par la loi qui le gouverne. Il existe des fonctions
@@ -205,7 +205,7 @@ l'utiliser.
 %.......................................................................
 %
 %.......................................................................
-\subsubsection{Loi uniforme}
+\subsubsection{Distribution uniforme}
 
    On spécifie une loi uniforme grâce à la fonction suivante
 
@@ -218,6 +218,66 @@ void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
 ``continu'' ou un ensemble discret, mais s'il s'agit d'un intervalle
 non borné, le résultat est \ldots {} aléatoire.
 
+   La figure \ref{figure:distuni} donne un exemple de résultat obtenu
+avec une distribution uniforme réelle dans l'intervalle $[0, 1]$.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.5\textwidth]{DistributionUnif.png}
+\caption{Une loi uniforme\label{figure:distuni}}
+\end{center}
+\end{figure}
+
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Distribution exponentielle}
+
+   On spécifie une loi exponentielle de paramètre $\lambda$ grâce à la
+fonction suivante 
+
+\index{randomGenerator\_setDistributionExp}
+\begin{verbatim}
+void randomGenerator_setDistributionExp(struct randomGenerator_t * rg,
+                                        double lambda);
+
+\end{verbatim}
+
+   La figure \ref{figure:distexp} donne un exemple de résultat obtenu
+avec une distribution exponentielle de paramètre $\lambda = 10.0$
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.5\textwidth]{DistributionExp.png}
+\caption{Une loi exponentielle\label{figure:distexp}}
+\end{center}
+\end{figure}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Distribution de Pareto}
+
+   On spécifie une loi de Pareto de paramètres $\alpha$ et $x_{min}$ grâce à la
+fonction suivante 
+
+\index{randomGenerator\_setDistributionPareto}
+\begin{verbatim}
+void tor_setDistributionPareto(struct randomGenerator_t * rg,
+                               double alpha, double xmin);
+\end{verbatim}
+
+   La figure \ref{figure:distpa} donne un exemple de résultat obtenu
+avec une distribution de Pareto de paramètres $\alpha = 40.0$ et
+$x_{min} = 1.0$
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.5\textwidth]{DistributionPar.png}
+\caption{Une loi de Pareto\label{figure:distpar}}
+\end{center}
+\end{figure}
 %.......................................................................
 %
 %.......................................................................

@@ -189,6 +189,7 @@ void probe_resetExhaustive(struct probe_t * probe)
 void probe_resetGraphBar(struct probe_t * probe)
 {
    int i;
+   printf_debug(DEBUG_PROBE, "reseting '%s'\n", probe_getName(probe));
 
    for (i = 0; i < probe->data.graphBar->nbBar; i++){
       probe->data.graphBar->value[i] = 0.0;
@@ -291,6 +292,11 @@ void probe_reset(struct probe_t * probe)
    }
 
    probe->nbSamples = 0;
+   probe->min = 0.0;
+   probe->max = 0.0;
+   probe->lastSample = 0;
+   probe->lastSampleDate = 0;
+
    printf_debug(DEBUG_PROBE, "reset \"%s\"\n", probe_getName(probe));
 }
 
@@ -573,10 +579,10 @@ void probe_sampleExhaustive(struct probe_t * probe, double value)
 {
    struct sampleSet_t * currentSet = probe->data.sampleSet;
 
-   printf_debug(DEBUG_PROBE_VERB, "\"%s\" : nbSamples=%ld, value = %f\n", probe_getName(probe), probe->nbSamples, value);
+   printf_debug(DEBUG_PROBE_VERB, "%p \"%s\" : nbSamples=%ld, value = %f\n", probe, probe_getName(probe), probe->nbSamples, value);
 
    if(!(probe->nbSamples % PROBE_NB_SAMPLES_MAX)) {
-     //      printf_debug(DEBUG_PROBE, "building new set\n");
+      printf_debug(DEBUG_PROBE_VERB, "building new set\n");
       probe->data.sampleSet = (struct sampleSet_t *) sim_malloc(sizeof(struct sampleSet_t));
 
       probe->data.sampleSet->prev = currentSet;
@@ -585,11 +591,12 @@ void probe_sampleExhaustive(struct probe_t * probe, double value)
 	 currentSet->next = probe->data.sampleSet;
       }
       currentSet = probe->data.sampleSet;
-      //      printf("***(pr %p, %s) New set built : %p %p\n", probe, probe_getName(probe), probe->data.sampleSet, probe->data.sampleSet->prev);
+      //      printf_debug(DEBUG_ALWAYS, "***(pr %p, %s) New set built : %p %p\n", probe, probe_getName(probe), probe->data.sampleSet, probe->data.sampleSet->prev);
    }
-
+  
    currentSet->dates[probe->nbSamples%PROBE_NB_SAMPLES_MAX] = motSim_getCurrentTime();
    currentSet->samples[probe->nbSamples%PROBE_NB_SAMPLES_MAX] = value;
+   printf_debug(DEBUG_PROBE, "OUT\n");
 }
 
 /*
@@ -951,7 +958,6 @@ void probe_sample(struct probe_t * probe, double value)
 
    // On chaine si nécessaire 
    if (probe->nextProbe != NULL){
-      printf_debug(DEBUG_PROBE_VERB, "chain sampling ...\n");
       probe_sample(probe->nextProbe, value);
    }
 

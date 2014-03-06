@@ -1,6 +1,6 @@
 /**
  * @file rg-draw.c
- * @brief 
+ * @brief Draws the PDF of some distributions
  *
  */
 
@@ -16,11 +16,12 @@
  * elle sera affichée comme un graphbar de nbBar barres
  * avec le nom name
  */
-void tracer(struct probe_t * pr, char * fileName, char * name, int nbBar, double prop)
+void draw(struct probe_t * pr, char * fileName, char * name, int nbBar, double prop)
 {
    struct probe_t   * gb;
    struct gnuplot_t * gp;
 
+   printf("Min %f, max %f, nb %d\n", probe_min(pr), probe_max(pr), probe_nbSamples(pr));
    /* On crée une sonde de type GraphBar */
    gb = probe_createGraphBar(probe_min(pr), probe_max(pr), nbBar/prop);
    probe_setName(gb, name);
@@ -71,38 +72,47 @@ int main() {
 
    /**
     * Defining a random generator with exponential distribution
-    */
-   
+    */  
    randomGenerator_setDistributionExp(rg, lambda);
-   printf("exponential distribution (lambda = %f) exp. = %f\n", lambda, 1.0/lambda);
-
-   // Running 
    average = 0.0;
    for (n = 0; n < NB_SAMPLES; n++) {
       average += randomGenerator_getNextDouble(rg);
    }
    average /= NB_SAMPLES;
-   printf("avg (%d samples) : %f\n", NB_SAMPLES, average);
 
-   tracer(pr, "DistributionExp.png", "Dist. exp.", 100, 0.4);
+   draw(pr, "DistributionExp.png", "Dist. exp.", 50, 0.4);
 
    motSim_reset();
 
    /**
     * Defining a random generator with pareto distribution
     */
-   randomGenerator_setDistributionPareto(rg, alpha, xmin);
-   printf("Pareto distribution (lambda = %f) exp. = %f\n", lambda, 1.0/lambda);
 
-   // Running 
+   randomGenerator_setDistributionPareto(rg, alpha, xmin);
    average = 0.0;
    for (n = 0; n < NB_SAMPLES; n++) {
       average += randomGenerator_getNextDouble(rg);
    }
    average /= NB_SAMPLES;
-   printf("avg (%d samples) : %f\n", NB_SAMPLES, average);
 
-   tracer(pr, "DistributionParp.png", "Dist. par.", 10, 0.05);
+   draw(pr, "DistributionPar.png", "Dist. par.", 50, 1.0);
+
+   motSim_reset();
+
+   /**
+    * Defining a random generator with [0-1] uniform distribution
+    */
+   randomGenerator_delete(rg);
+   rg = randomGenerator_createDoubleRange(0.0, 1.0); // Default dist is uniform
+
+   randomGenerator_addValueProbe(rg, pr);
+   average = 0.0;
+   for (n = 0; n < NB_SAMPLES; n++) {
+      average += randomGenerator_getNextDouble(rg);
+   }
+   average /= NB_SAMPLES;
+
+   draw(pr, "DistributionUnif.png", "Dist. unif.", 50, 1.0);
 
    return 0;
 }

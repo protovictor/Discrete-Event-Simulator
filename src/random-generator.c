@@ -106,6 +106,7 @@ struct randomGenerator_t {
  */
 inline double randomGenerator_erand48GetNext(struct randomGenerator_t * rg)
 {
+  //   double result = drand48();
    double result = erand48(rg->aleaSrc.xsubi);
 
    if (rg->values)
@@ -351,6 +352,7 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg)
    if (rg->valueProbe) {
       probe_sample(rg->valueProbe, result);
    }
+
    return result;
 
 }
@@ -427,6 +429,8 @@ struct randomGenerator_t * randomGenerator_createRaw()
    // Source
    result->source = rGSourceErand48; // WARNING use rgSourceDefault
    randomGenerator_erand48Init(result); // ... ?
+
+   result->valueProbe = NULL;
 
    printf_debug(DEBUG_GENE, "OUT\n");
 
@@ -710,7 +714,7 @@ double randomGenerator_ITSGetNext(struct randomGenerator_t * rg)
    printf_debug(DEBUG_GENE, "IN\n");
 
    alea = rg->aleaGetNext(rg); //!< Uniform ]0, 1] sources
-   printf_debug(DEBUG_GENE, "alea %f", alea);
+   printf_debug(DEBUG_GENE, "alea %f\n", alea);
 
    switch (rg->distParam.d.its.nbParam) {
       case 0 :
@@ -722,7 +726,7 @@ double randomGenerator_ITSGetNext(struct randomGenerator_t * rg)
          result = rg->distParam.d.its.q.q1par(alea, rg->distParam.d.its.p1);
       break;
       case 2 :
-         printf_debug(DEBUG_GENE, "two param\n");
+	printf_debug(DEBUG_GENE, "two param : %f %f\n", rg->distParam.d.its.p1, rg->distParam.d.its.p2);
          result = rg->distParam.d.its.q.q2par(alea, rg->distParam.d.its.p1, rg->distParam.d.its.p2);
       break;
       default:
