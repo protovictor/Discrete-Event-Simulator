@@ -82,7 +82,7 @@ int main() {
 
    /* Une sonde sur les interarrivées */
    iaProbe = probe_createExhaustive();
-   dateGenerator_setInterArrivalProbe(dateGenExp, iaProbe);
+   dateGenerator_addInterArrivalProbe(dateGenExp, iaProbe);
 
    /* Une sonde sur les temps de séjour */
    sejProbe = probe_createExhaustive();
@@ -90,7 +90,7 @@ int main() {
 
    /* Une sonde sur les temps de service */
    srvProbe = probe_createExhaustive();
-   srvGen_setServiceProbe(serveur, srvProbe);
+   srvGen_addServiceProbe(serveur, srvProbe);
 
    /* On active la source */
    PDUSource_start(sourcePDU);

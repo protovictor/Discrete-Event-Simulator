@@ -89,14 +89,14 @@ int main() {
 
    /* Une sonde sur les tailles */
    szProbe = probe_createExhaustive();
-   randomGenerator_setValueProbe(sizeGen, szProbe);
+   randomGenerator_addValueProbe(sizeGen, szProbe);
 
    /* Affectation à la source */
    PDUSource_setPDUSizeGenerator(sourcePDU, sizeGen);
 
    /* Une sonde sur les interarrivées */
    iaProbe = probe_createExhaustive();
-   dateGenerator_setInterArrivalProbe(dateGenExp, iaProbe);
+   dateGenerator_addInterArrivalProbe(dateGenExp, iaProbe);
 
    /* Une sonde sur les temps de séjour */
    sejProbe = probe_createExhaustive();
@@ -104,7 +104,7 @@ int main() {
 
    /* Une sonde sur les temps de service */
    srvProbe = probe_createExhaustive();
-   srvGen_setServiceProbe(serveur, srvProbe);
+   srvGen_addServiceProbe(serveur, srvProbe);
 
    /* On active la source */
    PDUSource_start(sourcePDU);
