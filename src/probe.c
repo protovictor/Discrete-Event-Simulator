@@ -44,7 +44,8 @@ struct graphBar_t {
    double          min;
    double          max;
    unsigned long   nbBar;
-   unsigned long * value;
+   double        * value;      //!< Must be real for normalization
+   int             normalized; //!< Probe is read only once normalized
 };
 
 /*
@@ -141,7 +142,8 @@ struct probe_t {
 struct probe_t * firstProbe = NULL;
 
 
-/*
+/**
+ * @brief Define a probe as persistent
  * Une sonde persistante ne sera pas réinitialisée en cas de reset (en
  * fin de simulation)
  */
@@ -189,7 +191,7 @@ void probe_resetGraphBar(struct probe_t * probe)
    int i;
 
    for (i = 0; i < probe->data.graphBar->nbBar; i++){
-      probe->data.graphBar->value[i] = 0;
+      probe->data.graphBar->value[i] = 0.0;
    }
 }
 
@@ -545,7 +547,7 @@ double probe_timeSliceMean(struct probe_t * pr)
 
 void probe_delete(struct probe_t * p)
 {
-   printf_debug(DEBUG_TBD, "A FAIRE !\n");
+   printf_debug(DEBUG_TBD, "Not yet implemented !\n");
 }
 
 /*
@@ -728,23 +730,26 @@ struct probe_t * probe_createGraphBar(double min, double max, unsigned long nbBa
 {
    unsigned long i;
    struct probe_t * result = probe_createRaw(graphBarProbeType);
+
    result->data.graphBar = (struct graphBar_t *)sim_malloc(sizeof(struct graphBar_t));
    assert(result->data.graphBar);
 
    assert(max > min);
    assert (nbBar != 0);
 
+   result->data.graphBar->normalized = 0;
    result->data.graphBar->min = min;
    result->data.graphBar->max = max;
    result->data.graphBar->nbBar = nbBar;
-   result->data.graphBar->value = (unsigned long *)sim_malloc(sizeof(unsigned long)*(size_t)nbBar);
+   result->data.graphBar->value = (double *)sim_malloc(sizeof(double)*(size_t)nbBar);
    assert(result->data.graphBar->value);
 
    for (i = 0; i < nbBar; i++){
-      result->data.graphBar->value[i] = 0;
+      result->data.graphBar->value[i] = 0.0;
    }
  
    printf_debug(DEBUG_PROBE, "graphBar[%f, %f] with %ld bars\n", min, max, nbBar);
+
    return result;
 }
 
@@ -753,6 +758,11 @@ void probe_sampleGraphBar(struct probe_t * probe, double value)
    struct graphBar_t * gb = probe->data.graphBar;
    unsigned long bar;
 
+   if (gb->normalized) {
+      motSim_error(MS_WARN, "Normalized graphar '%s' is read only\n", probe_getName(probe));
+      return;
+   }
+
    if ((value < gb->max) && (value > gb->min)) {
       bar = (unsigned long)trunc((double)gb->nbBar*(value - gb->min)/(gb->max - gb->min));
 
@@ -760,7 +770,7 @@ void probe_sampleGraphBar(struct probe_t * probe, double value)
       assert(bar < gb->nbBar);
 
       gb->value[bar]++;
-      printf_debug(DEBUG_PROBE, "gb->v[%ld]=%ld (%f)\n", bar, gb->value[bar], value);
+      printf_debug(DEBUG_PROBE, "gb->v[%ld]=%f (%f)\n", bar, gb->value[bar], value);
    }
 }
 
@@ -776,11 +786,27 @@ double probe_meanGraphBar(struct probe_t * probe)
    
    for (n = 0 ; n < gb->nbBar; n++) {
      //     printf("[%f, %f] Contribution %d (%f) = %d sur %d\n", gb->min, gb->max, n, gb->min + (gb->max - gb->min)*(n + 0.5)/ gb->nbBar, gb->value[n], probe->nbSamples);
-     result += (gb->min + (gb->max - gb->min)*(n + 0.5) / gb->nbBar )* gb->value[n]/probe->nbSamples;
+     result += (gb->min + (gb->max - gb->min)*(n + 0.5) / gb->nbBar ) * (gb->normalized? gb->value[n]:(gb->value[n]/probe->nbSamples));
    }
 
    return result;
 }
+
+/**
+ * @brief Normalization of a graphBar probe
+ */
+void probe_graphBarNormalize(struct probe_t * pr)
+{
+   unsigned long n;
+   struct graphBar_t * gb = pr->data.graphBar;
+
+   for (n = 0 ; n < gb->nbBar; n++) {
+      gb->value[n] = gb->value[n]/pr->nbSamples;
+   }
+
+   gb->normalized = 1;
+}
+
 
 void probe_EMASample(struct probe_t * probe, double value)
 {
@@ -1258,7 +1284,7 @@ void probe_graphBarDumpFd(struct probe_t * probe, int fd, int format)
 
    for (n = 0; n < gb->nbBar; n++){
      //      printf("%f %d\n", gb->min+(n+0.5)*(gb->max-gb->min)/gb->nbBar, gb->value[n]);
-      sprintf(buffer, "%f %ld\n", gb->min+(n+0.5)*(gb->max-gb->min)/gb->nbBar, gb->value[n]);
+      sprintf(buffer, "%f %f\n", gb->min+(n+0.5)*(gb->max-gb->min)/gb->nbBar, gb->value[n]);
       write(fd, buffer, strlen(buffer));
    }
 }
@@ -1381,8 +1407,8 @@ double probe_demiIntervalleConfiance5pcCoupes(struct probe_t * p)
    return result;
 }
 
-/*
- * Conversion d'une sonde exhaustive en une graphBar
+/**
+ * @brief Conversion d'une sonde exhaustive en une graphBar
  */
 void probe_exhaustiveToGraphBar(struct probe_t * ep, struct probe_t * gbp)
 {
@@ -1406,8 +1432,8 @@ void probe_exhaustiveToGraphBar(struct probe_t * ep, struct probe_t * gbp)
       printf_debug(DEBUG_PROBE, "ep[%ld]=%f\n", n, currentSet->samples[n%PROBE_NB_SAMPLES_MAX]);
       probe_sample(gbp, currentSet->samples[n%PROBE_NB_SAMPLES_MAX]);
    } while (n != 0);
-
 }
+
 /*
  * Réduction du nombre d'échantillons d'une sonde exhaustive en
  * remplaçant blockSize échantillons consécutifs par leur moyenne

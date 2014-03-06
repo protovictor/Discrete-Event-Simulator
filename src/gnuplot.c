@@ -1,6 +1,13 @@
+/**
+ * @file gnuplot.c
+ * @brief Some basic tools to draw probes through gnuplot
+ *
+ */
+
 #include <stdlib.h>     // exit
 #include <unistd.h>     // pipe, unlink
 #include <string.h>     // strlen, strdup
+#include <errno.h>
 #include <stdio.h>      // perror
 #include <assert.h>
 
@@ -11,8 +18,19 @@
 #include <motsim.h>
 #include <gnuplot.h>
 
-/*
- * Multiple source fils can be associated to a given
+
+/**
+ * Some definitions fo gnuplot path and commands
+ */
+#ifndef GnuPlotCmd
+#   define GnuPlotCmd "/usr/bin/gnuplot"
+#endif
+#define GPSetTermWxt "set terminal wxt"
+#define GPSetTermPng "set terminal png"
+#define GPSetOutput "set output"
+
+/**
+ * Multiple source files can be associated to a given
  * terminal, so we need to chain the names
  */
 struct fileName_t {
@@ -20,14 +38,16 @@ struct fileName_t {
    struct fileName_t * next;
 };
 
+/**
+ * @brief A gnuplot_t structure is needed to draw some probes
+ */
 struct gnuplot_t {
-   // Ident of gnuplot terminal
-   int    id;
-
-   // Input file names daisy chain
-   struct fileName_t * srcFileName;
+   struct fileName_t * srcFileName;   //!< Input file names daisy chain
 
    // Gnuplot specific
+   char * outputFileName;
+   int    terminalType;
+   int                 id;    //!< Ident of gnuplot terminal
    char * title ;
    double xmin, xmax;
    double ymin, ymax;
@@ -48,6 +68,9 @@ struct gnuplotProcess_t {
 
 struct gnuplotProcess_t * gnuplotProcess = NULL; 
 
+/**
+ * @brief Send a command to a gnuplot process
+ */
 void GPSendCmd(struct gnuplot_t * gp, char * cmd)
 {
    char buffer[512];
@@ -65,10 +88,21 @@ void GPSendCmd(struct gnuplot_t * gp, char * cmd)
 
    if (gp) {
       printf_debug(DEBUG_GNUPLOT, "Selecting terminal (%s)...\n", (gp->title)?gp->title:"Guess my name");
-      sprintf(buffer, "%s %d title '%s'",
-              GPSetTermWxt,
-              gp->id,
-	      (gp->title)?gp->title:"Guess my name");
+      switch (gp->terminalType) {
+         case gnuplotTerminalTypeWxt :
+            sprintf(buffer, "%s %d title '%s'",
+                    GPSetTermWxt,
+                    gp->id,
+                    (gp->title)?gp->title:"Guess my name");
+         break;
+         case gnuplotTerminalTypePng :
+            sprintf(buffer, "%s",
+                    GPSetTermPng);
+             break;
+         default :
+            motSim_error(MS_FATAL, "unknown terminal type");
+         break;
+      }
       printf_debug(DEBUG_GNUPLOT, "sending \"%s\"\n", buffer);
       write(gnuplotProcess->stdin, buffer, strlen(buffer));
       write(gnuplotProcess->stdin, &cr, 1);
@@ -101,6 +135,9 @@ void on_exitGnuplot(int exitStatus, void * gP)
    printf_debug(DEBUG_GNUPLOT, "terminating gnuplot process ...\n");
    GPSendCmd(NULL, "exit");
 
+   //! Waiting for the process death
+   waitpid(gnuplotProcess->pid, NULL, 0);
+
    // Fermeture des tubes de communication
    printf_debug(DEBUG_GNUPLOT, "closing gnuplot pipes ...\n");
    close(gnuplotProcess->stdin);
@@ -109,10 +146,12 @@ void on_exitGnuplot(int exitStatus, void * gP)
    // Effacement des fichiers temporaires
    for (n=0,term = gnuplotProcess->lastTerminal; term != NULL; term = term->prev, n++) {
       while (term->srcFileName) {
-         printf_debug(DEBUG_GNUPLOT, " unlinking \"%s\"\n", term->srcFileName->fileName);
+         printf_debug(DEBUG_GNUPLOT, "unlinking \"%s\"\n", term->srcFileName->fileName);
+	 
          if (unlink(term->srcFileName->fileName)) {
             perror("unlink ");
          }
+	 
          p = term->srcFileName;
          term->srcFileName = p->next;
          free(p);
@@ -129,6 +168,11 @@ void on_exitGnuplot(int exitStatus, void * gP)
    assert(n == gnuplotProcess->nbPlot);
 }
 
+/**
+ * @brief gnuplot process creation
+ * We will for a single gnuplot process for all the terminals. This
+ * function creates this process as well as comunication means.
+ */
 int gnuplotProcessCreate()
 {
    int  pipeGPin[2];
@@ -201,8 +245,8 @@ int gnuplotProcessCreate()
    return 1;
 }
 
-/*
- * Affichage dans une fenetre d'une sonde
+/**
+ * @brief Affichage dans une fenetre d'une sonde
  *
  * On passe par un fichier dont le nom est de la forme %d.%d-%s.gp
  * avec, dans l'ordre, le numéro de processus, le numéro de terminal
@@ -221,12 +265,13 @@ int gnuplot_displayProbe(struct gnuplot_t * gp, int with, struct probe_t * probe
    
    assert(gp != NULL);
 
+   //! We need a title (wxt terminal)
    if (gp->title == NULL) {
       printf_debug(DEBUG_GNUPLOT, "gp->title\n");
       gnuplot_setTitle(gp, probe_getName(probe));
    }
 
-   // Création d'un fichier contenant le dump
+   //! We dump the probe in a temporary file
    sprintf(fileName, "%d.%d-%s.gp", getpid(), gp->id, gp->title);
    if ((fd = open(fileName, O_CREAT|O_WRONLY, 0644)) == -1) {
       perror("open");
@@ -235,25 +280,55 @@ int gnuplot_displayProbe(struct gnuplot_t * gp, int with, struct probe_t * probe
    probe_dumpFd(probe, fd, dumpGnuplotFormat);
    close(fd);
 
-   // Set filename
+   //! Set filename
    p = (struct fileName_t *)sim_malloc(sizeof(struct fileName_t));
    p->next = gp->srcFileName;
    gp->srcFileName = p;
    gp->srcFileName->fileName = strdup(fileName);
 
-   // Set terminal
-   sprintf(cmd, "%s %d title '%s'",
-           GPSetTermWxt,
-           gp->id,
-           gp->title);
+   /*
+   //! Set terminal (WARNING : it's done in GPSendCmd, so we only need
+   //! to send a void command here)
+   switch (gp->terminalType) {
+      case gnuplotTerminalTypeWxt :
+         sprintf(cmd, "%s %d title '%s'",
+                 GPSetTermWxt,
+                 gp->id,
+                 gp->title);
+         GPSendCmd(gp, cmd);
+      break;
+      case gnuplotTerminalTypePng :
+         sprintf(cmd, "%s",
+                 GPSetTermPng);
+         GPSendCmd(gp, cmd);
+      break;
+      default :
+         motSim_error(MS_FATAL, "unknown terminal type");
+      break;
+   }
+   */
+
+   //! Select ouput if specified
+   if (gp->outputFileName) {
+      sprintf(cmd, "%s '%s'",
+              GPSetOutput,
+	      gp->outputFileName);
+      GPSendCmd(gp, cmd);
+   }
+
+   //! WARNING, to be done : set style in a specific function so that
+   //! each instance can have specific style parameters
+   sprintf(cmd, "set style fill solid 0.5");
    GPSendCmd(gp, cmd);
 
-   // Plot the graph
+   //! Plot the graph
    sprintf(cmd, "plot '%s' using 1:2 with %s title '%s'",
            fileName,
            (with == 1)?"points":(with == 2)?"lines":"boxes",
            probe_getName(probe));
    GPSendCmd(gp, cmd);
+
+   //! Temporary files unlinked on exit
 
    return 1;
 }
@@ -285,7 +360,7 @@ int gnuplot_displayProbes(struct gnuplot_t * gp, int with, ...)
       sprintf(fileName, "%d.%d-%s-%d.gp", getpid(), gp->id, gp->title, n);
       if ((fd = open(fileName, O_CREAT|O_WRONLY, 0644)) == -1) {
          perror("open");
-         return 0;
+         return errno;
       }
       probe_dumpFd(probe, fd, dumpGnuplotFormat);
       close(fd);
@@ -309,12 +384,15 @@ int gnuplot_displayProbes(struct gnuplot_t * gp, int with, ...)
 
    // Plot the graph
    GPSendCmd(gp, cmd);
+   return 0;
 }
 
+/**
+ * @brief Creation of a gnuplot_t instance
+ */
 struct gnuplot_t * gnuplot_create()
 {
    struct gnuplot_t * result = (struct gnuplot_t *)sim_malloc(sizeof(struct gnuplot_t));
-
 
    // Création du process
    if (!gnuplotProcess) {
@@ -322,6 +400,9 @@ struct gnuplot_t * gnuplot_create()
    }
 
    result->srcFileName = NULL;
+
+   result->outputFileName = NULL;
+   result->terminalType = gnuplotTerminalTypeWxt;
    result->title = NULL;
    result->id = gnuplotProcess->nbPlot++;
 
@@ -373,10 +454,40 @@ void gnuplot_setYRange(struct gnuplot_t * gp, double ymin, double ymax)
 
 }
 
+/**
+ * @brief Change the output file name
+ * @param gp The gnuplot terminal 
+ * @param name The new file name
+ */
+void gnuplot_setOutputFileName(struct gnuplot_t * gp, char * outputFileName)
+{
+  gp->outputFileName = sim_malloc(strlen(outputFileName)+1);
+
+  strncpy(gp->outputFileName, outputFileName, strlen(outputFileName) +1);
+}
+
 void gnuplot_setTitle(struct gnuplot_t * gp, char * name)
 {
   gp->title = strdup(name);
   gp->title = sim_malloc(strlen(name)+1);
 
   strncpy(gp->title, name, strlen(name) +1);
+}
+
+/**
+ * @brief Select terminal type
+ * @param gp The gnuplot terminal 
+ * @param terminalType The new terminal type
+ */
+void gnuplot_setTerminalType(struct gnuplot_t * gp, int terminalType)
+{
+  gp->terminalType = terminalType;
+}
+
+/**
+ * @brief Destructor
+ */
+void gnuplot_delete(struct gnuplot_t * gp)
+{
+   printf_debug(DEBUG_TBD, "not yet implemented\n");
 }
