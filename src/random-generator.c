@@ -60,21 +60,29 @@ struct randomGenerator_t {
       } d;
    } param;
 
-   // ParamÃ¨tres liÃ©s Ã  la distribution
+   //!< Parameters describing the distribution 
    struct {
       double min, max; // Extreme values
       union {
-         double lambda; // Pour expon
-         struct {
+         double lambda; //!< Exponential distribution
+         struct {       //!< Discrete distribution
             int nbProba;
             double * proba;
          } discrete;
-	//         struct probe_t * pdf; // Ce n'est probablement pas le meilleur outil
+         struct {           //!< ITS distribution
+            int nbParam;    //!< Quantile function number of parameters 
+            double p1, p2;  //!< Parameters values
+	    union {
+               double(*q0par)(double x);
+               double(*q1par)(double x, double p1);
+               double(*q2par)(double x, double p1, double p2);
+            } q;    //!< Quantile function
+         } its;
       } d;
    } distParam; 
+
    // Prochaine valeur alÃ©atoire conformÃ©ment Ã  la distribution
    double (*distGetNext)(struct randomGenerator_t * rg); 
-
 
    // ParamÃ¨tres de la source d'alÃ©a utilisÃ©e
    union {
@@ -402,6 +410,8 @@ void randomGenerator_reset(struct randomGenerator_t * rg)
 /*==========================================================================*/
 struct randomGenerator_t * randomGenerator_createRaw()
 {
+   printf_debug(DEBUG_GENE, "IN\n");
+
    struct randomGenerator_t * result
           = sim_malloc(sizeof(struct randomGenerator_t ));
 
@@ -417,6 +427,8 @@ struct randomGenerator_t * randomGenerator_createRaw()
    // Source
    result->source = rGSourceErand48; // WARNING use rgSourceDefault
    randomGenerator_erand48Init(result); // ... ?
+
+   printf_debug(DEBUG_GENE, "OUT\n");
 
    return result;
 }
@@ -440,11 +452,13 @@ struct randomGenerator_t * randomGenerator_createULong(int distribution,
 /*--------------------------------------------------------------------------*/
 struct randomGenerator_t * randomGenerator_createDouble()
 {
+   printf_debug(DEBUG_GENE, "IN\n");
    struct randomGenerator_t * result = randomGenerator_createRaw();
 
    // Data type
    result->valueType = rGTypeDouble; 
- 
+    printf_debug(DEBUG_GENE, "OUT\n");
+
    return result;
 }
 
@@ -678,6 +692,109 @@ void randomGenerator_setDistributionExp(struct randomGenerator_t * rg, double la
 {
    rg->distribution = rGDistExponential;
    randomGenerator_exponentialInit(rg, lambda);
+}
+
+/*-------------------------------------------------------------------------*/
+/*   ITS functions                                                         */ 
+/*-------------------------------------------------------------------------*/
+
+/**
+ * @brief Next value with ITS
+ *
+ */
+double randomGenerator_ITSGetNext(struct randomGenerator_t * rg)
+{
+   double alea;
+   double result ;
+
+   printf_debug(DEBUG_GENE, "IN\n");
+
+   alea = rg->aleaGetNext(rg); //!< Uniform ]0, 1] sources
+   printf_debug(DEBUG_GENE, "alea %f", alea);
+
+   switch (rg->distParam.d.its.nbParam) {
+      case 0 :
+         printf_debug(DEBUG_GENE, "no param\n");
+         result = rg->distParam.d.its.q.q0par(alea);
+      break;
+      case 1 :
+         printf_debug(DEBUG_GENE, "one param\n");
+         result = rg->distParam.d.its.q.q1par(alea, rg->distParam.d.its.p1);
+      break;
+      case 2 :
+         printf_debug(DEBUG_GENE, "two param\n");
+         result = rg->distParam.d.its.q.q2par(alea, rg->distParam.d.its.p1, rg->distParam.d.its.p2);
+      break;
+      default:
+          motSim_error(MS_FATAL, "too many parameters");
+   }
+
+   printf_debug(DEBUG_GENE, "OUT : %f\n", result);
+
+   return result;
+}
+
+/**
+ * @brief Define a distribution by its quantile function for inverse
+ * transform sampling
+ * @param rg The random generator
+ * @param q The inverse cumulative density (quantile) function
+ * @param p1 The single parameter of the quantile function
+ */
+void randomGenerator_setQuantile1Param(struct randomGenerator_t * rg,
+				       double (*q)(double x, double p),
+				       double p)
+{
+   printf_debug(DEBUG_GENE, "IN\n");
+
+   rg->distribution = rGDistITS;
+   rg->distParam.d.its.nbParam = 1;
+   rg->distParam.d.its.p1 = p;
+   rg->distParam.d.its.q.q1par = q;
+   rg->distGetNext = randomGenerator_ITSGetNext;
+
+   printf_debug(DEBUG_GENE, "OUT\n");
+}
+
+
+/**
+ * @brief Define a distribution by its quantile function for inverse
+ * transform sampling
+ * @param rg The random generator
+ * @param q The inverse cumulative density (quantile) function
+ * @param p1 The first parameter of the quantile function
+ * @param p2 The second parameter of the quantile function
+ */
+void randomGenerator_setQuantile2Param(struct randomGenerator_t * rg,
+				       double (*q)(double x, double p1, double p2),
+				       double p1, double p2)
+{
+   printf_debug(DEBUG_GENE, "IN\n");
+
+   rg->distribution = rGDistITS;
+   rg->distParam.d.its.nbParam = 2;
+   rg->distParam.d.its.p1 = p1;
+   rg->distParam.d.its.p2 = p2;
+   rg->distParam.d.its.q.q2par = q;
+   rg->distGetNext = randomGenerator_ITSGetNext;
+
+   printf_debug(DEBUG_GENE, "OUT\n");
+}
+
+/**
+ * @brief Inverse of CDF for exponential distribution
+ */
+double randomGenerator_expDistQ(double x, double lambda)
+{
+   return - log(1.0 -x) / lambda;
+}
+
+/**
+ * @brief Inverse of CDF for pareto distribution
+ */
+double randomGenerator_paretoDistQ(double x, double alpha, double xmin)
+{
+   return  xmin/(pow(x, 1.0/alpha));
 }
 
 

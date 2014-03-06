@@ -64,10 +64,22 @@ struct probe_t * probe_periodicCreate(double t);
 // Conserve une moyenne mobile M <- a.M + (1-a).sample
 struct probe_t * probe_EMACreate(double a);
 
-/*
- * Une sonde qui compte le nombre d'occurences par intervalle
+/**
+ * @brief Création d'une sonde qui compte le nombre d'occurences par
+ * intervalle
+ * @param min Minimal value
+ * @param max Maximal value
+ * @param nbInt Number of bars
+ * @result Created graphBar probe
  */
-struct probe_t * probe_createGraphBar(double min, double max, unsigned long nbInt);
+struct probe_t * probe_createGraphBar(double min,
+				      double max,
+				      unsigned long nbInt);
+
+/**
+ * @brief Normalization of a graphBar probe
+ */
+void probe_graphBarNormalize(struct probe_t * pr);
 
 /**
  * @brief Destruction d'une probe
@@ -89,7 +101,8 @@ struct probe_t * probe_chain(struct probe_t * p1, struct probe_t * p2);
  */
 void probe_reset(struct probe_t * probe);
 
-/*
+/**
+ * @brief Define a probe as persistent
  * Une sonde persistante ne sera pas réinitialisée en cas de reset (en
  * fin de simulation)
  */
