@@ -330,6 +330,7 @@ int gnuplot_displayProbe(struct gnuplot_t * gp, int with, struct probe_t * probe
 
    //! Temporary files unlinked on exit
 
+
    return 1;
 }
 
