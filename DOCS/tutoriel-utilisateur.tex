@@ -244,7 +244,7 @@ disponibles est fournie.
 
    /* Une sonde sur les interarrivées */
    iaProbe = probe_createExhaustive();
-   dateGenerator_addInterArrivalProbe(dateGenExp, iaProbe);
+   dateGenerator_setInterArrivalProbe(dateGenExp, iaProbe);
 
    /* Une sonde sur les temps de séjour */
    sejProbe = probe_createExhaustive();
@@ -252,7 +252,7 @@ disponibles est fournie.
 
    /* Une sonde sur les temps de service */
    srvProbe = probe_createExhaustive();
-   srvGen_addServiceProbe(serveur, srvProbe);
+   srvGen_setServiceProbe(serveur, srvProbe);
 \end{verbatim}
 
 %........................................................................
@@ -443,7 +443,7 @@ taille, afin de vérifier qu'elle a bien la bonne tête :
 \begin{verbatim}
    /* Une sonde sur les tailles */
    szProbe = probe_createExhaustive();
-   randomGenerator_addValueProbe(sizeGen, szProbe);
+   randomGenerator_setValueProbe(sizeGen, szProbe);
 \end{verbatim}
 
    Avec ça, on pourra tracer une jolie courbe de plus !

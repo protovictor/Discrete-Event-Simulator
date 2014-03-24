@@ -136,47 +136,28 @@ struct probe_t * probe_createExhaustive();
 %........................................................................
 %
 %........................................................................
+\subsubsection{Les ``méta-sondes''}
+
+   À chaque échantillon, certaines sondes mettent à jours des
+informations que l'on peut souhaiter conserver (par exemple la moyenne
+mobile) afin de tracer leur évolution dans le temps.
+
+   Pour cela, une sonde périodique \lstinline!P! peut être placée sur
+une sonde observée \lstinline!O!. La sonde \lstinline!P! permettra
+ainsi d'observer une propriété de la sonde\lstinline!O! sur la base
+d'un échantillonage à une fréquence caractérisant la sonde
+\lstinline!P!. 
+
+   Cette technique permet également de collecter dans une sonde unique
+\lstinline!G! des échantillons prélevés dans plusieurs sondes
+différentes \lstinline!S1!, \lstinline!S2!, ldots Pour cela,
+\lstinline!G! sera ajoutée comme sonde sur les échantillons de
+\lstinline!S1!, \lstinline!S2!, ldots 
+
+%........................................................................
+%
+%........................................................................
 \subsubsection{L'histogramme}
-
-   Une sonde de type histogramme ne conserve que le nombre
-d'échantillons par intervalle. Elle est caractérisée par une valeur
-minimale, une valeur maximale, et un nombre d'intervalles.
-
-   Une telle sonde est créée grâce à la fonction suivante
-
-\index{probe\_createGraphBar}
-\begin{verbatim}
-struct probe_t * probe_createGraphBar(double min,
-				      double max,
-				      unsigned long nbInt);
-\end{verbatim}
-
-%
-%
-%
-\paragraph{Normalisation}
-
-   Une sonde de type histograme peut être ``normalisée'', c'est-à-dire
-que chaque valeur est divisée par la somme de toutes les valeurs. Si
-elle représentait un nombre d'occurence par intervalle, elle
-représente donc aprés normalisation un taux d'occurence par
-intervalle. 
-
-   Une telle nromalisation se fait à l'aide de la fonction suivante
-
-\index{probe\_graphBarNormalize}
-\begin{verbatim}
-void probe_graphBarNormalize(struct probe_t * pr);
-\end{verbatim}
-
-   Attention au fait qu'une fois normalisée, une sonde n'est plus
-modifiable, on ne peut en particulier plus y échantillonner de
-nouvelles valeurs.
-
-%
-%
-%
-\paragraph{Création depuis une sonde exhaustive}
 
 %........................................................................
 %
@@ -239,27 +220,6 @@ temporelles sont sautantes donc disjointes):
 \begin{verbatim}
 struct probe_t * probe_createTimeAverage(double t);
 \end{verbatim}
-
-%------------------------------------------------------------------------
-%
-%------------------------------------------------------------------------
-\subsection{Les ``méta-sondes''}
-
-   À chaque échantillon, certaines sondes mettent à jours des
-informations que l'on peut souhaiter conserver (par exemple la moyenne
-mobile) afin de tracer leur évolution dans le temps.
-
-   Pour cela, une sonde périodique \lstinline!P! peut être placée sur
-une sonde observée \lstinline!O!. La sonde \lstinline!P! permettra
-ainsi d'observer une propriété de la sonde\lstinline!O! sur la base
-d'un échantillonage à une fréquence caractérisant la sonde
-\lstinline!P!. 
-
-   Cette technique permet également de collecter dans une sonde unique
-\lstinline!G! des échantillons prélevés dans plusieurs sondes
-différentes \lstinline!S1!, \lstinline!S2!, ldots Pour cela,
-\lstinline!G! sera ajoutée comme sonde sur les échantillons de
-\lstinline!S1!, \lstinline!S2!, ldots 
 
 %------------------------------------------------------------------------
 %

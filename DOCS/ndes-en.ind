@@ -1,0 +1,20 @@
+\begin{theindex}
+
+  \item randomGenerator\_createDouble, 18
+  \item randomGenerator\_createDoubleDiscrete, 19
+  \item randomGenerator\_createDoubleDiscreteProba, 19
+  \item randomGenerator\_createDoubleExp, 18
+  \item randomGenerator\_createUInt, 18
+  \item randomGenerator\_createUIntDiscrete, 18
+  \item randomGenerator\_createUIntDiscreteProba, 18
+  \item randomGenerator\_delete, 19
+  \item randomGenerator\_getNextDouble, 20
+  \item randomGenerator\_getNextUInt, 20
+  \item randomGenerator\_setDistributionDiscrete, 20
+  \item randomGenerator\_setDistributionUniform, 19
+  \item rrSched\_addSource, 14
+  \item rrSched\_create, 13
+  \item rrSched\_getPDU, 14
+  \item rrSched\_processPDU, 15
+
+\end{theindex}

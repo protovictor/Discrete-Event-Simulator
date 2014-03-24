@@ -1,0 +1,259 @@
+%========================================================================
+%
+%========================================================================
+\section{The random generators}
+\label{section:rand-gen}
+
+  In a simulator, the generation of random numbers is an important part. 
+In {\sc ndes}, we take this very serious. The random number generator 
+management is a nameless horror! I admit I had problems understanding it too. 
+The good knews is that the result is really \ldots{} random.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{The characteristics of a random generator}
+
+ A random generator is characterised by three important components:
+
+\begin{description}
+   \item[The type of generated data] can be real, integer,
+     discrete, \ldots
+   \item[The law] can be uniform, exponential, \ldots
+   \item[The source] permits to determine the quality of the randomness, and 
+by example to render it deterministic (to obtain the same sequence with other 
+simulation).
+\end{description}
+
+  Be careful, these three components eventualy use some parameters.
+  
+    The general principle for generating a variable is described below.
+
+\begin{itemize}
+   \item A random number is provided by the source. It will be a
+      integer between two extreme values​​, for example, depending on
+      the nature of the source.
+   \item A transformation is applied to meet the probability density 
+      of the law.
+   \item A second transformation is applied to obtain a
+      value of the desired type.
+\end{itemize}
+
+   Shortly, everything is done to make the generation random \ldots
+
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{The use}
+
+  The general schema for using the generator is simple: we create a generator,
+we initialise with the desired values, we associate with it a probability 
+distribution, eventualy we can change the source of randomness on which it is based,
+then we can extract the random values and at the end we destroy the generator.
+
+   Observe in detail relevant functions of this exciting program.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{The creation and the distruction}
+   
+   There is at least a function of creation for each type of
+managed data (it fails more than that!). But sometimes, there are also
+functions to specify the distribution to use at the same time. 
+See this type per type.
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{The unsigned integers}
+
+   The function for creating the base is 
+
+\index{randomGenerator\_createUInt}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createUInt();
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{The unsigned integeres between {\tt min} and {\tt max}}
+
+   It is fun to play dice. This can be created with
+
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createUIntRange(unsigned int min,
+						      unsigned int max);
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{A list of unsigned integers}
+
+   Practice to randomize packet sizes!
+
+\index{randomGenerator\_createUIntDiscrete}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
+							      unsigned int * values);
+\end{verbatim}
+
+   The first parameter gives the number of values, and the second is 
+a table which contains (at least) these values. Its contents will be
+copied, so if you want to destroy / modify then, you're free to do it!
+   As there is little doubt that in such situations we will
+want to assign a probability to each value, you can use the
+following version:
+
+\index{randomGenerator\_createUIntDiscreteProba}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(
+				int nbValues,
+				unsigned int * values,
+				double * proba);
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{The real numbers in double precision}
+
+   We create a generator with the following function
+
+\index{randomGenerator\_createDouble}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDouble();
+\end{verbatim}
+
+   We may also create one generator based on an exponential distribution
+parameter {\tt lambda} :
+
+\index{randomGenerator\_createDoubleExp}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda);
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{The real numbers in double precision between {\tt min} and {\tt max}}
+
+\begin{verbatim}
+\end{verbatim}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{A list of real numbers in double precision}
+
+   For generating random numbers from a list with provided
+parameters:
+
+\index{randomGenerator\_createDoubleDiscrete}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDoubleDiscrete(
+                                     int nbValues,
+                                     double * values);
+\end{verbatim}
+
+   or, providing the probabilities directly:
+
+\index{randomGenerator\_createDoubleDiscreteProba}
+\begin{verbatim}
+struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(
+                                     int nbValues,
+                                     double * values,
+                                     double * proba);
+\end{verbatim}
+
+   The parameters are similar to the release based on unsigned short 
+int, according on what we see above.
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{The distruction}
+
+   We destroy the generator with the function
+
+\index{randomGenerator\_delete}
+\begin{verbatim}
+void randomGenerator_delete(struct randomGenerator_t * rg);
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Choosing the law}
+
+   Before it can be used, a random generator need to be characterised
+by a law who governs it. There are specific functions for this purpose. 
+Some function of creation call either of these functions, but not all! 
+So be careful to ensure that a distribution is associated with a generator 
+before using it.
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Uniform law}
+
+   We specify a uniform law through the following function
+
+\index{randomGenerator\_setDistributionUniform}
+\begin{verbatim}
+void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
+\end{verbatim}
+   
+   Be careful, the type of data can be a "continuous" bounded interval
+or a discrete set, but if it is an unbounded interval, the result is
+\ldots {} random.
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{Explicit law}
+   
+   I do not know how to call that! The idea is that it explicitly provides 
+all the probabilities. It is specified by the following function:
+   
+\index{randomGenerator\_setDistributionDiscrete}
+\begin{verbatim}
+void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
+					     int nb,
+                                             double * proba);
+\end{verbatim}
+   
+   Attention, it obviously only applies to discrete data!
+
+   The probabilities are copied by the functions so the pointer
+{\tt proba} can be released.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Choosing the source}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Generating a value}
+
+\index{randomGenerator\_getNextUInt}
+\index{randomGenerator\_getNextDouble}
+
+   A new value is obtained at each call of the following functions 
+(chosen according to the expected type)
+
+\begin{verbatim}
+unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg);
+double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{The sondes}
+
