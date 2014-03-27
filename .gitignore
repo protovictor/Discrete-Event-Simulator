@@ -4,6 +4,9 @@
 *.aux
 *.toc
 *.pdf
+*.idx
+*.ilg
+*.ind
 
 # Object files
 *.o
