@@ -65,7 +65,7 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
    result->detNextIdx = 0;
 
    // Ajout à la liste des choses à réinitialiser avant une prochaine simu
-   motsim_addToResetList(result, (void (*)(void *))PDUSource_start);
+ //  motsim_addToResetList(result, (void (*)(void *))PDUSource_start);
    
    return result;
 }
@@ -118,8 +118,8 @@ void PDUSource_addPDUGenerationSizeProbe(struct PDUSource_t * src, struct probe_
  * Spécification du générateur de taille de PDU associé
  */
 void PDUSource_setPDUSizeGenerator(struct PDUSource_t * src, struct randomGenerator_t * rg)
-{
-   src->sizeGen = rg;
+{  
+   src->sizeGen = rg; 
 }
 
 /** @brief émission de la PDU courante et création de la prochaine
@@ -239,9 +239,11 @@ struct PDU_t * PDUSource_getPDU(struct PDUSource_t * source)
 }
 
 void PDUSource_start(struct PDUSource_t * source)
-{
+{  printf("aici");
+
    // On ne sait jamais (cette fonction sert de reset)
    if (source->pdu) {
+
       PDU_free(source->pdu);
       source->pdu = NULL;
    }

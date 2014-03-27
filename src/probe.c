@@ -101,7 +101,7 @@ struct EMA_t {
 /*
  * Structure générale d'une sonde
  */
-struct probe_t {
+   struct probe_t {
    enum probeType_t probeType;
    char           * name;
    unsigned long    nbSamples;

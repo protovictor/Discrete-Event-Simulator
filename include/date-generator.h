@@ -35,12 +35,16 @@ double dateGenerator_nextDate(struct dateGenerator_t * dateGen,
  * exponentielle.
  */
 struct dateGenerator_t * dateGenerator_createExp(double lambda);
+struct dateGenerator_t * dateGenerator_createLognormal(double alpha, double beta);
+struct dateGenerator_t * dateGenerator_createWeibull(double alpha, double beta);
+struct dateGenerator_t * dateGenerator_createGamma(double alpha, double beta);
 
 /*
  * Modification du paramètre lambda
  */
 void dateGenerator_setLambda(struct dateGenerator_t * dateGen, double lambda);
-
+void dateGenerator_setAlpha(struct dateGenerator_t * dateGen, double alpha);
+void dateGenerator_setBeta(struct dateGenerator_t * dateGen, double beta);
 /*
  * Creation d'une source qui genere des evenements a interrarivee
  * constante. Bref, périodiques !

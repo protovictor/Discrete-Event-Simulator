@@ -100,12 +100,62 @@ struct dateGenerator_t * dateGenerator_createExp(double lambda)
   return result;
 }
 
+ /*
+  *  Lognormal distributed interarrival time
+  */
+
+struct dateGenerator_t * dateGenerator_createLognormal(double alpha, double beta)
+{
+  struct dateGenerator_t * result = (struct dateGenerator_t * )
+                   sim_malloc(sizeof(struct dateGenerator_t));
+  result->interArrivalProbe = NULL;
+
+  result->randGen = randomGenerator_createDoubleLognormal(alpha, beta);
+  
+  return result;  
+}
+
+ /*
+  *  Weibull distributed interarrival time       - recommended!!!
+  */
+  
+struct dateGenerator_t *dateGenerator_createWeibull(double alpha, double beta)
+{
+  struct dateGenerator_t * result = (struct dateGenerator_t * )
+                     sim_malloc(sizeof(struct dateGenerator_t));
+  result->interArrivalProbe = NULL;
+  result->randGen = randomGenerator_createDoubleWeibull(alpha, beta);
+}
+
+ /*
+  *  Gamma distributed interarrival time
+  */ 
+
+struct dateGenerator_t *dateGenerator_createGamma(double alpha, double beta)
+{
+  struct dateGenerator_t * result = (struct dateGenerator_t * )
+                     sim_malloc(sizeof(struct dateGenerator_t));
+  result->interArrivalProbe = NULL;
+  result->randGen = randomGenerator_createDoubleGamma(alpha, beta);
+}
+
+
 /*
  * Modification du paramètre lambda
  */
 void dateGenerator_setLambda(struct dateGenerator_t * dateGen, double lambda)
 {
    randomGenerator_setLambda(dateGen->randGen, lambda);
+}
+
+void dateGenerator_setAlpha(struct dateGenerator_t * dateGen, double alpha)
+{
+   randomGenerator_setAlpha(dateGen->randGen, alpha);
+}
+
+void dateGenerator_setBeta(struct dateGenerator_t * dateGen, double beta)
+{
+   randomGenerator_setBeta(dateGen->randGen, beta);
 }
 
 /*

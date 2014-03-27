@@ -106,6 +106,15 @@ To set the simualtor for a http reply:
 \begin{verbatim}
 PDUSource_start(reqPDU);
 \end{verbatim}
+ 
+  For the structure of the page, I used a random generator composed from three distributions for the random variables: main object size, inline object size and number of inline objects.
+  In the distribution parameter structure of the random generator, I added also a the option of a size main generator, inline main generator and a number inline object generator.
+
+\begin{verbatim}
+         struct randomGenerator_t * szmain;
+         struct randomGenerator_t * szin;
+         struct randomGenerator_t * nin;
+\end{verbatim} 
 
 
 

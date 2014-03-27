@@ -41,6 +41,10 @@ struct randomGenerator_t;
 #define rGDistExponential  2
 #define rGDistDiscrete     3
 #define rGDistITS          4
+#define rGDistLognormal    5
+#define rGDistWeibull      6
+#define rGDistGamma        7
+#define rGDistComposed     8
 
 #define rGDistDefault rGDistUniform
 /*
@@ -76,6 +80,9 @@ struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
 struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(int nbValues,
                                      unsigned int * values, double * proba);
  
+// Composed Web Request Size
+struct randomGenerator_t * randomGenerator_createRequestSize();
+
 // Des entiers longs non signÃ©s
 struct randomGenerator_t * randomGenerator_createULong(int distribution,
 						       unsigned long min,
@@ -136,7 +143,6 @@ void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
 void randomGenerator_setDistributionDiscreteFromFile(struct randomGenerator_t * rg,
 						     char * fileName);
 
-
 // Choix d'une loi uniforme
 void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
 
@@ -184,6 +190,18 @@ double randomGenerator_expDistQ(double x, double lambda);
  */
 double randomGenerator_paretoDistQ(double x, double alpha, double xmin);
 
+// Lognormal distribution
+void randomGenerator_setDistributionLognormal(struct randomGenerator_t * rg, double alpha, double beta);
+
+// Weibull distribution
+void randomGenerator_setDistributionWeibull(struct randomGenerator_t * rg, double alpha, double beta);
+
+// Gamma distribution
+void randomGenerator_setDistributionGamma(struct randomGenerator_t * rg, double alpha, double beta);
+
+// Composed 
+void randomGenerator_setDistributionComposed(struct randomGenerator_t * rg,  double main_alpha, double main_beta, double inline_alpha, double inline_beta, double nalpha, double nbeta);
+
 /*
  * Change lambda
  */
@@ -208,6 +226,11 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
  */
 double randomGenerator_getExpectation(struct randomGenerator_t * rg);
 
+double * randomGenerator_GetDistValues(struct randomGenerator_t *rg);
+double randomGenerator_WeibullGetNext(struct randomGenerator_t * rg);
+double randomGenerator_GammaGetNext(struct randomGenerator_t * rg);
+double randomGenerator_ComposedGetNext(struct randomGenerator_t *rg);
+
 /*==========================================================================*/
 /*   Probes                                                                 */ 
 /*==========================================================================*/
@@ -217,5 +240,7 @@ double randomGenerator_getExpectation(struct randomGenerator_t * rg);
 
 void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
 				   struct probe_t * p);
+
+unsigned long randomGenerator_getnbSamples(struct randomGenerator_t * rg);
 
 #endif
