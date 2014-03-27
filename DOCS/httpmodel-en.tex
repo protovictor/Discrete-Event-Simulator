@@ -1,0 +1,111 @@
+%========================================================================
+%
+%========================================================================
+\section{A simple http request model}
+
+ The implemented model represents a simplification of the method recommended in "Source traffic modeling of wireless applications".
+
+The ON-OFF model suggested in the document is composed from an HTTP-ON phase and an HTTP-OFF phase.
+\begin{description}
+ \item[HTTP-ON] phase models the activity after accepting a web request.
+ \item[HTTP-OFF] phase represebts the period when a user doesn't make any request. It's formed by the loading page time and the viewing time.
+\end{description}
+
+\subsection{HTTP model}
+
+We have two sets of parameters:
+\begin{itemize}
+ \item the first set describes the session level
+ \item the second set describes the composition of a web request
+\end{itemize}
+
+The recommended model contains the following random variables:
+
+\begin{description}
+ \item[I]: the time between two WWW sessions
+ \item[X]: the number of requests per session
+ \item[V]: the web request viewing time(HTTP-OFF time)
+ \item[M]: the size of main object of a webpage
+ \item[N]: the number of inline objects of a webpage
+ \item[O]: the size of inline objects
+ \item[R]: the size of \textit{GetRequests}
+
+\end{description}
+Thus being said, the random variable are distributed in the following way:
+
+\begin{description}
+ \item[I] - it is hard to establish a distribution, so it was used I = 1 second between two sessions;
+ \item[X] - Lognormal distributed with a mean E = 25 and a standard deviation $\sigma$=100;
+ \item[V] - Weibull distributed with a mean of 39.5 seconds( $\alpha$ = 0.5, $\beta$ = 4.44);
+ \item[M] - Lognormal distributed ($\alpha$ = 1.31, $\beta$ = 1.41) - with a mean of 10kB;
+ \item[N] - Gamma distributed ($\alpha$ = 0.24, $\beta$ = 23.42) - with a mean of 5.55 inline objects per webpage;
+ \item[O] - Lognormal distributed ($\alpha$ = -0.75, $\beta$ = 2.36) - with a mean of 7.7kB;
+ \item[R] - Lognormal distributed ($\alpha$ = 5.84, $\beta$ = 0.29) - with a mean of 360B;
+\end{description}
+
+\subsection{Implementation of the simulator}
+At first, we describe a general simulator:
+\begin{verbatim}
+
+   // We create a general simulator
+       motSim_create();          
+       sink = PDUSink_create();
+   // The recommended model uses for interarrival time a Weibull distribution
+  dateGenWb = dateGenerator_createWeibull(alpha, beta);
+  
+  server = srvGen_create(sink, (processPDU_t)PDUSink_processPDU);
+  srvGen_setServiceTime(server, serviceTimeProp, 1.0/debit); 
+
+  filePDU = filePDU_create(server, (processPDU_t)srvGen_processPDU); 
+
+\end{verbatim}
+
+\subsubsection{The request}
+
+The variable V described before represents the time when a user reads a page, the time between two consecutive requests.
+ This being told, for the request part, I suggest the following code to set the simulator:
+
+\begin{verbatim}
+
+   /* The size of GetRequest packets is Lognormal distributed 
+      with req_alpha = 5.84 and req_beta = 0.29
+   */    
+      getReqSzGen = randomGenerator_createDouble();
+      randomGenerator_setDistributionLognormal(getReqSzGen, req_alpha, req_beta);
+      
+      getRequest = PDUSource_create(dateGenWb, filePDU, (processPDU_t)filePDU_processPDU); 
+    /* We associate the PDUSource the random size generator getReqSzGen */
+      PDUSource_setPDUSizeGenerator(reqPDU, getReqSzGen);
+
+\end{verbatim}
+
+ To start the simulator:
+\begin{verbatim}
+      PDUSource_start(getReqSzGen);
+\end{verbatim}
+
+\subsubsection{The Reply} 
+
+The random variables for main object size, inline object average size and number use Lognormal and Gamma distributions.
+ These are implemented in the source random-generator.c
+
+To set the simualtor for a http reply:
+
+\begin{verbatim}
+      reqSizeGen = randomGenerator_createUInt();
+      randomGenerator_setDistributionComposed(reqSizeGen, a, b, ain, bin, galpha, gbeta);
+      
+ 
+      reqPDU = PDUSource_create(dateGenWb, filePDU, (processPDU_t)filePDU_processPDU);  
+  
+      /* We associate the size of the request packet to the reqPDU */
+      PDUSource_setPDUSizeGenerator(reqPDU, reqSizeGen);
+\end{verbatim}
+
+ To start the simulator:
+\begin{verbatim}
+PDUSource_start(reqPDU);
+\end{verbatim}
+
+
+
