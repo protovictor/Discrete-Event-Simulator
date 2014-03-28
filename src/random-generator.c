@@ -475,9 +475,9 @@ unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg)
       case rGTypeUIntEnum :
 	result = rg->param.uid.value[min((int)(rg->param.uid.nbValues*alea), rg->param.uid.nbValues -1)];
       break;
-      default :
-	 motSim_error(MS_FATAL, "not implemented\n");
-      break;
+     // default :
+//	 motSim_error(MS_FATAL, "not implemented\n");
+  //    break;
    }
    }
 
