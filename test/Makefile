@@ -1,6 +1,11 @@
 SRC_FILES= $(wildcard *.c)
 OBJ_FILES= $(SRC_FILES:.c=.o)
 
+NDES_PATH=..
+
+export CFLAGS=-Wall -I$(NDES_PATH)/include
+export LDFLAGS=-O3 -L$(NDES_PATH)/lib -lndes -lm
+
 TESTS = generators-0 generators-1 \
 	generators-3 generators-4 generators-5 \
 	drr \
@@ -8,7 +13,8 @@ TESTS = generators-0 generators-1 \
 #	debits \
 #	probes-1 probes-2 probes-3 probes-4 \
 #	muxfcfs-1 \
-#	intconf
+#	intconf \
+#	hs      
 
 
 .PHONY: clean 
@@ -20,6 +26,9 @@ tests :  $(TESTS)
 
 drr : drr.o ../$(SRC_DIR)/libndes.a
 	$(CC) drr.o -o drr $(LDFLAGS)
+
+hs: httpmodel.c
+	$(CC) $(CFLAGS) httpmodel.c -o hs $(LDFLAGS)
 
 generators-0 : generators-0.o ../$(SRC_DIR)/libndes.a
 	$(CC) generators-0.o -o generators-0 $(LDFLAGS)
