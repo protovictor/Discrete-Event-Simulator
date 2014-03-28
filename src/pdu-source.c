@@ -239,7 +239,7 @@ struct PDU_t * PDUSource_getPDU(struct PDUSource_t * source)
 }
 
 void PDUSource_start(struct PDUSource_t * source)
-{  printf("aici");
+{  
 
    // On ne sait jamais (cette fonction sert de reset)
    if (source->pdu) {
