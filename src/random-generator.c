@@ -275,7 +275,7 @@ double randomGenerator_GammaGetNext(struct randomGenerator_t * rg)
    double alea, result;
    alea = rg->aleaGetNext(rg);
 
-   result = incgamma(rg->distParam.d.alpha, rg->distParam.d.beta) / alea ) / tgamma(alpha); 
+   result = (incgamma(rg->distParam.d.alpha, rg->distParam.d.beta) / alea ) / tgamma(rg->distParam.d.alpha); 
   
    return result;
 }
