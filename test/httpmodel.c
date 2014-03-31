@@ -24,12 +24,13 @@ void tracer(struct probe_t *pr, char *name, int nbBar);
    struct PDU_sink_t        *sink;
    struct srvGen_t          *server; 
    struct filePDU_t         *filePDU; 
-   struct dateGenerator_t   *dateGenWb;
+   struct dateGenerator_t   *dateGen;
    struct randomGenerator_t *getReqSzGen, *reqSizeGen; // *req_per_session; 
    struct PDUSource_t       *getRequest, *reqPDU; 
    struct probe_t           *sejProbe, *iaProbe, *srvProbe;         //the sensors
    
-   float debit = 10000.0;          // bits/second
+   float debit = 1000.0;          // bits/second
+   float lambda = 1; //0.033;   
 
    // for Weibull            -  interarrival time = time between requests
    double alpha = 0.5;
@@ -46,8 +47,6 @@ void tracer(struct probe_t *pr, char *name, int nbBar);
        sink = PDUSink_create();
   
  /* Common settings for request and reply */ 
-   // The recommended model uses for interarrival time a Weibull distribution
-      dateGenWb = dateGenerator_createWeibull(alpha, beta);
   
   server = srvGen_create(sink, (processPDU_t)PDUSink_processPDU);
   srvGen_setServiceTime(server, serviceTimeProp, 1.0/debit); 
@@ -56,20 +55,22 @@ void tracer(struct probe_t *pr, char *name, int nbBar);
 
  /* -----------------------------------------------*/
  
-   if(option == 1)   // Request
+   if(option == 1)   // Request  // HTTP - OFF
    {
       // Lognormal distribution for GetRequest size packets
       double req_alpha = 5.84;
       double req_beta  = 0.29;  
       
+      dateGen = dateGenerator_createExp(lambda);
+
       getReqSzGen = randomGenerator_createDouble();
       randomGenerator_setDistributionLognormal(getReqSzGen, req_alpha, req_beta);
       
-      getRequest = PDUSource_create(dateGenWb, filePDU, (processPDU_t)filePDU_processPDU); 
+      getRequest = PDUSource_create(dateGen, filePDU, (processPDU_t)filePDU_processPDU); 
       PDUSource_setPDUSizeGenerator(getRequest, getReqSzGen);
 
    }
-   else if(option==2)    // Reply
+   else if(option==2)    // Reply   // HTTP - ON
    {
    
       // Lognormal distribution -  size of main object
@@ -82,13 +83,16 @@ void tracer(struct probe_t *pr, char *name, int nbBar);
       double galpha = 0.24;
       double gbeta = 23.42;
        
+       // The recommended model uses for interarrival time a Weibull distribution
+      dateGen = dateGenerator_createWeibull(alpha, beta);
+
       /* Request size*/
       reqSizeGen = randomGenerator_createDouble();
       randomGenerator_setDistributionComposed(reqSizeGen, a, b, ain, bin, galpha, gbeta);
       /* To do --- the replied page doesn't load sinchronously
         the main object first and the inline objects after */
  
-      reqPDU = PDUSource_create(dateGenWb, filePDU, (processPDU_t)filePDU_processPDU);  
+      reqPDU = PDUSource_create(dateGen, filePDU, (processPDU_t)filePDU_processPDU);  
   
       /* We associate the size of the request packet to the reqPDU */
       PDUSource_setPDUSizeGenerator(reqPDU, reqSizeGen);
@@ -99,7 +103,7 @@ void tracer(struct probe_t *pr, char *name, int nbBar);
  
  // A sensor of inter-arrivals 
        iaProbe = probe_createExhaustive();
-       dateGenerator_addInterArrivalProbe(dateGenWb, iaProbe);
+       dateGenerator_addInterArrivalProbe(dateGen, iaProbe);
 
  // A sensor for the journey/sejour 
        sejProbe = probe_createExhaustive();
