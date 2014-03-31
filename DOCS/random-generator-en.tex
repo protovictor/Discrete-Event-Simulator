@@ -1,6 +1,7 @@
 %========================================================================
 %
 %========================================================================
+
 \section{The random generators}
 \label{section:random-generator}
 
@@ -253,7 +254,7 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
 \end{verbatim}
 
 \subsection{Generating a random number with Weibull distribution}
-
+\label{weibull_dist}
 \index{randomGenerator\_setDistributionWeibull}
 \index{randomGenerator\_WeibullInit}
 \index{randomGenerator\_WeibullGetNext}
@@ -298,7 +299,7 @@ double randomGenerator_WeibullGetNext(struct randomGenerator_t * rg)
 \end{verbatim}
 
 \subsection{Generating a random number with Lognormal distribution}
-
+\label{lognormal_dist}
 \index{randomGenerator\_setDistributionLognormal}
 \index{randomGenerator\_LognormalInit}
 \index{randomGenerator\_LognormalGetNext}
@@ -348,7 +349,7 @@ double randomGenerator_LognormalGetNext(struct randomGenerator_t *rg)
 \end{verbatim}
 
 \subsection{Generating a random number with Gamma distribution}
-
+\label{gamma_dist}
 \index{randomGenerator\_setDistributionGamma}
 \index{randomGenerator\_GammaInit}
 \index{randomGenerator\_GammaGetNext}
@@ -418,7 +419,7 @@ double randomGenerator_GammaGetNext(struct randomGenerator_t * rg)
 \end{verbatim}
 
 \section{Composed random generator}
-
+\label{composed_rg}
    I defined the possibility of a random generator to have parameters maximum three random generators differently distributed. We have many possibilities: Pareto, Gamma, Lognormal, Weibull. These random generators "create" random numbers that can be used in any expression we want for the source random generator.
 The idea came from the proposed method of http model wrote in "Source Traffic Modeling of Wireless Applications".
 
