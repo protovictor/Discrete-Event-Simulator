@@ -14,3 +14,12 @@
 \indexentry {randomGenerator\_setDistributionDiscrete}{22}
 \indexentry {randomGenerator\_getNextUInt}{22}
 \indexentry {randomGenerator\_getNextDouble}{22}
+\indexentry {randomGenerator\_setDistributionWeibull}{22}
+\indexentry {randomGenerator\_WeibullInit}{22}
+\indexentry {randomGenerator\_WeibullGetNext}{22}
+\indexentry {randomGenerator\_setDistributionLognormal}{23}
+\indexentry {randomGenerator\_LognormalInit}{23}
+\indexentry {randomGenerator\_LognormalGetNext}{23}
+\indexentry {randomGenerator\_setDistributionGamma}{24}
+\indexentry {randomGenerator\_GammaInit}{24}
+\indexentry {randomGenerator\_GammaGetNext}{24}

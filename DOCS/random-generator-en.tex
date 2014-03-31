@@ -252,6 +252,270 @@ unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg);
 double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
 \end{verbatim}
 
+\subsection{Generating a random number with Weibull distribution}
+
+\index{randomGenerator\_setDistributionWeibull}
+\index{randomGenerator\_WeibullInit}
+\index{randomGenerator\_WeibullGetNext}
+
+Weibull distribution is characterized by two parameters, $\alpha$ and $\beta$.
+To generate a random number based on Weibull distribution, we need a random value, which we get from rg->aleaGetNext. Then, we apply the inverse CDF of Weibull distribution:
+
+  $$Weibull\_CDF^{-1}(x,\alpha,\beta)=\beta*(-\ln(1-x))^{1/\alpha}$$
+
+\begin{verbatim}
+void randomGenerator_setDistributionWeibull(struct randomGenerator_t * rg, double alpha, double beta)
+{
+   rg->distribution = rGDistWeibull;
+   randomGenerator_WeibullInit(rg, alpha, beta);
+}
+\end{verbatim}
+
+
+\begin{verbatim}
+void randomGenerator_WeibullInit(struct randomGenerator_t * rg, double alpha, double beta)
+{
+      assert(rg->distribution == rGDistWeibull);   
+      rg->distParam.min = 0.0;
+      rg->distParam.max = DBL_MAX;
+  
+      rg->distParam.d.alpha = alpha;
+      rg->distParam.d.beta  = beta; 
+      rg->distGetNext = randomGenerator_WeibullGetNext;
+}
+\end{verbatim}
+
+\begin{verbatim}
+double randomGenerator_WeibullGetNext(struct randomGenerator_t * rg)
+{
+      double alea, result;
+      alea = rg->aleaGetNext(rg);
+
+        result = rg->distParam.d.beta *  pow(-log(1-alea), 
+                                       1/rg->distParam.d.alpha);
+     return result;
+}
+\end{verbatim}
+
+\subsection{Generating a random number with Lognormal distribution}
+
+\index{randomGenerator\_setDistributionLognormal}
+\index{randomGenerator\_LognormalInit}
+\index{randomGenerator\_LognormalGetNext}
+
+Lognormal distribution is characterized by two parameters, $\alpha$ and $\beta$.
+To generate a random number based on Lognormal distribution, we need a random value, which we get from rg->aleaGetNext. Then, we apply the inverse CDF of Lognormal distribution:
+
+   $$ Lognormal\_CDF^{-1}(x,\alpha,\beta) = e^{\alpha + \beta * sqrt{2} * errorfunction(2*x-1)^{-1}} $$
+
+\begin{verbatim}
+void randomGenerator_setDistributionLognormal(struct randomGenerator_t * rg, double alpha, double beta)
+{
+   rg->distribution = rGDistLognormal;
+   randomGenerator_LognormalInit(rg, alpha, beta);
+} 
+\end{verbatim}
+
+\begin{verbatim}
+void randomGenerator_LognormalInit(struct randomGenerator_t *rg, double alpha, double beta)
+{
+      assert(rg->distribution == rGDistLognormal);   
+      rg->distParam.min = 0.0;
+      rg->distParam.max = DBL_MAX;
+  
+   rg->distParam.d.alpha = alpha;
+   rg->distParam.d.beta  = beta; 
+   rg->distGetNext = randomGenerator_LognormalGetNext;
+
+}
+\end{verbatim}
+
+\begin{verbatim}
+double randomGenerator_LognormalGetNext(struct randomGenerator_t *rg)
+{  
+      double alea;
+      double result ;
+   
+   alea = rg->aleaGetNext(rg);
+
+   result = exp (   rg->distParam.d.alpha + 
+                    rg->distParam.d.beta * sqrt(2) * pow(erf(2*alea - 1), -1) 
+                );
+
+   return result;
+
+}  
+\end{verbatim}
+
+\subsection{Generating a random number with Gamma distribution}
+
+\index{randomGenerator\_setDistributionGamma}
+\index{randomGenerator\_GammaInit}
+\index{randomGenerator\_GammaGetNext}
+
+Gamma distribution is characterized by two parameters, $\alpha$ and $\beta$.
+To generate a random number based on Gamma distribution, we need a random value, which we get from rg->aleaGetNext. Then, we apply the inverse CDF of Gamma distribution:
+  
+  $$ Gamma\_CDF^{-1}(x, \alpha, \beta) = (\Gamma(\alpha, \beta/x))/\Gamma(alpha) $$
+
+   Where $$\Gamma(\alpha, x) = \int_x^\infty \! \beta^{\alpha-1}*e^{-\beta}\, \mathrm{d}\beta $$
+
+   and $$\Gamma(\alpha, x) + \gamma(\alpha, x) = \Gamma(\alpha) $$
+
+   Such that $$ \Gamma(\alpha, x) = \Gamma(\alpha) - \gamma(\alpha, x) $$
+
+ We can aproximate $\gamma(\alpha, x)$ (the lower incomplete gamma function) in the following way:
+\begin{verbatim}
+double incgamma(double x, double alpha)   // aproximation of lower incomplete gamma function
+{
+ double sum = 0;  // aprox of integral
+ double term = 1.0 / alpha;
+ int n=1; 
+    while(term!=0)
+    {
+         sum  += term;
+         term *= x/(alpha+n);
+         n++;
+    }
+  return pow(x, alpha-1) * exp(-x) * sum;
+}
+\end{verbatim}
+
+The functions used to initialize and set the distribution:
+\begin{verbatim}
+void randomGenerator_setDistributionGamma(struct randomGenerator_t * rg, double alpha, double beta)
+{
+   rg->distribution = rGDistGamma;
+   randomGenerator_GammaInit(rg, alpha, beta);
+} 
+\end{verbatim}
+
+
+\begin{verbatim}
+void randomGenerator_GammaInit(struct randomGenerator_t *rg, double alpha, double beta)
+{
+      assert(rg->distribution == rGDistGamma);   
+      rg->distParam.min = 0.0;
+      rg->distParam.max = DBL_MAX;
+  
+   rg->distParam.d.alpha = alpha;
+   rg->distParam.d.beta  = beta; 
+   rg->distGetNext = randomGenerator_GammaGetNext;
+}
+\end{verbatim}
+
+\begin{verbatim}
+double randomGenerator_GammaGetNext(struct randomGenerator_t * rg)
+{
+   double alea, result;
+   alea = rg->aleaGetNext(rg);
+
+   result = ( tgamma(rg->distParam.d.alpha) - incgamma(rg->distParam.d.alpha, rg->distParam.d.beta/alea ) ) / tgamma(rg->distParam.d.alpha); 
+  
+  
+   return result;
+}
+\end{verbatim}
+
+\section{Composed random generator}
+
+   I defined the possibility of a random generator to have parameters maximum three random generators differently distributed. We have many possibilities: Pareto, Gamma, Lognormal, Weibull. These random generators "create" random numbers that can be used in any expression we want for the source random generator.
+The idea came from the proposed method of http model wrote in "Source Traffic Modeling of Wireless Applications".
+
+A requested webpage is composed from:
+\begin{itemize}
+\item{a main object} - its size is Lognormal distributed
+\item{a variable number of inline objects} - its size is Lognormal distributed and the number of objects is Gamma distributed
+\end{itemize}
+
+
+\begin{verbatim}
+//!< Parameters describing the distribution 
+   struct {
+      double min, max; // Extreme values
+      union {
+         double lambda; //!< Exponential distribution
+         double alpha, beta;
+        
+         struct randomGenerator_t * szmain;
+         struct randomGenerator_t * szin;
+         struct randomGenerator_t * nin;
+
+         struct {       //!< Discrete distribution
+            int nbProba;
+            double * proba;
+         } discrete;
+         struct {           //!< ITS distribution
+            int nbParam;    //!< Quantile function number of parameters 
+            double p1, p2;  //!< Parameters values
+	    union {
+               double(*q0par)(double x);
+               double(*q1par)(double x, double p1);
+               double(*q2par)(double x, double p1, double p2);
+            } q;    //!< Quantile function
+         } its;
+      } d;
+   } distParam; 
+\end{verbatim}
+
+ The main principle is the same as the other random generators.
+We need an Init function, a setDistribution function and a GetNext method.
+As an example, I implemented the example from the document with the webpage:
+
+\begin{verbatim}
+void randomGenerator_setDistributionComposed(struct randomGenerator_t * rg, double main_alpha, double main_beta, double inline_alpha, double inline_beta, double nalpha, double nbeta)
+{
+ 
+  rg->distribution = rGDistComposed;
+  
+
+  randomGenerator_ComposedInit(rg, main_alpha, main_beta, inline_alpha, inline_beta, nalpha, nbeta);
+
+}
+\end{verbatim}
+
+
+\begin{verbatim}
+double randomGenerator_ComposedGetNext(struct randomGenerator_t *rg)
+{
+    double mainsize, inlinesize;
+    int inlinenumber;
+    double result;
+    
+    mainsize = randomGenerator_LognormalGetNext(rg->distParam.d.szmain);
+    inlinesize = randomGenerator_LognormalGetNext(rg->distParam.d.szin);
+    inlinenumber = (int) randomGenerator_GammaGetNext(rg->distParam.d.nin);
+    
+    result = mainsize + inlinenumber * inlinesize;    
+
+    return result;
+}
+\end{verbatim}
+
+
+\begin{verbatim}
+void randomGenerator_ComposedInit(struct randomGenerator_t *rg, 
+                                  double main_alpha, double main_beta,
+                                  double inline_alpha, double inline_beta,
+                                  double nalpha, double nbeta)
+{
+   assert(rg->distribution == rGDistComposed);
+   
+   rg->distParam.d.szmain = randomGenerator_createDouble();
+   randomGenerator_setDistributionLognormal(rg->distParam.d.szmain, main_alpha, main_beta);
+
+   rg->distParam.d.szin = randomGenerator_createDouble();
+   randomGenerator_setDistributionLognormal(rg->distParam.d.szin, inline_alpha, inline_beta);
+
+   rg->distParam.d.nin = randomGenerator_createDouble();
+   randomGenerator_setDistributionGamma(rg->distParam.d.nin, nalpha, nbeta);
+  
+  rg->distGetNext = randomGenerator_ComposedGetNext;  
+    
+}
+\end{verbatim}
+
+
 %------------------------------------------------------------------------
 %
 %------------------------------------------------------------------------

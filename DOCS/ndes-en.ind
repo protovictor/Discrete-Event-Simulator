@@ -8,10 +8,19 @@
   \item randomGenerator\_createUIntDiscrete, 20
   \item randomGenerator\_createUIntDiscreteProba, 20
   \item randomGenerator\_delete, 21
+  \item randomGenerator\_GammaGetNext, 24
+  \item randomGenerator\_GammaInit, 24
   \item randomGenerator\_getNextDouble, 22
   \item randomGenerator\_getNextUInt, 22
+  \item randomGenerator\_LognormalGetNext, 23
+  \item randomGenerator\_LognormalInit, 23
   \item randomGenerator\_setDistributionDiscrete, 22
+  \item randomGenerator\_setDistributionGamma, 24
+  \item randomGenerator\_setDistributionLognormal, 23
   \item randomGenerator\_setDistributionUniform, 21
+  \item randomGenerator\_setDistributionWeibull, 22
+  \item randomGenerator\_WeibullGetNext, 22
+  \item randomGenerator\_WeibullInit, 22
   \item rrSched\_addSource, 14
   \item rrSched\_create, 13
   \item rrSched\_getPDU, 14
