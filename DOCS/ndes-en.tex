@@ -51,33 +51,17 @@ the author had other goals. Its use in a different context is however very diffi
 
 %\input{architecture-en}
 \input{tutoriel-programmeur-en}
-\input{httpmodel-en}
 %\input{motsim-en}
 %\input{ndes-object-en}
 %\input{log-en}
 
+\chapter{Traffic models}
+\input{httpmodel-en}
 %========================================================================
 %
 %========================================================================
-\section{GnuPlot diagrams}
-\label{section:gnuplot}
 
-%========================================================================
-%
-%========================================================================
-\section{Notion of simulation and of campaign}
 
-A simulation is a single instance of an execution of an event sequence
-following the initialization of the model. A campaign is a
-result of simulations on the same model with a reset of
-variables between two simulations.
-
-    The sensors relating to the simulation are re-initialized at the end of the
-simulation. Probes may be related to the campaign; they will not be reseted at the end of the campaign and they can allow also inter-simulation values​​, for example confidence intervals.
-
-%========================================================================
-%
-%========================================================================
 \chapter{The library}
 
 %\input{sondes-en}
@@ -92,6 +76,27 @@ simulation. Probes may be related to the campaign; they will not be reseted at t
 %\input{sched-acm-en}
 %\input{sched-acm-knapsack-en}
 
+
+\section{GnuPlot diagrams}
+\label{section:gnuplot}
+
+%========================================================================
+%
+%========================================================================
+
+\section{Notion of simulation and of campaign}
+
+A simulation is a single instance of an execution of an event sequence
+following the initialization of the model. A campaign is a
+result of simulations on the same model with a reset of
+variables between two simulations.
+
+    The sensors relating to the simulation are re-initialized at the end of the
+simulation. Probes may be related to the campaign; they will not be reseted at the end of the campaign and they can allow also inter-simulation values​​, for example confidence intervals.
+
+%========================================================================
+%
+%========================================================================
 %========================================================================
 %
 %========================================================================

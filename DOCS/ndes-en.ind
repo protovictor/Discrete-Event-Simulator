@@ -1,26 +1,26 @@
 \begin{theindex}
 
-  \item randomGenerator\_createDouble, 20
-  \item randomGenerator\_createDoubleDiscrete, 21
-  \item randomGenerator\_createDoubleDiscreteProba, 21
-  \item randomGenerator\_createDoubleExp, 20
-  \item randomGenerator\_createUInt, 20
-  \item randomGenerator\_createUIntDiscrete, 20
-  \item randomGenerator\_createUIntDiscreteProba, 20
-  \item randomGenerator\_delete, 21
-  \item randomGenerator\_GammaGetNext, 24
-  \item randomGenerator\_GammaInit, 24
-  \item randomGenerator\_getNextDouble, 22
-  \item randomGenerator\_getNextUInt, 22
-  \item randomGenerator\_LognormalGetNext, 23
-  \item randomGenerator\_LognormalInit, 23
-  \item randomGenerator\_setDistributionDiscrete, 22
-  \item randomGenerator\_setDistributionGamma, 24
-  \item randomGenerator\_setDistributionLognormal, 23
-  \item randomGenerator\_setDistributionUniform, 21
-  \item randomGenerator\_setDistributionWeibull, 22
-  \item randomGenerator\_WeibullGetNext, 22
-  \item randomGenerator\_WeibullInit, 22
+  \item randomGenerator\_createDouble, 22
+  \item randomGenerator\_createDoubleDiscrete, 23
+  \item randomGenerator\_createDoubleDiscreteProba, 23
+  \item randomGenerator\_createDoubleExp, 22
+  \item randomGenerator\_createUInt, 22
+  \item randomGenerator\_createUIntDiscrete, 22
+  \item randomGenerator\_createUIntDiscreteProba, 22
+  \item randomGenerator\_delete, 23
+  \item randomGenerator\_GammaGetNext, 26
+  \item randomGenerator\_GammaInit, 26
+  \item randomGenerator\_getNextDouble, 24
+  \item randomGenerator\_getNextUInt, 24
+  \item randomGenerator\_LognormalGetNext, 25
+  \item randomGenerator\_LognormalInit, 25
+  \item randomGenerator\_setDistributionDiscrete, 24
+  \item randomGenerator\_setDistributionGamma, 26
+  \item randomGenerator\_setDistributionLognormal, 25
+  \item randomGenerator\_setDistributionUniform, 23
+  \item randomGenerator\_setDistributionWeibull, 24
+  \item randomGenerator\_WeibullGetNext, 24
+  \item randomGenerator\_WeibullInit, 24
   \item rrSched\_addSource, 14
   \item rrSched\_create, 13
   \item rrSched\_getPDU, 14
