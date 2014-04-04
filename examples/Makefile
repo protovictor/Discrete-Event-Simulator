@@ -1,11 +1,14 @@
 SRC_FILES= $(wildcard *.c)
 OBJ_FILES= $(SRC_FILES:.c=.o)
 
-EXAMPLES = debits rg-its rg-draw example-1 example-2 example-3
+EXAMPLES = inoutdemo debits rg-its rg-draw example-1 example-2 example-3
 
 .PHONY: clean 
 
 all : $(EXAMPLES)
+
+inoutdemo : inoutdemo.o ../$(SRC_DIR)/libndes.a
+	$(CC) inoutdemo.o -o inoutdemo $(LDFLAGS)
 
 debits : debits.o ../$(SRC_DIR)/libndes.a
 	$(CC) debits.o -o debits $(LDFLAGS)

@@ -88,7 +88,7 @@ fonction de la forme :
 
 \begin{verbatim}
    int processPDU(void * rec,
-                  getPDU\_t getPDU,
+                  getPDU_t getPDU,
                   void * source);
 \end{verbatim}
 
@@ -103,11 +103,10 @@ d'avoir un pointeur \lstinline!NULL! retourné par
    La valeur de retour de cette fonction est nulle en cas d'échec, et
 non nulle en cas de succès.
 
-   Cette fonction peut être invoquée avec les deux derniers paramètres
+   Cette fonction peut être invoquée avec les deux derniers paramètres%l'avant-dernier paramètre%
 {\tt NULL}. Dans ce cas, l'objectif est uniquement de déterminer si
 l'entité {\tt rec} est disposée à traiter une nouvelle {\sc pdu}. Elle
-doit donc renvoyer 0 ou 1 si elle est occupée ou libre,
-respectivement. 
+doit donc renvoyer 0 ou 1 si elle est occupée ou libre, respectivement. 
 
    Cette propriété doit être implantée dans tous les cas et pourra
 être utilisée par exemple par une entité amont qui peut conserver les
@@ -175,7 +174,7 @@ la fonction \lstinline!getPDU! associée à {\tt A}.
      vaut donc être prèt à traiter.
 \end{itemize}
 
-   L'invocatio de la fonction \lstinline!getPDU! de l'entité amont
+   L'invocation de la fonction \lstinline!getPDU! de l'entité amont
 peut donc être déclanchée par un événement qui n'a rien a voir avec
 elle, c'est comme cela que l'on va aller chercher des {\sc pdu}s sans
 y avoir été invité, d'où la note précédente, et d'où (entre autres) le
