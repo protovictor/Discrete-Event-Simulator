@@ -3,7 +3,7 @@ OBJ_FILES= $(SRC_FILES:.c=.o)
 
 TESTS = generators-0 generators-1 \
 	generators-3 generators-4 generators-5 \
-	drr \
+	drr muxdemux \
 #	file-pdu file-pdu-2 file-pdu-3 \
 #	debits \
 #	probes-1 probes-2 probes-3 probes-4 \
@@ -20,6 +20,9 @@ tests :  $(TESTS)
 
 drr : drr.o ../$(SRC_DIR)/libndes.a
 	$(CC) drr.o -o drr $(LDFLAGS)
+
+muxdemux : muxdemux.o ../$(SRC_DIR)/libndes.a
+	$(CC) muxdemux.o -o muxdemux $(LDFLAGS)
 
 generators-0 : generators-0.o ../$(SRC_DIR)/libndes.a
 	$(CC) generators-0.o -o generators-0 $(LDFLAGS)

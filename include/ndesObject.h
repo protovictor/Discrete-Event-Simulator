@@ -54,7 +54,7 @@ struct ndesObjectType_t {
    void   (*setObject)(void *, struct ndesObject_t *);
    void * (*malloc)() ;         //!< Allocation d'une instance
    void   (*init)(void *);      //!< Initialisation
-   void * (*free)(void *) ;     //!< Destruction d'une instance
+   void   (*free)(void *) ;     //!< Destruction d'une instance
    int    size;                 //!< La taille de la structure privée
    int    objectOffset; 
    void * next;
@@ -160,6 +160,8 @@ extern motSimDate_t ndesObject_getCreationDate(struct ndesObject_t * ndesObject)
 
 /**
  * @brief Obtention des données associées à l'objet
+ * @param ndesObject a non NULL ndesObject pointer
+ * @return The private data associated with this object
  */
 void * ndesObject_getPrivate(struct ndesObject_t * ndesObject);
 

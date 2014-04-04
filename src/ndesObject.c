@@ -42,6 +42,8 @@ int ndesObject_getId(struct ndesObject_t * o)
 
 /**
  * @brief Obtention des données associées à l'objet
+ * @param ndesObject a non NULL ndesObject pointer
+ * @return The private data associated with this object
  */
 void * ndesObject_getPrivate(struct ndesObject_t * ndesObject)
 {
