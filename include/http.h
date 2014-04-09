@@ -61,8 +61,27 @@ void httpReply_LoadParameters(struct httpReply_t *Reply, struct PDUSink_t *sink)
 /*   The functions used for setting request's parameters                    */
 /*==========================================================================*/
 
+/**
+ * @brief The function changes the default value of lambda into a given value
+ * @param Request The Request on which we make modifications
+ * @param lamda The lambda parameter used for generating random arrival 
+ * dates (using an exponential distribution in this case) 
+ */
 void httpRequest_setLambda(struct httpRequest_t *Request, double lambda);
+/**
+ * @brief The function changes the server's parameter - debit
+ * @param Request The Request on which we make modifications
+ * @param debit The new value for the server's parameter
+ */
 void httpRequest_setdebit(struct httpRequest_t *Request, double debit);
+/**
+ * @brief The function changes the parameters of the random size generator
+ * @param Request The Request on which we make modifications
+ * @param alpha The alpha parameter of the Lognormal distribution used for the
+ * random size generator
+ * @param beta The beta parameter of the Lognormal distribution used for the
+ * random size generator
+ */
 void httpRequest_setSizeGenParam(struct httpRequest_t *Request, double alpha, double beta);
 
 
@@ -70,10 +89,47 @@ void httpRequest_setSizeGenParam(struct httpRequest_t *Request, double alpha, do
 /*   The functions used for setting reply's parameters                      */
 /*==========================================================================*/
 
+/**
+ * @brief The function changes the server's parameter - debit
+ * @param Reply The Reply on which we make modifications
+ * @param debit The new value for the server's parameter
+ */
 void httpReply_setdebit(struct httpReply_t *Reply, double debit);
+/**
+ * @brief The function changes the parameters of the random date generator
+ * @param Reply The Reply on which we make modifications
+ * @param alpha The alpha parameter of the Weibull distribution used for the
+ * random date generator
+ * @param beta The beta parameter of the Weibull distribution used for the
+ * random date generator
+ */
 void httpReply_setDateGenParam(struct httpReply_t *Reply, double alpha, double beta);
+/**
+ * @brief The function changes the parameters of the random main object size generator
+ * @param Reply The Reply on which we make modifications
+ * @param alpha The alpha parameter of the Lognormal distribution used for the
+ * random main object size generator
+ * @param beta The beta parameter of the Lognormal distribution used for the
+ * random main object size generator
+ */
 void httpReply_setMainSizeGenParam(struct httpReply_t *Reply, double alpha, double beta);
+/**
+ * @brief The function changes the parameters of the random inline object size generator
+ * @param Reply The Reply on which we make modifications
+ * @param alpha The alpha parameter of the Lognormal distribution used for the
+ * random inline object size generator
+ * @param beta The beta parameter of the Lognormal distribution used for the
+ * random inline object size generator
+ */
 void httpReply_setInlineSizeGenParam(struct httpReply_t *Reply, double alpha, double beta);
+/**
+ * @brief The function changes the parameters of the random inline object number generator
+ * @param Reply The Reply on which we make modifications
+ * @param alpha The alpha parameter of the Gamma distribution used for the
+ * random inline object number generator
+ * @param beta The beta parameter of the Gamma distribution used for the
+ * random inline object number generator
+ */
 void httpReply_setInlineNbGenParam(struct httpReply_t *Reply, double alpha, double beta);
 
 /*==========================================================================*/
