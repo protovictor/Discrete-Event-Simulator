@@ -136,23 +136,56 @@ void httpReply_setInlineNbGenParam(struct httpReply_t *Reply, double alpha, doub
 /*          The functions used to return request's parameters               */
 /*==========================================================================*/
 
+/**
+ * @brief The function returns the Request's date generator
+ * @param Request A pointer of the Request 
+ */
 struct dateGenerator_t* httpRequest_GetDateGen(struct httpRequest_t *Request);
+/**
+ * @brief The function returns the Request's size generator
+ * @param Request A pointer of the Request 
+ */
 struct randomGenerator_t* httpRequest_GetSizeGen(struct httpRequest_t *Request);
+/**
+ * @brief The function returns the Request's filePDU parameter
+ * @param Request A pointer of the Request 
+ */
 struct filePDU_t* httpRequest_GetFilePDU(struct httpRequest_t *Request);
+/**
+ * @brief The function returns the Request's server parameter
+ * @param Request A pointer of the Request 
+ */
 struct srvGen_t* httpRequest_GetServer(struct httpRequest_t *Request);
+/**
+ * @brief The function returns the Request's PDUSource
+ * @param Request A pointer of the Request 
+ */
 struct PDUSource_t* httpRequest_GetPDUSource(struct httpRequest_t *Request);
 
-/*
- *   Returns the debit of the server's request
+/**
+ * @brief The function returns the debit of the server's request
+ * @param Request A pointer of the Request 
  */
 double httpRequest_getDebit(struct httpRequest_t *Request);
 /*
- *   Functions for returning the parameters of the size generator
+ *  Functions for returning the parameters of the size generator
+ */
+
+/**
+ * @brief Returns the alpha parameter of the request's size generator
+ * (Lognormal distribution) 
+ * @param Request A pointer of the Request
  */
 double httpRequest_getalpha(struct httpRequest_t *Request);
+/**
+ * @brief Returns the beta parameter of the request's size generator
+ * (Lognormal distribution) 
+ * @param Request A pointer of the Request
+ */
 double httpRequest_getbeta(struct httpRequest_t *Request);
 /*
- *   Return the parameter for the date generator
+ * @brief The function returns the parameter of the request's date generator
+ * @param Request A pointer of the Request
  */
 double httpRequest_getLambda(struct httpRequest_t *Request);
 
@@ -160,34 +193,98 @@ double httpRequest_getLambda(struct httpRequest_t *Request);
 /*          The functions used to return reply's parameters                 */
 /*==========================================================================*/
 
+/**
+ * @brief The function returns the Reply's date generator
+ * @param Reply A pointer of the Reply 
+ */
 struct dateGenerator_t* httpReply_GetDateGen(struct httpReply_t *Reply);
+/**
+ * @brief The function returns the Reply's size generator
+ * @param Reply A pointer of the Reply 
+ */
 struct randomGenerator_t* httpReply_GetSizeGen(struct httpReply_t *Reply);
+/**
+ * @brief The function returns the Reply's filePDU parameter
+ * @param Reply A pointer of the Reply 
+ */
 struct filePDU_t* httpReply_GetFilePDU(struct httpReply_t *Reply);
+/**
+ * @brief The function returns the Reply's server parameter
+ * @param Reply A pointer of the Reply 
+ */
 struct srvGen_t* httpReply_GetServer(struct httpReply_t *Reply);
+/**
+ * @brief The function returns the Reply's PDUSource
+ * @param Reply A pointer of the Reply 
+ */
 struct PDUSource_t* httpReply_GetPDUSource(struct httpReply_t *Reply);
 /*
- *   Returns the debit of the server's reply
+ * @brief The function returns the debit of the server's reply
+ * @param Reply A pointer of the Reply 
  */
 double httpReply_getDebit(struct httpReply_t *Reply);
 /*
  *   Functions for returning the parameters of the date generator
  */
+
+/**
+ * @brief Returns the alpha parameter of the reply's date generator
+ * (Weibull distribution) 
+ * @param Reply A pointer of the Reply
+ */
 double httpReply_getdWalpha(struct httpReply_t *Reply);
+/**
+ * @brief Returns the beta parameter of the reply's date generator
+ * (Weibull distribution) 
+ * @param Reply A pointer of the Reply
+ */
 double httpReply_getdWbeta(struct httpReply_t *Reply);
 /*
  *   Functions for returning the parameters of the main object size generator
  */
+
+/**
+ * @brief Returns the alpha parameter of the reply's main object random size generator
+ * (Lognormal distribution) 
+ * @param Reply A pointer of the Reply
+ */
 double httpReply_getmLnalpha(struct httpReply_t *Reply);
+/**
+ * @brief Returns the beta parameter of the reply's main object random size generator
+ * (Lognormal distribution) 
+ * @param Reply A pointer of the Reply
+ */
 double httpReply_getmLnbeta(struct httpReply_t *Reply);
 /*
  *   Functions for returning the parameters of the inline object size generator
  */
+/**
+ * @brief Returns the alpha parameter of the reply's inline object random size generator
+ * (Lognormal distribution) 
+ * @param Reply A pointer of the Reply
+ */
 double httpReply_getiLnalpha(struct httpReply_t *Reply);
+/**
+ * @brief Returns the beta parameter of the reply's inline object random size generator
+ * (Lognormal distribution) 
+ * @param Reply A pointer of the Reply
+ */
 double httpReply_getiLnbeta(struct httpReply_t *Reply);
 /*
  *   Functions for returning the parameters of the inline object number generator
  */
+
+/**
+ * @brief Returns the alpha parameter of the reply's inline object random number generator
+ * (Gamma distribution) 
+ * @param Reply A pointer of the Reply
+ */
 double httpReply_getiGmalpha(struct httpReply_t *Reply);
+/**
+ * @brief Returns the beta parameter of the reply's inline object random number generator
+ * (Gamma distribution) 
+ * @param Reply A pointer of the Reply
+ */
 double httpReply_getiGmbeta(struct httpReply_t *Reply);
 
 
