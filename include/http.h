@@ -1,3 +1,15 @@
+/**
+ * @file http.h
+ * @brief A simple http traffic source model
+ *
+ * The model contains: reply, request
+ * Each of them is represented by a structure
+ * 
+ * - struct httpRequest_t (for the request)
+ * - struct httpReply_t   (for the reply)
+ * The structure is described below  
+ */ 
+
 #include <pdu-source.h>
 #include <file_pdu.h>
 #include <date-generator.h>
@@ -5,6 +17,9 @@
 #include <srv-gen.h>
 #include <pdu-sink.h>
 
+/*
+ *     The declaration of the request and reply structures
+ */
 
 struct httpRequest_t;
 struct httpReply_t;
@@ -22,7 +37,23 @@ struct httpReply_t* http_CreateReply();
 /*                             random generators                            */
 /*==========================================================================*/
 
+/**
+ * @brief Load the parameters into the request's structure
+ * The parameters can be seted manually, by a user, or we can use 
+ * the default parameters - recommended in the suggested model
+ * @param Request The request on which we will load the parameters for the 
+ * initialisation
+ * @param sink The sink for the server and PDUSource creation
+ */
 void httpRequest_LoadParameters(struct httpRequest_t *Request, struct PDUSink_t * sink);
+/**
+ * @brief Load the parameters into the reply's structure
+ * The parameters can be seted manually, by a user, or we can use 
+ * the default parameters - recommended in the suggested model
+ * @param Reply The reply on which we will load the parameters for the 
+ * initialisation
+ * @param sink The sink for the server and PDUSource creation
+ */
 void httpReply_LoadParameters(struct httpReply_t *Reply, struct PDUSink_t *sink);
 
 
