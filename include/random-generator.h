@@ -226,7 +226,6 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
  */
 double randomGenerator_getExpectation(struct randomGenerator_t * rg);
 
-double * randomGenerator_GetDistValues(struct randomGenerator_t *rg);
 double randomGenerator_WeibullGetNext(struct randomGenerator_t * rg);
 double randomGenerator_GammaGetNext(struct randomGenerator_t * rg);
 double randomGenerator_ComposedGetNext(struct randomGenerator_t *rg);
