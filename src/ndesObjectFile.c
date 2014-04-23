@@ -156,9 +156,12 @@ void ndesObjectFile_insertObject(struct ndesObjectFile_t * file,
 void ndesObjectFile_insert(struct ndesObjectFile_t * file,
 			   void * object)
 {
+   printf_debug(DEBUG_FILE, "IN\n");
    assert(file->type->getObject(object)->type == file->type);
 
    ndesObjectFile_insertObject(file, file->type->getObject(object));
+   printf_debug(DEBUG_FILE, "OUT\n");
+
 }
 
 /**

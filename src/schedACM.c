@@ -730,6 +730,7 @@ int schedACM_processPDUGeneric(struct schedACM_t * sched,
 
    // Si c'est juste pour tester si je suis pret
    if ((getPDU == NULL) || (source == NULL)) {
+      printf_debug(DEBUG_ALWAYS, "getPDU/source should not be NULL\n");
       return 1; // On fait comme si on était pret puisque on gère nous même
    }
 

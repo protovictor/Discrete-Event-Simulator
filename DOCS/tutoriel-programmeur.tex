@@ -156,39 +156,14 @@ int rrSched_processPDU(void *s,
 d'autres dans le fichier source. On se contente ici d'un {\em cast}
 pour respecter le prototype des fonctions d'échange.
 
-   La première chose à faire est de vérifier la disponibilité de
-l'entité aval :
+   Il suffit maintenant de demander à l'entité aval de venir chercher
+une {\sc pdu} (celle-là ou une autre, c'est l'algo qui le dira,
+mais on ne voit pas comment ça pourrait en être une autre~!).
 
 \begin{verbatim}
-   // La destination est-elle prete ?
-   int destDispo = sched->destProcessPDU(sched->destination, NULL, NULL);
-\end{verbatim}
-
-   Maintenant nous allons traiter le cas du test (paramètres {\tt
-NULL} pour tester notre disponibilité) :
-
-\begin{verbatim}
-   // Si c'est un test de dispo, je dépend de l'aval
-   if ((getPDU == NULL) || (source == NULL)) {
-      result = destDispo;
-\end{verbatim}
-
-   Et maintenant le c\oe{}ur de la meule ! Si l'entité aval est prête,
-on lui dit de venir chercher une {\sc pdu} (celle-là ou une autre,
-c'est l'algo qui le dira, mais on ne voit pas comment ça pourrait en
-être une autre !). Sinon, on laisse tomber, \ldots
-
-\begin{verbatim}
-   } else {
-      if (destDispo) {
-         // Si l'aval est dispo, on lui dit de venir chercher une PDU, ce
-         // qui déclanchera l'ordonnancement
-         result = sched->destProcessPDU(sched->destination, rrSched_getPDU, sched);
-      } else {
-         // On ne fait rien si l'aval (un support a priori) n'est pas pret
-         result = 0;
-      }
-   }
+   // On dit à l'aval de venir chercher une PDU, ce
+   // qui déclanchera l'ordonnancement
+   result = sched->destProcessPDU(sched->destination, rrSched_getPDU, sched);
 \end{verbatim}
 
    On oublie pas de renvoyer le résultat !

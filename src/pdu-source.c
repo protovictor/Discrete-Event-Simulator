@@ -92,6 +92,8 @@ struct PDUSource_t * PDUSource_createDeterministic(struct dateSize * sequence,
    struct PDUSource_t * result = PDUSource_create(NULL,
 						  destination,
 						  destProcessPDU);
+   printf_debug(DEBUG_SRC, "IN, dest=%p, proc=%p\n", destination, destProcessPDU);
+
    result->sizeGen = NULL; // Pour le moment, c'est implanté par
 			   // quelques lignes spécifiques fondées sur
 			   // l'absence de générateur de date, pas
@@ -161,8 +163,10 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
          probe_sample(source->PDUGenerationSizeProbe, (double)PDU_size(source->pdu));
       }
 
+   printf_debug(DEBUG_SRC, " COUCOU\n");
       // On passe la PDU au suivant  
       if ((source->destProcessPDU) && (source->destination)) {
+   printf_debug(DEBUG_SRC, " On passe\n");
          // On logue cet événement
  	ndesLog_logLineF(PDU_getObject(source->pdu),
                          "CREATED_BY %d", PDUSource_getObjectId(source));
@@ -207,7 +211,7 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
       source->nextPdu = PDU_create(size, NULL); 
 
       printf_debug(DEBUG_SRC, " next PDU %d (size %u) created at %6.3f\n",  
-                PDU_id(source->nextPdu), size, PDU_size(source->nextPdu),motSim_getCurrentTime());
+                PDU_id(source->nextPdu), size,motSim_getCurrentTime());
 
       // On crée un événement pour cette date
       event = event_create((eventAction_t)PDUSource_buildNewPDU, source, date);

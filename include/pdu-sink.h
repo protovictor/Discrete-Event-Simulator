@@ -22,6 +22,7 @@ int PDUSink_processPDU(void * pduSink, getPDU_t getPDU, void * source);
 /**
  * @brief Affectation d'une sonde sur les evenements d'insertion
  */
-void PDUSink_addInputProbe(struct PDUSink_t * sink, struct probe_t * insertProbe);
+void PDUSink_addInputProbe(struct PDUSink_t * sink,
+			   struct probe_t * insertProbe);
 
 #endif

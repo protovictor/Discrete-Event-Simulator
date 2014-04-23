@@ -286,6 +286,7 @@ int schedDRR_processPDU(void *s,
 
    // Si c'est un test de dispo, je suis prêt !
    if ((getPDU == NULL) || (source == NULL)) {
+      printf_debug(DEBUG_ALWAYS, "getPDU/source should not be NULL\n");
       printf_debug(DEBUG_SCHED, "c'etait juste un test\n");
       result = 1;
    } else {

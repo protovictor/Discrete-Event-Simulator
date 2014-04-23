@@ -65,7 +65,8 @@ int PDUSink_processPDU(void * s, getPDU_t getPDU, void * source)
    }
 
    if (pduSink->insertProbe){
-      probe_sample(pduSink->insertProbe, PDU_id(pdu));
+     //      probe_sample(pduSink->insertProbe, PDU_id(pdu));
+      probe_sample(pduSink->insertProbe, PDU_size(pdu));
    }
 
    if (pdu) {

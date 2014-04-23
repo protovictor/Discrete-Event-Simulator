@@ -88,7 +88,7 @@ fonction de la forme :
 
 \begin{verbatim}
    int processPDU(void * rec,
-                  getPDU\_t getPDU,
+                  getPDU_t getPDU,
                   void * source);
 \end{verbatim}
 
@@ -103,17 +103,17 @@ d'avoir un pointeur \lstinline!NULL! retourné par
    La valeur de retour de cette fonction est nulle en cas d'échec, et
 non nulle en cas de succès.
 
-   Cette fonction peut être invoquée avec les deux derniers paramètres
-{\tt NULL}. Dans ce cas, l'objectif est uniquement de déterminer si
-l'entité {\tt rec} est disposée à traiter une nouvelle {\sc pdu}. Elle
-doit donc renvoyer 0 ou 1 si elle est occupée ou libre,
-respectivement. 
+%   Cette fonction peut être invoquée avec les deux derniers paramètres
+%{\tt NULL}. Dans ce cas, l'objectif est uniquement de déterminer si
+%l'entité {\tt rec} est disposée à traiter une nouvelle {\sc pdu}. Elle
+%doit donc renvoyer 0 ou 1 si elle est occupée ou libre,
+%respectivement. 
 
-   Cette propriété doit être implantée dans tous les cas et pourra
-être utilisée par exemple par une entité amont qui peut conserver les
-{\sc pdu}s (une file par exemple) afin d'éviter une perte dûe à une
-entité aval qui ne pourrait pas recevoir une nouvelle {\sc pdu} (un
-lien en cours de  transmission par exemple).
+%   Cette propriété doit être implantée dans tous les cas et pourra
+%être utilisée par exemple par une entité amont qui peut conserver les
+%{\sc pdu}s (une file par exemple) afin d'éviter une perte dûe à une
+%entité aval qui ne pourrait pas recevoir une nouvelle {\sc pdu} (un
+%lien en cours de  transmission par exemple).
 
    Un exemple d'utilisation est donné dans le premier ''{\em Tutoriel
      du programmeur}'' en sous-section \ref{subsection:tut-ordo}.
