@@ -30,6 +30,9 @@ example-3 : example-3.o ../$(SRC_DIR)/libndes.a
 
 clean :
 	\rm -f $(OBJ_FILES) $(EXAMPLES) *~ 
+	(cd tuto-prog-1 ; make clean)
+	(cd tutorial-1 ; make clean)
+	(cd tutorial-2 ; make clean)
 
 .c.o :
 	$(CC) $(CFLAGS) -I../$(INCL_DIR) $< -c

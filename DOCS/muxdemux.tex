@@ -1,0 +1,17 @@
+%========================================================================
+%
+%========================================================================
+\section{Un multiplexeur/démultiplexeur}
+\label{section:muxdemux}
+
+   Un outil de multiplexage/démultiplexage élémentaire est implanté
+dans {\tt src/muxdemux.c} définissant une entité de multiplexage et
+une entité de démultiplexage. Le but est de fournir un cadre simple
+mais propre permettant à l'utilisateur de multiplexer dans une même
+séquence d'entités des flux différents et d'\^etre capable de les
+différencier à l'arrivée.
+
+   Attention, cet outil ne fournit aucune fonctionnalité de stockage,
+si bien que si le premier élément de la séquences séparant le
+multiplexeur du démultiplexeur n'est pas assez rapide, alors des {\sc
+  pdu} peuvent être perdues.

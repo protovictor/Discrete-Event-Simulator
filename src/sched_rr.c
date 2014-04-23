@@ -99,27 +99,9 @@ int rrSched_processPDU(void *s,
    struct rrSched_t * sched = (struct rrSched_t *)s;
 
    printf_debug(DEBUG_SCHED, "in\n");
-   // La destination est-elle prete ?
-   int destDispo = sched->destProcessPDU(sched->destination, NULL, NULL);
 
-   printf_debug(DEBUG_SCHED, "dispo du lien aval : %d\n", destDispo);
+   result = sched->destProcessPDU(sched->destination, rrSched_getPDU, sched);
 
-   // Si c'est un test de dispo, je dépend de l'aval
-   if ((getPDU == NULL) || (source == NULL)) {
-      printf_debug(DEBUG_SCHED, "c'etait juste un test\n");
-      result = destDispo;
-   } else {
-      if (destDispo) {
-         // Si l'aval est dispo, on lui dit de venir chercher une PDU, ce
-         // qui déclanchera l'ordonnancement
-         printf_debug(DEBUG_SCHED, "on fait suivre ...\n");
-         result = sched->destProcessPDU(sched->destination, rrSched_getPDU, sched);
-      } else {
-         // On ne fait rien si l'aval (un support a priori) n'est pas pret
-         printf_debug(DEBUG_SCHED, "on ne fait rien (aval pas pret) ...\n");
-         result = 0;
-      }
-   }
    printf_debug(DEBUG_SCHED, "out %d\n", result);
 
    return result;
