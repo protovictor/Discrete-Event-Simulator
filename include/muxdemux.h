@@ -9,6 +9,7 @@
 #include <pdu.h>
 #include <ndesObject.h>
 #include <ndesObjectFile.h>
+#include <pdu-filter.h>
 
 /**
  * @brief A multiplexing sender
@@ -40,7 +41,7 @@ processPDU_t muxDemuxSenderProcessPDU;
 /**
  * @brief Sender (multiplexer) creator
  */
-struct muxDemuxSender_t * muxDemuxSender_Create(void * destination,
+struct muxDemuxSender_t * muxDemuxSender_create(void * destination,
 						processPDU_t destProcessPDU);
 
 /**
@@ -61,11 +62,16 @@ int muxDemuxSender_processPDU(void * muxSenderSAP,
 				 getPDU_t getPDU,
 				 void * source);
 
+/**
+ * @brief Create a filter based on a SAP
+ */
+struct PDUFilter_t * muxDemuxSender_createFilterFromSAP(struct muxDemuxSenderSAP_t * sap);
+
 
 /**
  * @brief Receiver (demultiplexer) creator
  */
-struct muxDemuxReceiver_t * muxDemuxReceiver_Create();
+struct muxDemuxReceiver_t * muxDemuxReceiver_create();
 
 /**
  * @brief Creation of a new Service Access Point on a receiver
@@ -76,7 +82,6 @@ struct muxDemuxReceiverSAP_t * muxDemuxReceiver_createNewSAP(struct muxDemuxRece
 						             unsigned int newSAPI,
 							     void * destination,
 							     processPDU_t destProcessPDU);
-
 /**
  * @brief The receiver input fonction
  */

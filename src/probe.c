@@ -118,7 +118,10 @@ struct probe_t {
       struct slidingWindow_t * window;
       struct EMA_t           * ema;
       struct periodic_t      * periodic;
-} data;
+   } data;
+
+   // (Optional) fiter to apply before sampling
+   struct PDUFilter_t * filter;
 
    // Une sonde persistante n'est jamais réinitialisée
    int persistent;
@@ -320,7 +323,10 @@ struct probe_t * probe_createRaw(enum probeType_t probeType)
    result->name = strdup("Generic probe");
    result->nextProbe = NULL;
    result->period = 0.0;
-   
+
+   // Default is no filter
+   result->filter = NULL;
+
    // Les métas probes
    result->meanProbe = NULL;
    result->throughputProbe = NULL;
@@ -884,7 +890,10 @@ double probe_EMAThroughput(struct probe_t * probe)
    //   return probe->data.ema->bwAvg;
 }
 
-void probe_sample(struct probe_t * probe, double value)
+/**
+ * @brief Do the actual sample, without filtering or chaining
+ */
+void probe_doSample(struct probe_t * probe, double value)
 {
    if (probe==NULL)
       return;
@@ -955,6 +964,11 @@ void probe_sample(struct probe_t * probe, double value)
      printf_debug(DEBUG_PROBE_VERB, "Throughput %f from probe \"%s\" (type \"%s\") \n", probe_throughput(probe), probe_getName(probe), probeTypeName(probe->probeType));
       probe_sample(probe->throughputProbe, probe_throughput(probe));
    }
+}
+
+void probe_sample(struct probe_t * probe, double value)
+{
+   probe_doSample(probe, value);
 
    // On chaine si nécessaire 
    if (probe->nextProbe != NULL){
@@ -1575,4 +1589,45 @@ void probe_addSampleProbe(struct probe_t * p1, struct probe_t * p2)
 {
   addProbe(p1->sampleProbe, p2);
 }
+
+
+/*****************************************************************************
+       Probes and filters
+ */
+
+/**
+ * @brief Set a filter to a probe
+ *
+ * If the probe is used through probe_sampleValuePDUFilter, the sample
+ * will be done iif the PDU validates the filter
+ */
+void probe_setFilter(struct probe_t * probe, 
+		     struct PDUFilter_t * filter)
+{
+   probe->filter = filter;
+}
+
+/**
+ * @brief Echantillonage d'une valeur
+ * @param probe La sonde dans laquelle on veut enregistrer
+ * @param value La valeur à enregistrer
+ * @param pdu une PDU sur laquelle le filtre sera appliqué
+ * La probe peut être NULL, auquel cas rien n'est enregistré,
+ * naturellement.
+ * Attention, l'échantillonage se fera SI ET SEULEMENT SI la PDU passe
+ * le fitre.
+ */
+void probe_sampleValuePDUFilter(struct probe_t * probe, 
+			        double value, struct PDU_t* pdu)
+{
+   if ((probe->filter == NULL) || PDUFilter_filterPDU(probe->filter, pdu)) {
+      probe_doSample(probe, value);
+   }
+
+   // Chaining ...
+   if (probe->nextProbe != NULL){
+     probe_sampleValuePDUFilter(probe->nextProbe, value, pdu);
+   }
+}
+
 

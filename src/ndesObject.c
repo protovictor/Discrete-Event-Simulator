@@ -1,3 +1,5 @@
+#include <string.h>    // memset
+ 
 #include <ndesObject.h>
 #include <log.h>
 

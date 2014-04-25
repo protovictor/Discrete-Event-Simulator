@@ -145,7 +145,7 @@ void knapsackParModCod(int mc, struct sched_kse_t * sched)
    double interet;
    int volume;
    int fini;
-   int choice; // Pour tirer au hasard en cas d'égalité
+   //   int choice; // Pour tirer au hasard en cas d'égalité
    int mt, qt, doublon; // Pour la recherche de doublon dans la démarche exhaustive
 
    do { // Pour chaque taille de BBFRAME

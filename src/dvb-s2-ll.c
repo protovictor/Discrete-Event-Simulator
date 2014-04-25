@@ -359,4 +359,5 @@ int DVBS2ll_processPDU(struct DVBS2ll_t * dvbs2ll,
   
       DVBS2ll_sendPDU(dvbs2ll, pdu);
    }
+   return 1;
 }

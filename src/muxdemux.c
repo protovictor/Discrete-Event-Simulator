@@ -43,10 +43,12 @@ struct ndesObjectType_t  muxDemuxSenderSAPType = {
    ndesObjectTypeDefaultValues(muxDemuxSenderSAP)
 };
 
+#define SAPI_MAGIC_NB 684253148796258036
 /**
  * @brief An encapsulation structure
  */
 struct muxDemuxEncaps_t {
+   unsigned long long magic;  // WARNING to remove
    unsigned int sapi;
    struct PDU_t * pdu;
 };
@@ -56,6 +58,7 @@ struct muxDemuxEncaps_t * muxDemuxEncaps_create(struct muxDemuxSenderSAP_t * sap
 {
   struct muxDemuxEncaps_t * result = (struct muxDemuxEncaps_t * )sim_malloc(sizeof(struct muxDemuxEncaps_t ));
 
+   result->magic = SAPI_MAGIC_NB;
    result->sapi = sap->identifier;
    result->pdu = pdu;
 
@@ -70,7 +73,7 @@ void muxDemuxEncaps_delete(struct muxDemuxEncaps_t * encaps)
 /**
  * @brief Sender (multiplexer) creator
  */
-struct muxDemuxSender_t * muxDemuxSender_Create(void * destination,
+struct muxDemuxSender_t * muxDemuxSender_create(void * destination,
 						processPDU_t destProcessPDU)
 {
    struct muxDemuxSender_t * result = (struct muxDemuxSender_t *)sim_malloc(sizeof(struct muxDemuxSender_t ));
@@ -214,6 +217,29 @@ int muxDemuxSender_processPDU(void * receiver,
    }
 }
 
+int muxDemuxSender_pduMatchesSAP(void* s, struct PDU_t * pdu)
+{
+   struct muxDemuxSenderSAP_t * sap = (struct muxDemuxSenderSAP_t *)s;
+   struct muxDemuxEncaps_t * encaps = (struct muxDemuxEncaps_t * ) PDU_private(pdu);
+   
+   return ((encaps->magic == SAPI_MAGIC_NB) && (encaps->sapi == sap->identifier));
+}
+
+/**
+ * @brief Create a filter based on a SAP
+ */
+struct PDUFilter_t * muxDemuxSender_createFilterFromSAP(struct muxDemuxSenderSAP_t * sap)
+{
+   struct PDUFilter_t * result;
+
+   result = PDUFilter_create();
+
+   PDUFilter_setPrivate(result, (void *)sap);
+   PDUFilter_setTestFunction(result, muxDemuxSender_pduMatchesSAP);
+ 
+   return result;
+}
+
 /*********************************************************************************
             RECEIVER SIDE
  */
@@ -253,7 +279,7 @@ struct ndesObjectType_t  muxDemuxReceiverSAPType = {
 /**
  * @brief Receiver (demultiplexer) creator
  */
-struct muxDemuxReceiver_t * muxDemuxReceiver_Create()
+struct muxDemuxReceiver_t * muxDemuxReceiver_create()
 {
    struct muxDemuxReceiver_t * result = (struct muxDemuxReceiver_t *)sim_malloc(sizeof(struct muxDemuxReceiver_t ));
 

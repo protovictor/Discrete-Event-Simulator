@@ -4,6 +4,8 @@
 #include <stdlib.h>    // Malloc, NULL, ...
 #include <assert.h>
 
+#include <motsim.h>
+
 struct t_file_elt {
    void * data;
    struct t_file_elt * suivant;
@@ -30,6 +32,8 @@ struct t_file * creerFileVide()
 void insererFile(struct t_file * file, void * data)
 {
    struct t_file_elt * pq = (struct t_file_elt *)sim_malloc(sizeof(struct t_file_elt));
+
+   printf_debug(DEBUG_FILE, "IN\n");
 
    pq->data = data;
 

@@ -166,14 +166,14 @@ struct PDU_t * schedDRR_getPDU(void * s)
 				      >= filePDU_size_n_PDU(currentInput->file, 1)) ?
 	      0:((filePDU_size_n_PDU(currentInput->file, 1)-currentInput->deficitCounter-1)/currentInput->quantum+1);
             nbToursSup = min(nbToursSup, currentInput->nbToursSupp);
- 	    printf_debug(DEBUG_SCHED, "current input %p (source %p, file %p) : %d PDU (first size %d), deficit %d, quantum %d, needs %d rounds\n",
+ 	    printf_debug(DEBUG_SCHED, "current input %p (source %p, file %p) : %d PDU (first size %d), deficit %ld, quantum %ld, needs %d rounds\n",
 			 currentInput,
 			 currentInput->source, currentInput->file,
 			 filePDU_length(currentInput->file),
 			 filePDU_size_n_PDU(currentInput->file, 1),
 			 currentInput->deficitCounter,
 			 currentInput->quantum,
-			currentInput->nbToursSupp );
+		  	currentInput->nbToursSupp );
 
             currentInput = currentInput->next;
          } while (currentInput);
@@ -182,12 +182,12 @@ struct PDU_t * schedDRR_getPDU(void * s)
          * que quelqu'un puisse émettre. Le deuxième phase consiste donc
          * à appliquer la conséquence de ces tours sur les déficits
          */
-	 printf_debug(DEBUG_SCHED, "Fast forwarding %d rounds\n",
+	 printf_debug(DEBUG_SCHED, "Fast forwarding %ld rounds\n",
 		      nbToursSup);
          currentInput = sched->activeSourceList;
          do {
             currentInput->deficitCounter += nbToursSup*currentInput->quantum;
-  	    printf_debug(DEBUG_SCHED, "current input %p (source %p, file %p) : %d PDU (first size %d), deficit %d, quantum %d\n",
+  	    printf_debug(DEBUG_SCHED, "current input %p (source %p, file %p) : %d PDU (first size %d), deficit %ld, quantum %ld\n",
 			 currentInput,
 			 currentInput->source, currentInput->file,
 			 filePDU_length(currentInput->file),

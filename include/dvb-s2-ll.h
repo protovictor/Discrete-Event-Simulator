@@ -16,7 +16,7 @@
 #define __DEF_DVBS2_LL
 
 #include <pdu.h>
-#include <dvb-s2-ll.h>
+#include <probe.h>
 
 #define NB_MODCOD_MAX 4
 

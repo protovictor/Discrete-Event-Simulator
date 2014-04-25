@@ -66,7 +66,6 @@ struct dateSize sequence[NB_CHANNELS][NB_PDU+1] = {
    }
 };
 
-
 int main()
 {
    struct PDUSource_t * sources[NB_CHANNELS];
@@ -93,7 +92,7 @@ int main()
    }
 
    // Demultiplexer
-   rd = muxDemuxReceiver_Create();
+   rd = muxDemuxReceiver_create();
 
    // Create a SAP for each channel
    for (n = 0; n < NB_CHANNELS ; n++){
@@ -108,7 +107,7 @@ int main()
    link = filePDU_create(rd, muxDemuxReceiver_processPDU);
 
    // Multiplexer
-   sm = muxDemuxSender_Create(link, filePDU_processPDU);
+   sm = muxDemuxSender_create(link, filePDU_processPDU);
 
    // Sources creation
    for (n = 0; n < NB_CHANNELS ; n++){

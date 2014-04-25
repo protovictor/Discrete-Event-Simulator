@@ -15,3 +15,31 @@ différencier à l'arrivée.
 si bien que si le premier élément de la séquences séparant le
 multiplexeur du démultiplexeur n'est pas assez rapide, alors des {\sc
   pdu} peuvent être perdues.
+
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Multiplexeur : déclaration et initialisation}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Démultiplexeur : déclaration et initialisation}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Utilisation d'un filtre pour éviter le multiplexage}
+
+   Il peut être intéressant de conditionner des traitements sur
+l'identifiant de multiplexage sans démultiplexer les flux. Un filtre
+peut être simplement construit pour cela. Les filtres sont décrits
+dans la section \ref{section:filtres}.
+
+\index{muxDemuxSender\_createFilterFromSAP}
+\begin{verbatim}
+struct PDUFilter_t * muxDemuxSender_createFilterFromSAP(struct muxDemuxSenderSAP_t * sap);
+\end{verbatim}
+
+   Un exemple est disponible dans le fichier de test {\tt tests/rr-mux.c}.

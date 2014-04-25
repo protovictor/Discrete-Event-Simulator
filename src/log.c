@@ -180,7 +180,7 @@ int ndesLog_dump(char * fileName)
    struct ndesLogEntry_t           * le;
 
    ofi = ndesObjectFile_createIterator(ndesLog->journal);
-   while (obj = ndesObjectFile_iteratorGetNext(ofi)) {
+   while ((obj = ndesObjectFile_iteratorGetNext(ofi))) {
       assert(ndesObject_getType(obj) == &ndesLogEntryType);
       le = ndesObject_getPrivate(obj);
       printf("[LOG] %f %d \"%s\" !\n", le->date, ndesObject_getId(le->object), le->msg);

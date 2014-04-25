@@ -8,7 +8,7 @@
 %------------------------------------------------------------------------
 %
 %------------------------------------------------------------------------
-\subsection{Déclaration}
+\subsection{Déclaration et initialisation}
 
    Un objet qui doit aussi être un ndesObject devra utiliser la macro
    \lstinline{declareAsNdesObject}, par exemple de la façon suivante
@@ -47,11 +47,22 @@ fonctions de base, qui sont généralement suffisantes.
 /**
  * @brief Mes objets sont aussi des ndesObject
  */
-struct ndesObjectType_t monType = {
+struct ndesObjectType_t monTypeType = {
   ndesObjectTypeDefaultValues(monType)
 };
 \end{verbatim}
 
+   Enfin, lors de l'initialisation d'un objet, il est indispensable
+d'initialiser son ``côté objet'' grâce à la fonction
+\lstinline!ndesObjectInit! :
+
+\index{ndesObjectInit}
+\begin{verbatim}
+   struct monType_t * t;
+   ...
+   ndesObjectInit(t, monType);
+   ...
+\end{verbatim}
 
 %------------------------------------------------------------------------
 %
