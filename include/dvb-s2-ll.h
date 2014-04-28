@@ -60,8 +60,7 @@ struct DVBS2ll_t * DVBS2ll_create(void * destination,
 #define   M16APSK  4
 #define   M32APSK  5
 
-
-/*
+/**
  * @brief Ajout d'un MODCOD
  * Le codage est paramétré par le nombre de bits
  * par BBFRAME et la modulation par le nombre de bits par symbole.
