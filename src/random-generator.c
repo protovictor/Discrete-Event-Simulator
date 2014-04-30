@@ -106,7 +106,7 @@ struct randomGenerator_t {
  */
 inline double randomGenerator_erand48GetNext(struct randomGenerator_t * rg)
 {
-  //   double result = drand48();
+   //   double result = drand48();
    double result = erand48(rg->aleaSrc.xsubi);
 
    if (rg->values)
@@ -189,7 +189,7 @@ double randomGenerator_exponentialGetNext(struct randomGenerator_t * rg)
    //  Les sources sont censÃ©es Ãªtre uniformes ...
    alea = rg->aleaGetNext(rg);
 
-   result =  - log(alea) /rg->distParam.d.lambda;
+   result =  - log( alea) /rg->distParam.d.lambda;
 
 /*
    printf_debug(DEBUG_GENE, " alea = %6.3f, lambda = %6.3f, result = %6.3f\n",
@@ -471,6 +471,7 @@ struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda)
    struct randomGenerator_t * result = randomGenerator_createDouble();
 
    randomGenerator_setDistributionExp(result, lambda);
+   printf("Un exp avec lambda = %le\n", result->distParam.d.lambda);
 
    return result;
 }
@@ -790,7 +791,7 @@ void randomGenerator_setQuantile2Param(struct randomGenerator_t * rg,
  */
 double randomGenerator_expDistQ(double x, double lambda)
 {
-   return - log(1.0 -x) / lambda;
+   return - log(1.0 - x) / lambda;
 }
 
 /**

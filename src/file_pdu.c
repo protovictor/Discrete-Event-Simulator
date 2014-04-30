@@ -110,14 +110,14 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file)
 
       /* Gestion des sondes */
       if (file->extractProbe) {
-	probe_sampleValuePDUFilter(file->extractProbe, PDU_size(PDU_private(premier)), PDU_private(premier));
+         probe_sampleValuePDUFilter(file->extractProbe, PDU_size(PDU_private(premier)), PDU_private(premier));
          //probe_sample(file->extractProbe, PDU_size(premier->data));
       }
       if (file->sejournProbe) {
          if(motSim_getCurrentTime() <  PDU_getCreationDate(premier)){
 	    printf_debug(DEBUG_WARN, "Attention, quand on purge, il ne faut pas mettre dans les sondes\n");
          } else {
-	   probe_sampleValuePDUFilter(file->sejournProbe, motSim_getCurrentTime() - PDU_getCreationDate(premier), premier);
+	    probe_sampleValuePDUFilter(file->sejournProbe, motSim_getCurrentTime() - PDU_getCreationDate(premier), PDU);
             //probe_sample(file->sejournProbe, motSim_getCurrentTime() - premier->creationDate);
 	 }
       }

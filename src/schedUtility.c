@@ -135,7 +135,7 @@ void schedulerUtilityMC(struct schedUtility_t * sched, int mc, t_remplissage * r
          for (qa = 0; qa < schedACM_getNbQoS(sched->schedACM); qa++) {
             q = (qa + qb)%schedACM_getNbQoS(sched->schedACM);
 
-/*	    printf_debug(DEBUG_ALWAYS, "Etudions [%d][%d](type %d, beta %f) - (déjà %d paquets) reste %d pq, bw %f util %f\n",
+	    printf_debug(DEBUG_NEVER, "Etudions [%d][%d](type %d, beta %f) - (déjà %d paquets) reste %d pq, bw %f util %f\n",
 			 m, q,
 			 schedACM_getQoS(sched->schedACM, m, q)->typeQoS,
 			 schedACM_getQoS(sched->schedACM, m, q)->beta,
@@ -145,7 +145,7 @@ void schedulerUtilityMC(struct schedUtility_t * sched, int mc, t_remplissage * r
 			 utiliteDerivee(schedACM_getQoS(sched->schedACM, m, q),
 					schedACM_getQoS(sched->schedACM, m, q)->debit,
 					schedACM_getACMLink(sched->schedACM)));
-*/
+
             // Cette file peut-elle fournir au moins un paquet
             // (première clause) qui tienne (deuxième) ?
             if ((remplissage->nbrePaquets[m][q] < filePDU_length(schedACM_getInputQueue(sched->schedACM, m, q))) // Il en reste un
@@ -161,13 +161,13 @@ void schedulerUtilityMC(struct schedUtility_t * sched, int mc, t_remplissage * r
                   paquetDispo = 1;
       		  bestMC = m;
 		  bestQoS = q;
-/*
-  		  printf("Meilleur interet pour le moment : %f (was %f)\n",
+
+  		  printf_debug(DEBUG_NEVER, "Meilleur interet pour le moment : %f (was %f)\n",
 			 utiliteDerivee(schedACM_getQoS(sched->schedACM, m, q),
 					schedACM_getQoS(sched->schedACM, m, q)->debit,
 					schedACM_getACMLink(sched->schedACM)),
 			 remplissage->interet);
-*/
+
 		  remplissage->interet = utiliteDerivee(schedACM_getQoS(sched->schedACM, m, q),
 						schedACM_getQoS(sched->schedACM, m, q)->debit,
 						schedACM_getACMLink(sched->schedACM));

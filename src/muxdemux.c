@@ -43,7 +43,9 @@ struct ndesObjectType_t  muxDemuxSenderSAPType = {
    ndesObjectTypeDefaultValues(muxDemuxSenderSAP)
 };
 
-#define SAPI_MAGIC_NB 684253148796258036
+#define SAPI_MAGIC_NB ((long long unsigned)684253148796258036)
+//#define SAPI_MAGIC_NB ((long long unsigned)48324832)
+
 /**
  * @brief An encapsulation structure
  */
@@ -56,7 +58,9 @@ struct muxDemuxEncaps_t {
 struct muxDemuxEncaps_t * muxDemuxEncaps_create(struct muxDemuxSenderSAP_t * sap,
 						struct PDU_t * pdu)
 {
-  struct muxDemuxEncaps_t * result = (struct muxDemuxEncaps_t * )sim_malloc(sizeof(struct muxDemuxEncaps_t ));
+   struct muxDemuxEncaps_t * result = (struct muxDemuxEncaps_t * )sim_malloc(sizeof(struct muxDemuxEncaps_t ));
+
+   printf_debug(DEBUG_MUX, "IN for PDU %d in SAPI %d\n", PDU_id(pdu), sap->identifier);
 
    result->magic = SAPI_MAGIC_NB;
    result->sapi = sap->identifier;
@@ -179,7 +183,7 @@ struct PDU_t * muxDemuxSender_getPDU(void * s)
 
    // Embed this in a PDU
    pduEnc = PDU_create(PDU_size(pdu), encaps);
-   printf_debug(DEBUG_MUX, "OUT\n");
+   printf_debug(DEBUG_MUX, "OUT (encapsulated in PDU %d)\n", PDU_id(pduEnc));
 
    return pduEnc;
 }
@@ -222,6 +226,11 @@ int muxDemuxSender_pduMatchesSAP(void* s, struct PDU_t * pdu)
    struct muxDemuxSenderSAP_t * sap = (struct muxDemuxSenderSAP_t *)s;
    struct muxDemuxEncaps_t * encaps = (struct muxDemuxEncaps_t * ) PDU_private(pdu);
    
+   printf_debug(DEBUG_MUX, "IN (magic (%llu %llu) %s) PDU %d\n", encaps->magic,  SAPI_MAGIC_NB, (encaps->magic == SAPI_MAGIC_NB)?"Yes":"NO", PDU_id(pdu));
+   if (encaps->magic == SAPI_MAGIC_NB) {
+     printf_debug(DEBUG_MUX, "Match (%d/%d): %s\n", encaps->sapi, sap->identifier, (encaps->sapi == sap->identifier)?"Yes":"NO");
+   }
+
    return ((encaps->magic == SAPI_MAGIC_NB) && (encaps->sapi == sap->identifier));
 }
 

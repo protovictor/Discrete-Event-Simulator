@@ -139,7 +139,7 @@ static unsigned long debug_mask = 0x00000000
   //     | DEBUG_FILE      // La gestion des files
   //     | DEBUG_GNUPLOT
   //     | DEBUG_MUX
-  //       | DEBUG_PROBE
+  //     | DEBUG_PROBE
   //     | DEBUG_PROBE_VERB
   //     | DEBUG_DVB       // Les outils DVB
   //     | DEBUG_KS        // L'algorithme Knapsack

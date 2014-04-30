@@ -602,7 +602,7 @@ void probe_sampleExhaustive(struct probe_t * probe, double value)
   
    currentSet->dates[probe->nbSamples%PROBE_NB_SAMPLES_MAX] = motSim_getCurrentTime();
    currentSet->samples[probe->nbSamples%PROBE_NB_SAMPLES_MAX] = value;
-   printf_debug(DEBUG_PROBE, "OUT\n");
+   printf_debug(DEBUG_PROBE_VERB, "OUT\n");
 }
 
 /*
@@ -1620,14 +1620,20 @@ void probe_setFilter(struct probe_t * probe,
 void probe_sampleValuePDUFilter(struct probe_t * probe, 
 			        double value, struct PDU_t* pdu)
 {
-   if ((probe->filter == NULL) || PDUFilter_filterPDU(probe->filter, pdu)) {
-      probe_doSample(probe, value);
-   }
+   printf_debug(DEBUG_PROBE_VERB, "IN '%s' (filter %p pdu %p)\n", probe_getName(probe), probe->filter, pdu);
 
+   if ((probe->filter == NULL) || PDUFilter_filterPDU(probe->filter, pdu)) {
+      printf_debug(DEBUG_PROBE_VERB, "Ca passe\n");
+      probe_doSample(probe, value);
+   }else {
+      printf_debug(DEBUG_PROBE_VERB, "Ca FOIRE\n");
+   }
    // Chaining ...
    if (probe->nextProbe != NULL){
-     probe_sampleValuePDUFilter(probe->nextProbe, value, pdu);
+      printf_debug(DEBUG_PROBE_VERB, "About to chain\n");
+      probe_sampleValuePDUFilter(probe->nextProbe, value, pdu);
    }
+   printf_debug(DEBUG_PROBE_VERB, "OUT\n");
 }
 
 

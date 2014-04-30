@@ -54,7 +54,7 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
 
    result->pdu = NULL;
    result->nextPdu = NULL;
-   result->dateGen = dateGen;
+   PDUSource_setDateGenerator(result, dateGen);
    result->destProcessPDU = destProcessPDU;
    result->destination = destination;
    result->sizeGen = NULL;
@@ -69,7 +69,27 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
    
    return result;
 }
+/**
+ * @brief Change the date generator
+ * @param src The PDUSource to modify
+ * @param gen The new date generator
+ * The previos date generator should be freed by the caller
+ */
+void PDUSource_setDateGenerator(struct PDUSource_t * src,
+                                struct dateGenerator_t * dateGen)
+{
+   src->dateGen = dateGen;
+}
 
+/**
+ * @brief Get access to the date generator
+ * @param src The PDUSource to query
+ * @result The date generator
+ */
+struct dateGenerator_t * PDUSource_getDateGenerator(struct PDUSource_t * src)
+{
+   return src->dateGen;
+}
 
 /**
  *  @brief Création d'un générateur déterministe
