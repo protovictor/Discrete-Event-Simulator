@@ -175,9 +175,10 @@ void srvGen_terminateProcess(struct srvGen_t * srv)
 /*
  * Notification de la présence d'une PDU
  */
-int srvGen_processPDU(struct srvGen_t * server,
+int srvGen_processPDU(void * srv,
                        getPDU_t getPDU, void * source)
 {
+   struct srvGen_t * server = (struct srvGen_t * )srv;
    struct PDU_t * pdu;
 
    printf_debug(DEBUG_SRV, " server processing\n");

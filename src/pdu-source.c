@@ -246,8 +246,9 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
 /*
  * The function used by the destination to actually get the next PDU
  */
-struct PDU_t * PDUSource_getPDU(struct PDUSource_t * source)
+struct PDU_t * PDUSource_getPDU(void * src)
 {
+   struct PDUSource_t * source = (struct PDUSource_t *)src;
    struct PDU_t * pdu = source->pdu;
 
    source->pdu = NULL;

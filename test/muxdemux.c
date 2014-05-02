@@ -72,7 +72,7 @@ int main()
    struct PDUSink_t   * sinks[NB_CHANNELS];
    struct probe_t     * pr[NB_CHANNELS];
 
-   struct FilePDU_t * link;
+   struct filePDU_t * link;
 
    struct muxDemuxSender_t * sm;
    struct muxDemuxReceiver_t * rd;

@@ -6,9 +6,11 @@
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <motsim.h>
 #include <probe.h>
+#include <gnuplot.h>
 
 #define TPMAX 200
 #define NBECH 200
@@ -22,7 +24,7 @@ void tracer(struct probe_t * gb, char * name)
    gp = gnuplot_create();
    gnuplot_setYRange(gp, 0.0, 1.1*(double)probe_graphBarGetMaxValue(gb));
    gnuplot_setXRange(gp, probe_min(gb), probe_max(gb));
-   gnuplot_displayProbe(gp, gb);
+   gnuplot_displayProbe(gp, WITH_BOXES, gb);
 }
 
 
@@ -30,7 +32,6 @@ int main()
 {
    struct probe_t * gbp, *ep;
    int  e, n;
-   unsigned long l;
 
    double meanE, meanGB, data;
 
@@ -57,16 +58,16 @@ int main()
    meanGB = probe_mean(gbp);
 
 
-   printf("[PROBE-1] Nombre d'echantillons = %d\n", probe_nbSamples(ep)); 
+   printf("[PROBE-1] Nombre d'echantillons = %ld\n", probe_nbSamples(ep)); 
    printf("[PROBE-1] Moyenne exhaustive    = %f\n", meanE);
-   printf("[PROBE-1] Nombre d'echantillons = %d\n", probe_nbSamples(gbp)); 
+   printf("[PROBE-1] Nombre d'echantillons = %ld\n", probe_nbSamples(gbp)); 
    printf("[PROBE-1] Moyenne graph         = %4.1e\n", meanGB);
-
+   /*
    tracer(gbp, "Pour voir");
 
    printf("*** ^C pour finir ;-)\n");
    pause();
-
+   */
 
    if (    (meanGB >= 1.0e-10) 
         || (probe_nbSamples(ep) != probe_nbSamples(gbp))

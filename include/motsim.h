@@ -136,7 +136,7 @@ void motSim_exit(int retValue);
 #define DEBUG_ALWAYS   0xFFFFFFFF
 #define DEBUG_NEVER    0x00000000
 
-static unsigned long debug_mask = 0x00000000
+static unsigned long debug_mask __attribute__ ((unused)) = 0x00000000
   //     | DEBUG_EVENT     // Les événements (lourd !)
   //     | DEBUG_MOTSIM    // Le moteur
   //     | DEBUG_GENE      // Les générateurs de nombre/date/...

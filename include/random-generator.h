@@ -69,6 +69,11 @@ struct randomGenerator_t * randomGenerator_createUIntConstant(unsigned int v);
 // Des entiers non signÃ©s listÃ©s
 struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
 							      unsigned int * values);
+/**
+ * @brief Création d'une ditribution d'après un fichier
+ */
+struct randomGenerator_t * randomGenerator_createUIntDiscreteFromFile(char * fileName);
+
 /*
  * Le nombre de valeurs possibles est passÃ© en paramÃ¨tre ainsi que la
  * liste de ces valeurs puis la liste de leurs probabilitÃ©.
