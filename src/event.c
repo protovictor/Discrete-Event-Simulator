@@ -15,7 +15,7 @@ unsigned long event_nbMalloc = 0;
 unsigned long event_nbReuse = 0;
 unsigned long event_nbFree = 0;
 
-struct event_t * event_create(void (*run)(void *data), void * data, double date)
+struct event_t * event_create(void (*run)(void *data), void * data, motSimDate_t date)
 {
    struct event_t * result;
 
@@ -46,13 +46,13 @@ struct event_t * event_create(void (*run)(void *data), void * data, double date)
 /*
  * La même, avec insersion dans le simulateur
  */
-void event_add(void (*run)(void *data), void * data, double date)
+void event_add(void (*run)(void *data), void * data, motSimDate_t date)
 {
    motSim_addEvent(event_create(run, data, date));
 }
 
 
-struct event_t * event_periodicCreate(void (*run)(void *data), void * data, double date, double period)
+struct event_t * event_periodicCreate(void (*run)(void *data), void * data, motSimDate_t date, motSimDate_t period)
 {
    struct event_t * result;
 
@@ -67,7 +67,7 @@ struct event_t * event_periodicCreate(void (*run)(void *data), void * data, doub
 /*
  * La même, avec insersion dans le simulateur
  */
-void event_periodicAdd(void (*run)(void *data), void * data, double date, double period)
+void event_periodicAdd(void (*run)(void *data), void * data, motSimDate_t date, motSimDate_t period)
 {
   motSim_addEvent(event_periodicCreate(run, data, date, period));
 }
@@ -93,7 +93,7 @@ void event_run(struct event_t * event)
    }
 }
 
-double event_getDate(struct event_t * event)
+motSimDate_t event_getDate(struct event_t * event)
 {
    return event->date;
 }

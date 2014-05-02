@@ -23,7 +23,7 @@ static struct schedACM_func_t schedKS_func = {
    .getPDU = NULL,
    .processPDU = NULL,
    .buildBBFRAME = NULL,
-   .schedule = scheduler_knapsack_exhaustif
+   .schedule = (void (*)(void *))scheduler_knapsack_exhaustif
 };
 
 /**

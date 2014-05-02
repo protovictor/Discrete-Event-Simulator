@@ -196,5 +196,5 @@ int ndesLog_dump(char * fileName)
  */
 struct ndesObjectType_t ndesLog_type = {
    .name = "log",
-   .malloc = ndesLog_create
+   .malloc = (void * (*)())ndesLog_create
 };

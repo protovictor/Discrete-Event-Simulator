@@ -5,7 +5,14 @@
 #include <pdu.h>
 #include <motsim.h>
 
+#include <ndesObject.h>
+
 struct PDUSource_t; //!< Le type d'une source
+
+/**
+ * @brief Declare the object relative functions
+ */
+declareObjectFunctions(PDUSource);
 
 /**
  * @brief Définition de couples {date, taille}
@@ -13,7 +20,7 @@ struct PDUSource_t; //!< Le type d'une source
  * Pour définir explicitement une séquence de PDUs
  */
 struct dateSize {
-   double date;
+   motSimDate_t date;
    unsigned int size;
 };
 

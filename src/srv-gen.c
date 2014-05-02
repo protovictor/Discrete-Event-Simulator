@@ -217,8 +217,9 @@ int srvGen_processPDU(struct srvGen_t * server,
 /*
  * Obtention de la dernière PDU servie (éventuellement NULL si trop tard !)
  */
-struct PDU_t * srvGen_getPDU(struct srvGen_t * srv)
+struct PDU_t * srvGen_getPDU(void * s)
 {
+   struct srvGen_t * srv = (struct srvGen_t * )s;
    struct PDU_t * pdu = srv->currentPDU;
    
    srv->currentPDU = NULL;

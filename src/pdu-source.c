@@ -13,7 +13,6 @@
 #include <event.h>
 #include <pdu-source.h>
 
-#include <ndesObject.h>
 #include <log.h>
 
 /**
@@ -157,7 +156,7 @@ void PDUSource_setPDUSizeGenerator(struct PDUSource_t * src, struct randomGenera
  */
 void PDUSource_buildNewPDU(struct PDUSource_t * source)
 {
-   double date;
+   motSimDate_t date;
    struct event_t * event;
    unsigned int size = 0; 
 
@@ -253,7 +252,9 @@ struct PDU_t * PDUSource_getPDU(struct PDUSource_t * source)
 
    source->pdu = NULL;
 
-   printf_debug(DEBUG_SRC, "releasing PDU %d (size %d)\n",
+   //   if (PDUSource_getName(source) != NULL)
+      printf_debug(DEBUG_SRC, "'%s' releasing PDU %d (size %d)\n",
+		PDUSource_getName(source),
 		PDU_id(pdu),
 		PDU_size(pdu));
 

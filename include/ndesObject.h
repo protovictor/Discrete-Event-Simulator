@@ -22,6 +22,7 @@
 #define __DEF_ndesObject
 
 #include <stddef.h>   // offsetof
+#include <string.h>   // strdup
 
 #include <motsim.h>
 #include <probe.h>
@@ -35,9 +36,10 @@
  * fournies plus bas.
  */
 struct ndesObject_t {
-   int           id;           //!< Un identifiant général
-   motSimDate_t  creationDate;
-
+   int             id;           //!< Un identifiant général
+   char          * name;
+   motSimDate_t    creationDate;
+   
    void        * data;  //!< Des donnees privées
    struct ndesObjectType_t * type; //!< Les fonctions spécifiques de manipulation
 };
@@ -104,7 +106,16 @@ void ndesObjectType##_setObject(struct ndesObjectType##_t * o,  struct ndesObjec
 int ndesObjectType##_getObjectId(struct ndesObjectType##_t * o) \
 {    \
    return o->ndesObject->id; \
-}
+} \
+void ndesObjectType##_setName(struct ndesObjectType##_t * o, const char * n)	\
+{    \
+  o->ndesObject->name = strdup(n);		\
+} \
+char * ndesObjectType##_getName(struct ndesObjectType##_t * o)	\
+{    \
+  return o->ndesObject->name;		\
+} \
+
    
 /**
  * @brief Déclaration pour le .h
@@ -112,7 +123,10 @@ int ndesObjectType##_getObjectId(struct ndesObjectType##_t * o) \
 #define declareObjectFunctions(ndesObjectType) \
 struct ndesObject_t * ndesObjectType##_getObject(struct ndesObjectType##_t * o); \
 void ndesObjectType##_setObject(struct ndesObjectType##_t * o,  struct ndesObject_t *ndesObject); \
-int ndesObjectType##_getObjectId(struct ndesObjectType##_t * o);
+int ndesObjectType##_getObjectId(struct ndesObjectType##_t * o); \
+ void ndesObjectType##_setName(struct ndesObjectType##_t * o, const char * n); \
+     char * ndesObjectType##_getName(struct ndesObjectType##_t * o);	\
+
    
 /**
  * @brief Valeurs par défaut des champs de définition du type

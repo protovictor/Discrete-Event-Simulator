@@ -119,6 +119,10 @@ int filePDU_size_n_PDU(struct filePDU_t * file, int n);
 int filePDU_size_PDU_n(struct filePDU_t * file, int n);
 int filePDU_id_PDU_n(struct filePDU_t * file, int n);
 
+/****************************************************************************
+    File probes
+ ***************************************************************************/
+
 /*
  * Affectation d'une sonde sur la taille des PDUs insÃ©rÃ©es.
  */
@@ -138,6 +142,11 @@ void filePDU_addDropSizeProbe(struct filePDU_t * file, struct probe_t * dropProb
  * Affectation d'une sonde sur le temps de sÃ©jour
  */
 void filePDU_addSejournProbe(struct filePDU_t * file, struct probe_t * sejournProbe);
+
+/**
+ * @brief Add a probe on queue length (nb of PDU) on insert events
+ */
+void filePDU_addFileLengthProbe(struct filePDU_t * file, struct probe_t * length);
 
 /*
  * Mesure du dÃ©bit d'entrÃ©e sur les n-1 derniÃ¨res PDUs, oÃ¹ n est le

@@ -20,7 +20,7 @@ struct srvGen_t * srvGen_create(void * destination,
 /*
  * La fonction utilisée par le destinataire pour prendre une PDU servie
  */
-struct PDU_t * srvGen_getPDU(struct srvGen_t * srv);
+struct PDU_t * srvGen_getPDU(void * srv);
 
 /*
  * La fonction de consommation d'une PDU
@@ -30,8 +30,8 @@ int srvGen_processPDU(struct srvGen_t * srv,
 
 /*
  * Obtention de la dernière PDU servie (éventuellement NULL si trop tard !)
- */
 struct PDU_t * srvGen_getPDU(struct srvGen_t * srv);
+ */
 
 /*
  * Fonction de calcul du temps de service

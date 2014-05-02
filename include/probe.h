@@ -172,11 +172,23 @@ void probe_sampleEvent(struct probe_t * probe);
 
 double probe_exhaustiveGetSample(struct probe_t * probe, unsigned long n);
 
-/*
- * Nombre d'echantillons
+/*****************************************************************************
+       Consultation des métriques offertes par une sonde
+ */
+
+/**
+ * @brief Nombre d'echantillons
  */
 unsigned long probe_nbSamples(struct probe_t * probe);
+
+/**
+ * @brief Maximal sampled value
+ */
 double probe_max(struct probe_t * probe);
+
+/**
+ * @brief Minimal sampled value
+ */
 double probe_min(struct probe_t * probe);
 
 /*
@@ -185,6 +197,11 @@ double probe_min(struct probe_t * probe);
 double probe_mean(struct probe_t * probe);
 double probe_variance(struct probe_t * probe);
 double probe_stdDev(struct probe_t * probe);
+
+/**
+ * @brief Experimental coefficient of variation
+ */
+double probe_coefficientOfVariation(struct probe_t * probe);
 
 /*
  * Demi largeur de l'intervalle de confiance à 5%

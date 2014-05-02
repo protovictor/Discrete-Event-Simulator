@@ -3,10 +3,11 @@ OBJ_FILES= $(SRC_FILES:.c=.o)
 
 TESTS = generators-0 generators-1 \
 	generators-3 generators-4 generators-5 \
-	drr muxdemux rr-mux \
+	probes-1 probes-2 probes-3 probes-4 \
+	muxdemux rr-mux \
+	drr \
 #	file-pdu file-pdu-2 file-pdu-3 \
 #	debits \
-#	probes-1 probes-2 probes-3 probes-4 \
 #	muxfcfs-1 \
 #	intconf
 

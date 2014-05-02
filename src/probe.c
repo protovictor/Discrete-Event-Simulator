@@ -605,13 +605,16 @@ void probe_sampleExhaustive(struct probe_t * probe, double value)
    printf_debug(DEBUG_PROBE_VERB, "OUT\n");
 }
 
-/*
- * Reading the nth sample in an exhaustive probe
-*/
+/**
+ * @brief Reading the nth sample in an exhaustive probe
+ * @param probe The exhaustive probe to read from
+ * @param n the number of sample to read
+ * @result the value of sample n
+ */
 double probe_exhaustiveGetSampleN(struct probe_t * probe, int n)
 {
    assert(probe->probeType == exhaustiveProbeType);
-   assert(n<=probe->nbSamples);
+   assert(n<=probe->nbSamples); // WARNING  < or <= !?
 
    struct sampleSet_t * currentSet = probe->data.sampleSet;
    int numSet = probe->nbSamples / PROBE_NB_SAMPLES_MAX;
@@ -1357,6 +1360,27 @@ double probe_ecartType(struct probe_t * probe)
 double probe_stdDev(struct probe_t * probe)
 {
    return sqrt(probe_variance(probe));
+}
+
+/**
+ * @brief Experimental coefficient of variation
+ */
+double probe_coefficientOfVariation(struct probe_t * probe)
+{
+   int n;
+   double mean = probe_mean(probe);
+   double result = 0.0;
+
+   if (probe->probeType != exhaustiveProbeType) {
+      return NAN;
+   }
+
+   for (n = 0; n < probe_nbSamples(probe); n++) {
+     result += (probe_exhaustiveGetSampleN(probe, n)-mean)*(probe_exhaustiveGetSampleN(probe, n)-mean);
+   }
+
+   result = sqrt(result/probe_nbSamples(probe)) / mean;
+   return result;
 }
 
 

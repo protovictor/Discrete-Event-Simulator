@@ -17,11 +17,12 @@ struct ndesObject_t * ndesObject_create(void * private,
    result = (struct ndesObject_t *)sim_malloc(sizeof(struct ndesObject_t));
 
    result->id = ndesObject_nb++;
+   result->name = NULL;
 
    result->creationDate = motSim_getCurrentTime();
    result->data = private;
    result->type = objectType;   
-
+   
    printf_debug(DEBUG_OBJECT, "ndesObject %p created, id %d type \"%s\"\n",
 		result,
 		result->id,

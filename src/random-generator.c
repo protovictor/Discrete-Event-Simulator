@@ -14,6 +14,8 @@
 #include <math.h>      // log
 #include <values.h>    // *_MAX
 
+#include <sys/time.h>  // gettimeofday
+
 #include <assert.h>
 
 #include <motsim.h>
@@ -120,9 +122,11 @@ inline double randomGenerator_erand48GetNext(struct randomGenerator_t * rg)
  */
 void randomGenerator_erand48Init(struct randomGenerator_t * rg)
 {
+   struct timeval now;
    assert(rg->source == rGSourceErand48);
 
-   bzero(rg->aleaSrc.xsubi, 3);
+   gettimeofday(&now, NULL);
+   bcopy(&now + sizeof(now) - sizeof(rg->aleaSrc.xsubi), rg->aleaSrc.xsubi, sizeof(rg->aleaSrc.xsubi));
    rg->aleaGetNext = randomGenerator_erand48GetNext;
 
 }
@@ -471,7 +475,6 @@ struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda)
    struct randomGenerator_t * result = randomGenerator_createDouble();
 
    randomGenerator_setDistributionExp(result, lambda);
-   printf("Un exp avec lambda = %le\n", result->distParam.d.lambda);
 
    return result;
 }

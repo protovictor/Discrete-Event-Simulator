@@ -28,8 +28,8 @@ unsigned long __totalMallocSize = 0;
  */
 struct motsim_t {
    time_t               actualStartTime;
-   double               currentTime;
-   double               finishTime; // Heure simulée de fin prévue
+   motSimDate_t               currentTime;
+   motSimDate_t               finishTime; // Heure simulée de fin prévue
    struct eventFile_t * events;
    int                  nbInsertedEvents;
    int                  nbRanEvents;
@@ -213,7 +213,7 @@ void motSim_runUntilTheEnd()
  * L'état final (celui des sondes en particulier) est celui
  * correspondant à la fin de la dernière simulation.
  */
-void motSim_runNSimu(double date, int nbSimu)
+void motSim_runNSimu(motSimDate_t date, int nbSimu)
 {
    int n;
 
@@ -227,7 +227,7 @@ void motSim_runNSimu(double date, int nbSimu)
    }
 }
 
-void motSim_runUntil(double date)
+void motSim_runUntil(motSimDate_t date)
 {
    struct event_t * event;
 
@@ -337,7 +337,7 @@ void motSim_reset()
 }
 
 
-double motSim_getCurrentTime()
+motSimDate_t motSim_getCurrentTime()
 {
    return __motSim->currentTime;
 };
@@ -345,7 +345,7 @@ double motSim_getCurrentTime()
 /*
  * Initialisation puis insertion d'un evenement
  */
-void motSim_insertNewEvent(void (*run)(void *data), void * data, double date)
+void motSim_insertNewEvent(void (*run)(void *data), void * data, motSimDate_t date)
 {
   motSim_addEvent(event_create(run, data, date));
 }
