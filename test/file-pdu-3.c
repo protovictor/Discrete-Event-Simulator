@@ -19,6 +19,7 @@
 int main() {
    struct filePDU_t       * filePDU;
    int n;
+   int result = 0;
 
    /* Creation du simulateur */
    motSim_create();
@@ -34,6 +35,8 @@ int main() {
 
    printf("%d PDU dans la file\n", filePDU_length(filePDU));
 
+   result = result || (filePDU_length(filePDU) != NBMAX);
+
    filePDU_setDropStrategy(filePDU, filePDU_dropHead);
    filePDU_reset(filePDU);
    for (n = 0 ; n < 2 * NBMAX; n++) {
@@ -43,5 +46,7 @@ int main() {
 
    printf("%d PDU dans la file\n", filePDU_length(filePDU));
 
-   return 1;
+   result = result || (filePDU_length(filePDU) != NBMAX);
+
+   return 0;
 }

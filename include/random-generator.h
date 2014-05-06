@@ -56,6 +56,9 @@ struct randomGenerator_t;
 /*  Creators                                                                */
 /*==========================================================================*/
 
+/*
+ *  Creators without distribution
+ */
 // Des entiers non signÃ©s quelconques
 struct randomGenerator_t * randomGenerator_createUInt();
 
@@ -69,6 +72,13 @@ struct randomGenerator_t * randomGenerator_createUIntConstant(unsigned int v);
 // Des entiers non signÃ©s listÃ©s
 struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
 							      unsigned int * values);
+// Des rÃ©els double prÃ©cision
+struct randomGenerator_t * randomGenerator_createDouble();
+
+/*
+ * Creators with a pre defined distribution
+ */
+
 /**
  * @brief Création d'une ditribution d'après un fichier
  */
@@ -85,8 +95,6 @@ struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(int nbValues,
 struct randomGenerator_t * randomGenerator_createULong(int distribution,
 						       unsigned long min,
 						       unsigned long max);
-// Des rÃ©els double prÃ©cision
-struct randomGenerator_t * randomGenerator_createDouble();
 
 // Des rÃ©els double prÃ©cision, avec une distribution exp de paramÃ¨tre lambda
 struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda);

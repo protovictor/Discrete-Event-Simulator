@@ -45,5 +45,5 @@ int main()
    printf("Min : %f / %f\n", probe_min(ep), probe_min(mp));
    printf("Max : %f / %f\n", probe_max(ep), probe_max(mp));
 
-   return 1;
+   return 0; // WARNING, on ne teste rien en fait !
 }

@@ -117,8 +117,8 @@ int main()
          printf("%10.1f  ", probe_mean(prSrc[c][s]));
  	 sum += probe_mean(prSrc[c][s]);
          if (s > 0) {
-	   if (fabs(probe_mean(prSrc[c][s])/(s+1) - probe_mean(prSrc[c][s-1])/s) > 10.0) {
-	       printf("*");
+	   if (fabs(probe_mean(prSrc[c][s])/(s+1) - probe_mean(prSrc[c][s-1])/s) > probe_mean(prSrc[c][s])/20.0) {
+	       printf("!");
                result = 1;
 	    } else {
 	       printf(" ");

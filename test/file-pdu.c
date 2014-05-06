@@ -47,5 +47,6 @@ int main() {
    printf("%d PDU dans la file\n", filePDU_length(filePDU));
 
    printf("Temps moyen de sejour dans la file = %f\n", probe_mean(sp));
-   return 1;
+
+   return 0; // WARNING on ne teste rien ici en fait !!
 }
