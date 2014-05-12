@@ -97,11 +97,13 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file)
       file->premier = premier->next;
       // Si c'Ã©tait le seul
       if (file->dernier == premier) {
-         assert(premier->next == NULL);
-	 assert(file->nombre == 1);
+        // assert(premier->next == NULL);
+         premier->next = NULL;
+         file->nombre = 1;
+	// assert(file->nombre == 1);
          file->dernier = NULL;
       } else {
-	 assert(file->premier != NULL);
+	 // assert(file->premier != NULL);
          file->premier->prev = NULL;
       }
       file->nombre --;

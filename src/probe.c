@@ -886,6 +886,7 @@ double probe_EMAThroughput(struct probe_t * probe)
 
 void probe_sample(struct probe_t * probe, double value)
 {
+ 
    if (probe==NULL)
       return;
    printf_debug(DEBUG_PROBE_VERB, "about to sample %f in \"%s\" (%p, type %s, %lu samples)\n",

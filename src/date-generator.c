@@ -38,16 +38,15 @@ struct dateGenerator_t {
  *  @param currentTime la date actuelle
  */
 double dateGenerator_nextDate(struct dateGenerator_t * dateGen, double currentTime)
-{
+{  
    double result =  randomGenerator_getNextDouble(dateGen->randGen);
-
+   
    if (dateGen->interArrivalProbe){
       probe_sample(dateGen->interArrivalProbe, result);
       printf_debug(DEBUG_GENE, " Mean = %6.3f\n", probe_mean(dateGen->interArrivalProbe));
    }
 
    return currentTime + result ;
-  //   return dateGen->nextDate(dateGen, currentTime);
 }
 
 /** @brief Insertion d'une sonde sur les inter-arrivees.
@@ -115,7 +114,7 @@ struct dateGenerator_t * dateGenerator_createLognormal(double alpha, double beta
   return result;  
 }
 
- /*
+ /**
   *  Weibull distributed interarrival time       - recommended!!!
   */
   
@@ -127,7 +126,7 @@ struct dateGenerator_t *dateGenerator_createWeibull(double alpha, double beta)
   result->randGen = randomGenerator_createDoubleWeibull(alpha, beta);
 }
 
- /*
+ /**
   *  Gamma distributed interarrival time
   */ 
 
@@ -180,3 +179,4 @@ struct dateGenerator_t * dateGenerator_createPeriodic(double period)
 void dateGenerator_recordThenReplay(struct dateGenerator_t *  d){
   randomGenerator_recordThenReplay(d->randGen);
 };
+

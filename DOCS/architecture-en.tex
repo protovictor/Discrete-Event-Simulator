@@ -1,0 +1,254 @@
+%========================================================================
+%
+%========================================================================
+\section{General architecture}
+\label{section:architecture}
+
+   
+The purpose of this section is to describe the logic of {\sc
+ndes}.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Type of the simulation}
+
+   {\sc Ndes} is a library of a discrete event network
+simulator. No, this is not original, but it is still
+really important for the future. All the code for processing a
+event will be executed into a long time, but absolutely not recognized in simulated time. And worse! During the processing of an event, such as time
+simulated is fixed, the system does not change (except through the code in
+question). 
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{General schema of the models}
+
+   The basic idea is that the simulated network can be
+modeled as a sequence of entitées chained together. In the
+strictly linear simplest version, the first of these
+entities will produce messages, called {\sc pdu}s, it will
+follow the following entity and so on until the last one
+may conserve the messages or destroy them.
+
+   The M/M/1 queue described in the first tutorial is a perfect
+example of this model. We already know the four types of
+nodes: {\tt sourcePDU}, {\tt filePDU}, {\tt serv\_gen} and {\tt PDUSink}.
+
+   The construction of the network is starting "later" and
+based on the source, as it can be seen in the
+tutorial. Each time you create an entity, you must pass
+parameters as information about the downstream entity. 
+However, we don't need to know anything about these entities. Yes, it
+there can be several.
+
+   Some entities may also have multiple downstream entities
+(to be provided by a specific function), but the {\sc pdu}
+data is passed to only one of them.
+
+   
+    The bad news is that this scheme will be reviewed soon
+or later! It is not good to model things more
+symmetric (a protocol entity that sends and receives), and
+things to be reviewed as the term {\sc pdu} is not at all
+appropriate. It is just {\sc pdu} which is represented by
+this thing!
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{The exchange {\sc pdu} function}
+
+   Because of the general network architecture for any entity capable
+generating or transferring PDU must be a function of the form
+
+\begin{verbatim}
+   struct PDU_t * getPDU(void * source);
+\end{verbatim}
+
+   The parameter is a pointer to the "private data" for
+identify the node(typically a direct pointer to the node).
+
+   The returned pointer is a PDU which is used by the source. 
+It must absolutely be managed (or, less, destroyed) by the user of this function. 
+If PDU is unavailable, the {\tt NULL} value is returned.
+
+   This function and the associated pointer must be provided to
+the recipient entity, if any!
+
+    If the module name is {\tt foo}, the function will be named for example
+{\tt foo\_getPDU().}\\
+
+    Symmetrically, any module that may receive PDU must provide
+function of the form:
+
+\begin{verbatim}
+   int processPDU(void * rec,
+                  getPDU\_t getPDU,
+                  void * source);
+\end{verbatim}
+
+   
+    It is this function who invokes a source to notify the
+availability of a PDU. This function will have the responsibility
+go get the PDU (through the function \lstinline!getPDU! and the source included) 
+and to treat it. The recovery and treating may
+be postponed (if unavailable) but there is a risk to 
+have a \lstinline!NULL! pointer returned by
+\lstinline!getPDU()!.
+
+   The value returned by this function is zero in case of failure, and
+non-zero if successful.
+
+    This function can be invoked with the last two parameters
+{\tt NULL}. In this case, the only purpose is to determine if {\tt rec}
+entity is ready to process a new {\sc pdu}. It
+must return 0 if it is occupied or 1 if it is free.
+
+   This property must be implemented in all cases and may
+for example be used by an upstream entity that can keep
+{\sc pdu}s (a file, for example) to avoid loss due to
+a downstream entity that could not receive a new {\sc pdu} (a
+link during transmission, for example).
+
+   An example of utilisation is given in the first ''{\em Programmer's tutorial}'' in sub-section \ref{subsection:tut-ordo}.
+
+   If the module name is {\tt foo}, the function will be named for example
+{\tt foo\_processPDU()}.
+
+    An then you tell me ``what is this site?!''. In fact, that's how it's supposed to work (and it looks like it's working!). Imagine two entities {\tt A} and {\tt B} of our
+network, {\tt B} being the downstream of {\tt A} as in Figure \ref{figure: reseauAB}.
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{The transmision of a {\sc pdu}}
+
+   
+   If, while processing an event, the entity {\tt A} must
+follow a {\sc pdu} to {\tt B}, it will do by invoking the function
+\lstinline!processPDU! associated with {\tt B}. From that moment, the
+{\sc} pdu is the responsibility of {\tt B}. Two cases are
+possible:
+
+\begin{itemize}
+   \item Either {\tt B} is ready to process the {\tt pdu} (this is a file
+      not full, or an inactive server), then it invokes
+      immediately (within its code \lstinline!processPDU!) the
+      function \lstinline!getPDU! of {\tt A} and all is good.
+   \item Either {\tt B} is not ready. In the code of the
+      \lstinline!processPDU!, there will be no invocation of
+      \lstinline!getPDU! of {\tt A}, but there must be an action
+      to do it later \footnote{In fact, it is not
+      quite true! We must be sure that {\tt B} will
+      recover the {\tt pdu}, but we can make other arrangements
+      as we will see with the arrival of a {\sc pdu}} (in the simulated time!). 
+      But for that invocation to happen, perhaps {\tt A} has destroyed the {\sc pdu} 
+      (guess {\tt A} models a physical layer, it
+      will not hold a {\sc pdu}. Finally, it's reasonable!
+\end{itemize}
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{The arrival of a {\sc pdu}}
+
+   On the other hand, if, during the processing of an event, the entity
+{\tt B} is ready to consume a {\sc pdu}, it will by invoking
+the function \lstinline!getPDU! associated with {\tt A}.
+
+    Again, two cases have been recognised:
+
+\begin{itemize}
+   \item Either {\tt A} has actually a {\sc pdu} to provide
+      to {\tt B}, and in this case everything goes well!
+   \item Either {\tt A} doesn't have {\sc pdu}s. In that case, the function
+     \lstinline!getPDU! will transmit a \lstinline!NULL! pointer who
+     will be ready to treat.
+\end{itemize}
+
+   The invocation of the function \lstinline!GetPDU! can be triggered by an event that has nothing to do with it, this is how we will get the {\sc pdu}s without
+having been requested, where the previous note, and (among other things) it 
+risks a \lstinline!NULL! pointer.
+
+%.......................................................................
+%
+%.......................................................................
+\subsubsection{The chronology of the events}
+
+   All of this may seem a bit vicious, and you may be unclear to know what 
+function to use when! But do not worry, all that has to be mastered by anyone 
+who wants create new types of entities in the simulator.
+
+    On the other hand, it is actually very simple, just follow the
+logic of events. For example, imagine that you want to
+model a {\em round-robin} scheduler. We will assume that it is
+downstream of a number of files, and upstream of a server that
+models a communication link. See Figure
+\ref {figure: exempleordo}.    
+
+% Figure
+
+%
+%
+%
+\paragraph{\lstinline!schedRRProcessPDU!}
+
+   How it will look like the code for the treatment of a {\sc pdu} in this scheduler?
+
+    This function is invoked when one of the upstream queues will have a
+{\sc pdu} to provide to the scheduler. But the {\sc pdu} must
+be scheduled only if the following two conditions are satisfied:
+\begin{itemize}
+   \item the support (downstream) is free;
+   \item it is the turn of the queue to be served or the other is
+      empty \footnote{If not it will not work conserving}.
+\end{itemize}
+
+   The function \lstinline!SchedRRProcessPDU! will therefore have to test these
+conditions and, if they are true, actually retrieve the {\sc pdu} (with \lstinline!getPDU! call) and then to send the
+link (with \lstinline!processPDU! of the server).
+
+    If the conditions are not satisfied, it leaves the {\sc pdu} where it is.
+
+%
+%
+%
+\paragraph{\lstinline!schedRRGetPDU!}
+
+   And now to whom it looks like this function to obtain a {\sc pdu} our scheduler?
+
+   It is invoked by the communication support(downstream) when
+it is free (an event of the end of the transmission from the preceding
+example).
+
+   The scheduler does not have {\sc pdu}s itself. It should
+pick up in queues upstream next to him and serve
+a {\sc pdu} through his \lstinline!getPDU!. If
+it finds anything, it returns a \lstinline!NULL! pointer to downstream entity
+(link) which therefore does nothing.
+
+   In this situation, the next event is the arrival of a
+{\sc pdu} in a queue by invoking the \lstinline!processPDU! function
+that invoke the scheduler, \ldots
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Several transmitters to the same recipient}
+
+   How about when several entities are upstream of the same
+entitée downstream? For example, several sources that send customers
+to a single server.
+
+   In fact, this is not a problem, the downstream entity does not generally understand the entity upstream . So, if there are two or more, it doesn't care. 
+Yes, except no! Imagine an entity that is not always prepared to deal with an
+incoming {\sc pdu}. In general, it will store somewhere a
+information that will allow him to pick the {\sc pdu} when it wants. 
+If this happens several times before the entity is willing to finally treat the waiting{\sc pdu}s, only the last may have been stored !
+
+   So, we might be tempted to make a linked list of
+events, so as not to miss any . Unfortunately , this puts
+necessarily a policy {\sc FCFS }, then we want to implement something else.
+

@@ -1,6 +1,6 @@
 #include <motsim.h>
 #include <gnuplot.h>
-#include <http.h>
+#include <httpmodel.h>
 #include <probe.h>
 
 void tracer(struct probe_t *pr, char *name, int nbBar);
@@ -8,8 +8,7 @@ void tracer(struct probe_t *pr, char *name, int nbBar);
  int main()
 {
   struct probe_t          *sejProbe, *iaProbe, *srvProbe;
-  struct httpRequest_t    *Request;
-  struct httpReply_t      *Reply;
+  struct httpSim_t        *simHTTP;
   struct PDUSource_t      *PDUSource;
   struct filePDU_t        *filePDU;
   struct dateGenerator_t  *dateGen;
@@ -17,43 +16,25 @@ void tracer(struct probe_t *pr, char *name, int nbBar);
   struct PDUSink_t        *sink;
   int option;
 
-  motSim_create();
-  sink = PDUSink_create();
-  
   printf("Select an option for simulation:\n");
   printf("1. Request (press 1)\n");
   printf("2. Reply (press 2)\n");
-  scanf("%d", &option);  
-
-  if(option==1) //We create a Request with the default recommended values
-  {  Request = http_CreateRequest(); 
-
-     // ! Optional
-     // By example, we can change some parameters
-     // We change lamda - parameter for the date generator
-     httpRequest_setLambda(Request, 0.7);
-
-     httpRequest_LoadParameters(Request, sink);
-
-     dateGen = httpRequest_GetDateGen(Request);
-     filePDU = httpRequest_GetFilePDU(Request);
-     server = httpRequest_GetServer(Request);
-     PDUSource = httpRequest_GetPDUSource(Request);
-
-  }
+  scanf("%d", &option);
+ 
+  motSim_create();
+  sink = PDUSink_create();
+  
+  if(option==1)
+   simHTTP = httpSim_CreateRequest(sink);
   if(option==2)
-  {  Reply = http_CreateReply();
-
-     httpReply_LoadParameters(Reply, sink);
-      
-     dateGen = httpReply_GetDateGen(Reply);
-     filePDU = httpReply_GetFilePDU(Reply);
-     server = httpReply_GetServer(Reply);
-     PDUSource = httpReply_GetPDUSource(Reply);
-
-  }
+   simHTTP = httpSim_CreateReply(sink);
  
+  dateGen = httpSim_GetDateGen(simHTTP);
+  filePDU = httpSim_GetFilePDU(simHTTP);
+  server = httpSim_GetServer(simHTTP);
+  PDUSource = httpSim_GetPDUSource(simHTTP);
  
+
  //------------------------- Sensors -------------------
  
  // A sensor of inter-arrivals 
@@ -74,7 +55,7 @@ void tracer(struct probe_t *pr, char *name, int nbBar);
   
    motSim_runUntil(100000.0); //100seconds 
    motSim_printStatus();
- 
+
 
    printf("Number of the packets remaining: %d\n", filePDU_length(filePDU));
    

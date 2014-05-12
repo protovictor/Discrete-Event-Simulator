@@ -19,7 +19,7 @@
 /**
  * @brief Une source générique de PDU
  */
-struct PDUSource_t {
+struct PDUSource_t{
    declareAsNdesObject;  //!< C'est un ndesObject
    struct dateGenerator_t * dateGen; //!< Le générateur de date de départ
    struct randomGenerator_t * sizeGen;//!< Le générateur de taille
@@ -41,7 +41,7 @@ struct PDUSource_t {
 defineObjectFunctions(PDUSource);
 struct ndesObjectType_t PDUSourceType = {
   ndesObjectTypeDefaultValues(PDUSource)
-};
+}; 
 
 struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
 				      void * destination,
@@ -51,7 +51,6 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
               sim_malloc(sizeof(struct PDUSource_t));
 
    ndesObjectInit(result, PDUSource);
-
    result->pdu = NULL;
    result->nextPdu = NULL;
    result->dateGen = dateGen;
@@ -114,6 +113,7 @@ void PDUSource_addPDUGenerationSizeProbe(struct PDUSource_t * src, struct probe_
    src->PDUGenerationSizeProbe = newProbe;
 }
 
+
 /*
  * Spécification du générateur de taille de PDU associé
  */
@@ -140,18 +140,17 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
    unsigned int size = 0; 
 
    printf_debug(DEBUG_SRC, " IN\n");
-
+ 
    // Suppression de la PDU précédente si pas consommée
    if (source->pdu) {
       printf_debug(DEBUG_SRC, " Destruction de %d\n", PDU_id(source->pdu));
       PDU_free(source->pdu);
    }
-
+  
    // La prochaine devient la nouvelle
    source->pdu = source->nextPdu;
-
+   
    if (source->pdu) { // La première fois, c'est un coup à blanc
-
       // Transmission de la nouvelle PDU
       printf_debug(DEBUG_SRC, " PDU %d (size %u) sent at %6.3f\n",
                    PDU_id(source->pdu), PDU_size(source->pdu),motSim_getCurrentTime());
@@ -169,11 +168,13 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
         (void)source->destProcessPDU(source->destination,
                                      (getPDU_t)PDUSource_getPDU,
                                      source);
+
       }
+      
    }
+
    // Maintenant on prépare la prochaine PDU
    printf_debug(DEBUG_SRC, " building next PDU ...\n");
-
    // Gestion de la version "déterministe" par une valeur spéciale du
    // pointeur. Je n'aime pas ça, mais en attendant mieux, ...
    if (source->dateGen == NULL) {
@@ -192,7 +193,7 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
 
    } else {
       // On détermine la date de prochaine transmission
-      date = dateGenerator_nextDate(source->dateGen, motSim_getCurrentTime());
+      date = dateGenerator_nextDate(source->dateGen, motSim_getCurrentTime()); 
       // On choisi la taille
       size = source->sizeGen?randomGenerator_getNextUInt(source->sizeGen):0;
    }
@@ -200,7 +201,7 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
    printf_debug(DEBUG_SRC, " next PDU to be sent at %f\n", date);
 
    // Un petit hack pour arrêter si une source déterministe a un {0.0, 0}
-   if ((date >= motSim_getCurrentTime())
+   if ((date >= motSim_getCurrentTime() && ((date <= motSim_getFinishTime() && motSim_getFinishTime() != 0 ) || motSim_getFinishTime()==0  ) ) 
        && ((size != 0) || (source->dateGen))
       ) {
       // Création de la prochaine PDU
@@ -211,7 +212,6 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
 
       // On crée un événement pour cette date
       event = event_create((eventAction_t)PDUSource_buildNewPDU, source, date);
-
       // On ajoute cet événement au simulateur
       motSim_addEvent(event);
    } else {
@@ -238,12 +238,18 @@ struct PDU_t * PDUSource_getPDU(struct PDUSource_t * source)
    return pdu;
 }
 
+struct PDU_t* PDUSource_getNextPDU(struct PDUSource_t* source)
+{
+   return source->pdu;
+}
+
+
+
 void PDUSource_start(struct PDUSource_t * source)
-{  
+{ 
 
    // On ne sait jamais (cette fonction sert de reset)
    if (source->pdu) {
-
       PDU_free(source->pdu);
       source->pdu = NULL;
    }
@@ -264,4 +270,28 @@ void PDUSource_start(struct PDUSource_t * source)
    // On ajoute cet événement au simulateur
    //   motSim_addEvent(event);
 }
+
+
+struct probe_t *PDUSource_getPDUGenerationSizeProbe(struct PDUSource_t* source)
+{
+  return source->PDUGenerationSizeProbe; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

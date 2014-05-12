@@ -82,6 +82,7 @@ void periodicHandler(int sig)
    }
 }
 
+
 /*
  * Terminaison "propre"
  */
@@ -150,13 +151,14 @@ void motSim_create()
 
 void motSim_addEvent(struct event_t * event)
 {
- 
-  printf_debug(DEBUG_EVENT, "New event (%p) at %6.3f (%d ev)\n", event, event_getDate(event), __motSim->nbInsertedEvents);
-   assert(__motSim->currentTime <= event_getDate(event));
+  
+   printf_debug(DEBUG_EVENT, "New event (%p) at %6.3f (%d ev)\n", event, event_getDate(event), __motSim->nbInsertedEvents);
 
+   assert(__motSim->currentTime <= event_getDate(event));
+ 
    eventFile_insert(__motSim->events, event);
    __motSim->nbInsertedEvents++;
- 
+
 }
 
 void motSim_runNevents(int nbEvents)
@@ -200,11 +202,17 @@ void motSim_runUntilTheEnd()
          event_run(event);
          __motSim->nbRanEvents ++;
       } else {
-         printf_debug(DEBUG_MOTSIM, "no more event !\n");
+         printf_debug(DEBUG_MOTSIM, "no more events !\n");
          return ;
       }
    }
 }
+
+double motSim_getFinishTime()
+{
+   return __motSim->finishTime;
+}
+
 
 /*
  * Lancement de plusieurs simulations consécutives de même durée
@@ -238,15 +246,15 @@ void motSim_runUntil(double date)
       __motSim->actualStartTime = time(NULL);
    }
    event = eventFile_nextEvent(__motSim->events);
-
+   
    while ((event) && (event_getDate(event) <= date)) {
       event = eventFile_extract(__motSim->events);
-
       printf_debug(DEBUG_EVENT, "next event at %f\n", event_getDate(event));
       assert(__motSim->currentTime <= event_getDate(event));
       __motSim->currentTime = event_getDate(event);
       event_run(event);
       __motSim->nbRanEvents ++;
+      
       /*
 afficher le message toutes les 
       n secondes de temps réel
@@ -268,9 +276,9 @@ void motSim_purge()
    printf_debug(DEBUG_MOTSIM, "about to purge events\n");
 
    event = eventFile_extract(__motSim->events);
-
+   
    while (event){
-
+       
       printf_debug(DEBUG_MOTSIM, "next event at %f\n", event_getDate(event));
       assert(__motSim->currentTime <= event_getDate(event));
       __motSim->currentTime = event_getDate(event);
@@ -333,6 +341,11 @@ void motSim_reset()
 
    // La simulation est considérée finie
    probe_sample(__motSim->dureeSimulation , time(NULL) - __motSim->actualStartTime);
+}
+
+void motSim_setCurrentTime(double newtime)
+{
+   __motSim->currentTime = newtime;
 }
 
 

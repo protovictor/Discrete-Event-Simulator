@@ -171,7 +171,6 @@ void httpRequest_LoadParameters(struct httpRequest_t *Request, struct PDUSink_t 
     Request->filePDU = filePDU_create(Request->server, (processPDU_t)srvGen_processPDU); 
     Request->dateGen = dateGenerator_createExp(Request->Param.lambda);
 
-
     Request->sizeGen = randomGenerator_createDouble();
     randomGenerator_setDistributionLognormal(Request->sizeGen, Request->Param.Lnd.alpha, 
                                                                Request->Param.Lnd.beta);

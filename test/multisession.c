@@ -3,6 +3,15 @@
 #include <http.h>
 #include <probe.h>
 
+/*=========================================================*/
+/*  A multiple http-session model                          */
+/*  The model is represented by a series of http sessions, */
+/*  all of the same type (replies or requests, not mixed). */
+/*  All the requests are made on the same server and all   */
+/*  the replies are sent to the same client                */
+/*=========================================================*/
+
+
 void tracer(struct probe_t *pr, char *name, int nbBar);
 
  int main()
@@ -10,13 +19,18 @@ void tracer(struct probe_t *pr, char *name, int nbBar);
   struct probe_t          *sejProbe, *iaProbe, *srvProbe;
   struct httpRequest_t    *Request;
   struct httpReply_t      *Reply;
-  struct PDUSource_t      *PDUSource;
   struct filePDU_t        *filePDU;
-  struct dateGenerator_t  *dateGen;
+  struct dateGenerator_t  *dateGen, *dtGen;
+  struct randGenerator_t  *sizeGen;
   struct srvGen_t         *server;
   struct PDUSink_t        *sink;
-  int option;
+  struct SessionList_t    *Sessions;
 
+  int option;
+  int avg_nb_session = 60;       /* the average number of sessions in a simulation */
+  double duration = 60000.0;     /* the duration of a simulation */
+  double period = duration / (double)avg_nb_session; 
+ 
   motSim_create();
   sink = PDUSink_create();
   
@@ -25,31 +39,45 @@ void tracer(struct probe_t *pr, char *name, int nbBar);
   printf("2. Reply (press 2)\n");
   scanf("%d", &option);  
 
-  if(option==1) //We create a Request with the default recommended values
-  {  Request = http_CreateRequest(); 
+  if(option==1) //We create a Session of Requests with the default recommended values
+  {  
+     /* We create a single session, just to get the default values we need later */
+     Request = http_CreateRequest();   
 
-     // ! Optional
-     // By example, we can change some parameters
-     // We change lamda - parameter for the date generator
-     httpRequest_setLambda(Request, 0.7);
-
+     /* We load the default parameters */    
      httpRequest_LoadParameters(Request, sink);
 
-     dateGen = httpRequest_GetDateGen(Request);
+     /* We get the values we need for the simulator */
+     dateGen = httpRequest_GetDateGen(Request);    
      filePDU = httpRequest_GetFilePDU(Request);
      server = httpRequest_GetServer(Request);
-     PDUSource = httpRequest_GetPDUSource(Request);
+     sizeGen = httpRequest_GetSizeGen(Request);
+    
+     /* We create a date generator for each session start time */
+     dtGen = dateGenerator_createPeriodic(period); 
+     /* We create the list of sessions */
+     Sessions = SessionList_Create(dtGen, dateGen, sizeGen, filePDU);
 
   }
-  if(option==2)
-  {  Reply = http_CreateReply();
+  if(option==2) //We create a Session of Replies with the default recommended values
+  {  
+     /* We create a single session, just to get the default values we need later */
+     Reply = http_CreateReply();
 
+     /* We load the default parameters */   
      httpReply_LoadParameters(Reply, sink);
       
+     /* We get the values we need for the simulator */
      dateGen = httpReply_GetDateGen(Reply);
      filePDU = httpReply_GetFilePDU(Reply);
      server = httpReply_GetServer(Reply);
-     PDUSource = httpReply_GetPDUSource(Reply);
+     sizeGen = httpReply_GetSizeGen(Reply);      
+
+     /* We create a date generator for each session start time */
+     dtGen = dateGenerator_createPeriodic(period);
+   
+     /* We create the list of sessions */
+     Sessions = SessionList_Create(dtGen, dateGen, sizeGen, filePDU);
 
   }
  
@@ -70,9 +98,10 @@ void tracer(struct probe_t *pr, char *name, int nbBar);
 
  //--------------------------------------
 
-   PDUSource_start(PDUSource);
-  
-   motSim_runUntil(100000.0); //100seconds 
+  /* We start building sessions */
+   SessionList_Start(Sessions);
+ 
+   motSim_runUntil(duration);
    motSim_printStatus();
  
 

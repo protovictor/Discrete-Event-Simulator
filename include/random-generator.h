@@ -17,6 +17,7 @@
 
 #include <probe.h>
 
+
 struct randomGenerator_t;
 
 /*
@@ -241,5 +242,7 @@ void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
 				   struct probe_t * p);
 
 unsigned long randomGenerator_getnbSamples(struct randomGenerator_t * rg);
+
+void randGen_print(struct randomGenerator_t * rg);
 
 #endif

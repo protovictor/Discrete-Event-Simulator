@@ -63,6 +63,7 @@ void PDUSource_setPDUSizeGenerator(struct PDUSource_t * src,
 void PDUSource_addPDUGenerationSizeProbe(struct PDUSource_t * src,
 					 struct probe_t *  PDUGenerationSizeProbe);
 
+
 /**
  * @brief Démarrage d'une source dans le cadre d'un simulateur
  *
@@ -74,3 +75,7 @@ void PDUSource_start(struct PDUSource_t * source);
  * The function used by the destination to actually get the next PDU
  */
 struct PDU_t * PDUSource_getPDU(struct PDUSource_t * source);
+
+struct PDU_t * PDUSource_getNextPDU(struct PDUSource_t * source);
+
+struct probe_t *PDUSource_getPDUGenerationSizeProbe(struct PDUSource_t* source);

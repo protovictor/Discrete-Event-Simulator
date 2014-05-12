@@ -61,6 +61,8 @@ void motSim_insertNewEvent(void (*run)(void *data), void * data, double date);
 
 void motSim_runNevents(int nbEvents);
 
+void motSim_setCurrentTime(double newtime);
+
 /* 
  * Obtention de la date courante, exprimée en secondes
  */
@@ -92,6 +94,10 @@ void motSim_printCampaignStat();
  * Terminaison "propre"
  */
 void motSim_exit(int retValue);
+
+
+double motSim_getFinishTime();
+
 
 /*
  * Les outils de debogage

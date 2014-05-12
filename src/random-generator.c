@@ -628,7 +628,9 @@ struct randomGenerator_t * randomGenerator_createULong(int distribution,
 struct randomGenerator_t * randomGenerator_createDouble()
 {
    printf_debug(DEBUG_GENE, "IN\n");
-   struct randomGenerator_t * result = randomGenerator_createRaw();
+   struct randomGenerator_t * result = (struct randomGenerator_t *)sim_malloc(sizeof(struct randomGenerator_t));
+
+   result = randomGenerator_createRaw();
 
    // Data type
    result->valueType = rGTypeDouble; 
@@ -639,7 +641,9 @@ struct randomGenerator_t * randomGenerator_createDouble()
 
 struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda)
 {
-   struct randomGenerator_t * result = randomGenerator_createDouble();
+   struct randomGenerator_t * result = (struct randomGenerator_t *)sim_malloc(sizeof(struct randomGenerator_t));
+
+   result = randomGenerator_createDouble();
 
    randomGenerator_setDistributionExp(result, lambda);
 
@@ -650,7 +654,9 @@ struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda)
 
 struct randomGenerator_t * randomGenerator_createDoubleGamma(double alpha, double beta)
 {
-   struct randomGenerator_t * result = randomGenerator_createDouble();
+   struct randomGenerator_t * result = (struct randomGenerator_t *)sim_malloc(sizeof(struct randomGenerator_t));
+  
+   result = randomGenerator_createDouble();
    
    randomGenerator_setDistributionGamma(result, alpha, beta);
    
@@ -659,7 +665,9 @@ struct randomGenerator_t * randomGenerator_createDoubleGamma(double alpha, doubl
 
 struct randomGenerator_t * randomGenerator_createDoubleLognormal(double alpha, double beta)
 {
-   struct randomGenerator_t * result  = randomGenerator_createDouble();
+   struct randomGenerator_t * result = (struct randomGenerator_t *)sim_malloc(sizeof(struct randomGenerator_t));
+   
+   result = randomGenerator_createDouble();
     
    randomGenerator_setDistributionLognormal(result, alpha, beta);
   
@@ -668,7 +676,9 @@ struct randomGenerator_t * randomGenerator_createDoubleLognormal(double alpha, d
 
 struct randomGenerator_t * randomGenerator_createDoubleWeibull(double alpha, double beta)
 {
-   struct randomGenerator_t * result = randomGenerator_createDouble();
+   struct randomGenerator_t * result = (struct randomGenerator_t *)sim_malloc(sizeof(struct randomGenerator_t));
+  
+   result = randomGenerator_createDouble();
 
    randomGenerator_setDistributionWeibull(result, alpha, beta);
  
@@ -682,7 +692,9 @@ struct randomGenerator_t * randomGenerator_createDoubleWeibull(double alpha, dou
 struct randomGenerator_t * randomGenerator_createDoubleRange(double min,
 							     double max)
 {
-   struct randomGenerator_t * result = randomGenerator_createRaw();
+   struct randomGenerator_t * result = (struct randomGenerator_t *)sim_malloc(sizeof(struct randomGenerator_t));
+   
+   result = randomGenerator_createRaw();
 
    // Data type
    result->valueType = rGTypeDoubleRange; 
@@ -1105,3 +1117,13 @@ void readUIntDiscreteProbaFromFile(char * fileName,
    } 
    fclose(f);
 }
+
+void randGen_print(struct randomGenerator_t * rg)
+{
+   printf("begin\n");
+   printf("Value type: %d \n", rg->valueType);
+   printf("Type of distribution: %d\n", rg->distribution);
+   printf("Source: %d \n", rg->source);
+   printf("Dist param Lambda = %f \n", rg->distParam.d.lambda);
+}
+

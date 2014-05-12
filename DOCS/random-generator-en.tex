@@ -423,7 +423,7 @@ double randomGenerator_GammaGetNext(struct randomGenerator_t * rg)
    I defined the possibility of a random generator to have parameters maximum three random generators differently distributed. We have many possibilities: Pareto, Gamma, Lognormal, Weibull. These random generators "create" random numbers that can be used in any expression we want for the source random generator.
 The idea came from the proposed method of http model wrote in "Source Traffic Modeling of Wireless Applications".
 
-A requested webpage is composed from:
+In the suggested method, a requested webpage is composed from:
 \begin{itemize}
 \item{a main object} - its size is Lognormal distributed
 \item{a variable number of inline objects} - its size is Lognormal distributed and the number of objects is Gamma distributed

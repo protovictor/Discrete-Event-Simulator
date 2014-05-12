@@ -18,5 +18,4 @@ struct event_t * eventFile_nextEvent(struct eventFile_t * file);
 
 int eventFile_length(struct eventFile_t * file);
 
-
 #endif
