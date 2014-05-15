@@ -12,6 +12,7 @@ TESTS = generators-0 generators-1 \
         tst \
         ms \
         mt \
+        ftptest \
 #	file-pdu file-pdu-2 file-pdu-3 \
 #	debits \
 #	probes-1 probes-2 probes-3 probes-4 \
@@ -39,6 +40,8 @@ ms: multisession.c
 mt: mixedtraffic.c
 	$(CC) $(CFLAGS) mixedtraffic.c -o mt $(LDFLAGS)
 
+ftptest: ftptest.c
+	$(CC) $(CFLAGS) ftptest.c -o ftptest $(LDFLAGS)
 
 generators-0 : generators-0.o ../$(SRC_DIR)/libndes.a
 	$(CC) generators-0.o -o generators-0 $(LDFLAGS)
