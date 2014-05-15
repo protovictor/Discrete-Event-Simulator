@@ -20,7 +20,7 @@ struct FTP_t * FTP_CreateFileTransfer();
  * @brief The function loads the parameters into
  * the file transfer structure
  * @param fileTransfer a pointer to the file transfer structure 
- * @param sink a pointer to the sink which creates the PDUs
+ * @param sink a pointer to the sink
  */
 void FTP_LoadParameters(struct FTP_t *fileTransfer, struct PDUSink_t * sink);
 
