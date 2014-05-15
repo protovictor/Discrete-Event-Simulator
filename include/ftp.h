@@ -12,7 +12,6 @@ struct FTP_t;
 /**
  * @brief The function is used for creating a file
  * transfer with the default parameters
- *
  */
 struct FTP_t * FTP_CreateFileTransfer();
 
