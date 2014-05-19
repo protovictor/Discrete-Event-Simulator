@@ -12,6 +12,7 @@ TESTS = generators-0 generators-1 \
         tst \
         ms \
         mt \
+        tcptest\
         ftptest \
 #	file-pdu file-pdu-2 file-pdu-3 \
 #	debits \
