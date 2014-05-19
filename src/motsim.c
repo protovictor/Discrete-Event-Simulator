@@ -411,3 +411,8 @@ void motSim_campaignStat()
    printf("[MOTSI] Number of simulations : %l\n", probe_nbSamples(__motSim->dureeSimulation));
    printf("[MOTSI] Mean duration         : %f sec\n", probe_mean(__motSim->dureeSimulation));
 }
+
+int motSim_getNbRanEvents()
+{
+  return __motSim->nbRanEvents;
+}

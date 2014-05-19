@@ -224,7 +224,7 @@ double randomGenerator_exponentialGetNext(struct randomGenerator_t * rg)
 
    //  Les sources sont censÃ©es Ãªtre uniformes ...
    alea = rg->aleaGetNext(rg);
-
+   printf("alea: %f \n", alea);
    result =  - log(alea) /rg->distParam.d.lambda;
 
 /*
@@ -268,6 +268,7 @@ void randomGenerator_WeibullInit(struct randomGenerator_t * rg, double alpha, do
   
       rg->distParam.d.distr.alpha = alpha;
       rg->distParam.d.distr.beta  = beta; 
+      
       rg->distGetNext = randomGenerator_WeibullGetNext;
 }
 
@@ -278,9 +279,9 @@ double randomGenerator_GammaGetNext(struct randomGenerator_t * rg)
 {
    double alea, result;
    alea = rg->aleaGetNext(rg);
-
+   
    result = ( tgamma(rg->distParam.d.distr.alpha) - incgamma(rg->distParam.d.distr.alpha, rg->distParam.d.distr.beta/alea ) ) / tgamma(rg->distParam.d.distr.alpha); 
-  
+
    return result;
 }
  /* Initialisation of Gamma distribution */
@@ -293,6 +294,7 @@ void randomGenerator_GammaInit(struct randomGenerator_t *rg, double alpha, doubl
   
    rg->distParam.d.distr.alpha = alpha;
    rg->distParam.d.distr.beta  = beta; 
+
    rg->distGetNext = randomGenerator_GammaGetNext;
 }
 
@@ -306,7 +308,7 @@ double randomGenerator_LognormalGetNext(struct randomGenerator_t *rg)
    // Lognormal distribution  
   
    alea = rg->aleaGetNext(rg);
-
+  
    result = exp (   rg->distParam.d.distr.alpha + 
                     rg->distParam.d.distr.beta * sqrt(2) * pow(erf(2*alea - 1), -1) 
                 );
@@ -527,6 +529,7 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg)
    return result;
 
 }
+
 
 double randomGenerator_UIntDiscreteGetExpectation(struct randomGenerator_t * rg)
 {
@@ -1118,12 +1121,9 @@ void readUIntDiscreteProbaFromFile(char * fileName,
    fclose(f);
 }
 
-void randGen_print(struct randomGenerator_t * rg)
+void randomGenerator_setMinMax(struct randomGenerator_t *rg, double min, double max)
 {
-   printf("begin\n");
-   printf("Value type: %d \n", rg->valueType);
-   printf("Type of distribution: %d\n", rg->distribution);
-   printf("Source: %d \n", rg->source);
-   printf("Dist param Lambda = %f \n", rg->distParam.d.lambda);
+   rg->distParam.min = min;
+   rg->distParam.max = max;
 }
 

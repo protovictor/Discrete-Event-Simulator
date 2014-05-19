@@ -219,7 +219,6 @@ void randomGenerator_recordThenReplay(struct randomGenerator_t * rg);
  */
 unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg);
 double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
-
 /*
  * Obtention de certains paramÃ¨tres. Il s'agit ici de valeurs
  * thÃ©oriques, pour obtenir leurs Ã©quivalents sur une sÃ©rie
@@ -230,6 +229,7 @@ double randomGenerator_getExpectation(struct randomGenerator_t * rg);
 double randomGenerator_WeibullGetNext(struct randomGenerator_t * rg);
 double randomGenerator_GammaGetNext(struct randomGenerator_t * rg);
 double randomGenerator_ComposedGetNext(struct randomGenerator_t *rg);
+double randomGenerator_ITSGetNext(struct randomGenerator_t * rg);
 
 /*==========================================================================*/
 /*   Probes                                                                 */ 
@@ -243,6 +243,6 @@ void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
 
 unsigned long randomGenerator_getnbSamples(struct randomGenerator_t * rg);
 
-void randGen_print(struct randomGenerator_t * rg);
+void randomGenerator_setMinMax(struct randomGenerator_t *rg, double min, double max);
 
 #endif

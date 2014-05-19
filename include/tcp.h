@@ -5,7 +5,10 @@
 #include <srv-gen.h>
 #include <pdu-sink.h>
 
-#define MTU 1500        /* maximum transmission unit = 1500 bytes */
+
+#define MAX_SIZE    1048576  // 2MB
+#define MAX_NUMBER  53
+#define MTU         /* maximum transmission unit = 1500 bytes => the webpage is splitted */
 
 
 struct TCP_client_t;
@@ -15,12 +18,16 @@ struct getRequest_t;
 
 struct getRequest_t* getRequest_Create(double mainsz, int embnr, struct randomGenerator_t *embsz);
 
-struct TCP_client_t* TCP_clientCreate(struct dateGenerator_t *dg,
-                                      struct randomGenerator_t *mainrg,
+struct TCP_client_t* TCP_clientCreate(//struct dateGenerator_t *dg,
+                                      struct randomGenerator_t *maiszg,
                                       struct randomGenerator_t *embnr,
                                       struct randomGenerator_t *embsz,
                                       void *destination);
  
+void TCP_clientSetDestination(struct TCP_client_t * client, void *destination);
+
+
+
 struct TCP_server_t* TCP_serverCreate(struct dateGenerator_t *dg, void *destination, processPDU_t destProcessPDU);
 
 void TCP_Send_EmbeddedObjects(struct TCP_server_t *server);

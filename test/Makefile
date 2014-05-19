@@ -31,6 +31,9 @@ tests :  $(TESTS)
 drr : drr.o ../$(SRC_DIR)/libndes.a
 	$(CC) drr.o -o drr $(LDFLAGS)
 
+tcptest: tcptest.c
+	$(CC) $(CFLAGS) tcptest.c -o tcptest $(LDFLAGS)
+
 tst: htest.c
 	$(CC) $(CFLAGS) htest.c -o tst $(LDFLAGS)
 

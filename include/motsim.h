@@ -83,6 +83,10 @@ void motSim_runUntilTheEnd();
 void motSim_printStatus();
 
 /*
+ * The function return the current number of ran events
+ */
+int motSim_getNbRanEvents();
+/*
  * Lancement de nbSimu simulations, chacune d'une durée inférieures ou
  * égale à date.
  */
