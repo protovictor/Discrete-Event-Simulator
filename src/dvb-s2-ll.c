@@ -9,10 +9,10 @@
 #include <stdlib.h>    // Malloc, NULL, exit...
 #include <assert.h>
 
-#include "motsim.h"
-#include "event.h"
+#include <motsim.h>
+#include <event.h>
 
-#include "dvb-s2-ll.h"
+#include <dvb-s2-ll.h>
 
 /*
  * Caractérisation d'un MODCOD

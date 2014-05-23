@@ -6,10 +6,10 @@
 #include <stdlib.h>    // Malloc, NULL, exit...
 #include <math.h>      // log
 
-#include "motsim.h"
-#include "probe.h"
-#include "random-generator.h"
-#include "date-generator.h"
+#include <motsim.h>
+#include <probe.h>
+#include <random-generator.h>
+#include <date-generator.h>
 
 /**
  * @brief Implantation des générateurs de dates.

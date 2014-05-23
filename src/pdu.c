@@ -1,7 +1,7 @@
 #include <stdlib.h>    // Malloc, NULL, ...
 #include <assert.h>
 
-#include "pdu.h"
+#include <pdu.h>
 
 static int pduNB = 0;
 

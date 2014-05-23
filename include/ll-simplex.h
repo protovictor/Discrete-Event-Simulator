@@ -4,7 +4,7 @@
 #ifndef __DEF_LL_SIMPLEX
 #define __DEF_LL_SIMPLEX
 
-#include "pdu.h"
+#include <pdu.h>
 
 /*
  * Création d'une entité. Les deux paramètres importants sont le

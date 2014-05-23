@@ -2,8 +2,8 @@
 #include <stdlib.h>    // Malloc, NULL, exit...
 #include <assert.h>
 
-#include "event.h"
-#include "motsim.h"
+#include <event.h>
+#include <motsim.h>
 
 /*
  * Une file d'événements libres

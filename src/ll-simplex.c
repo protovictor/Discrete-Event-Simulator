@@ -1,7 +1,7 @@
-#include "motsim.h"
-#include "event.h"
-#include "ll-simplex.h"
-#include "file_pdu.h"
+#include <motsim.h>
+#include <event.h>
+#include <ll-simplex.h>
+#include <file_pdu.h>
 
 /*
  * Caractéristiques d'une couche liaison simplex

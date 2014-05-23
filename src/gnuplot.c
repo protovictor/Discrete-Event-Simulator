@@ -15,8 +15,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "motsim.h"
-#include "gnuplot.h"
+#include <motsim.h>
+#include <gnuplot.h>
 
 
 /**

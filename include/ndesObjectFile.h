@@ -6,8 +6,8 @@
 #ifndef __DEF_LISTE_NDES_OBJECT
 #define __DEF_LISTE_NDES_OBJECT
 
-#include "ndesObject.h"
-#include "probe.h"
+#include <ndesObject.h>
+#include <probe.h>
 
 //struct ndesObjectFile_t;
 

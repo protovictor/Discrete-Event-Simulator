@@ -5,7 +5,7 @@
 #ifndef __DEF_PDU_SINK
 #define __DEF_PDU_SINK
 
-#include "pdu.h"
+#include <pdu.h>
 
 struct PDUSink_t;
 

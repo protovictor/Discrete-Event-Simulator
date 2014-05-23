@@ -20,7 +20,7 @@
 #endif
 
 #define NDES_USES_LOG // Nécessaire localement
-#include "log.h"
+#include <log.h>
 
 #ifdef NDES_USES_LOG_IS_SET
 #   define NDES_USES_LOG
@@ -29,7 +29,7 @@
 #endif
 
 
-#include "ndesObjectFile.h"
+#include <ndesObjectFile.h>
 
 /**
  * @brief définition d'une entrée dans les log

@@ -23,8 +23,8 @@
 
 #include <stddef.h>   // offsetof
 
-#include "motsim.h"
-#include "probe.h"
+#include <motsim.h>
+#include <probe.h>
 
 /**
  * @brief Le type général de tous les objets

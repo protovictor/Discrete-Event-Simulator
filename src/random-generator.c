@@ -16,9 +16,9 @@
 
 #include <assert.h>
 
-#include "motsim.h"
-#include "file_pdu.h"
-#include "random-generator.h"
+#include <motsim.h>
+#include <file_pdu.h>
+#include <random-generator.h>
 
 
 #define PI 3.141592

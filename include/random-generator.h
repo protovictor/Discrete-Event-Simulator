@@ -15,7 +15,7 @@
 #ifndef __DEF_RANDOM_GENERATOR
 #define __DEF_RANDOM_GENERATOR
 
-#include "probe.h"
+#include <probe.h>
 
 
 struct randomGenerator_t;

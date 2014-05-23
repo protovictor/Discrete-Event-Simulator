@@ -8,8 +8,8 @@
 
 #include <stdlib.h>    // Malloc, NULL, exit...
 
-#include "motsim.h"
-#include "muxfcfs.h"
+#include <motsim.h>
+#include <muxfcfs.h>
 
 struct muxfcfs_t {
 

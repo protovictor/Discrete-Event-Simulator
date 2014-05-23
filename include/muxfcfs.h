@@ -1,8 +1,8 @@
 #ifndef __DEF_MUX_FCFS
 #define __DEF_MUX_FCFS
 
-#include "pdu.h"
-#include "probe.h"
+#include <pdu.h>
+#include <probe.h>
 
 struct muxfcfs_t ;
 

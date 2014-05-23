@@ -9,7 +9,7 @@
 #ifndef __DEF_EVENT
 #define __DEF_EVENT
 
-#include "motsim.h"
+#include <motsim.h>
 
 struct event_t {
    int    type;

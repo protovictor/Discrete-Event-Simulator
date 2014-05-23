@@ -15,8 +15,8 @@
 
 #include <stdarg.h>
 
-#include "motsim.h"
-#include "ndesObject.h"
+#include <motsim.h>
+#include <ndesObject.h>
 
 /**
  * Exporté pour ndesObject qui logue mais ne doit pas logué ce qui a

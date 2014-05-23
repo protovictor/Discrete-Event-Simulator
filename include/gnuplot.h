@@ -4,7 +4,7 @@
 #ifndef __DEF_NDES_GPOUT
 #define __DEF_NDES_GPOUT
 
-#include "probe.h"
+#include <probe.h>
 #include <stdarg.h>
 
 /**

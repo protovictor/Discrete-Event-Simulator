@@ -10,7 +10,7 @@
 #ifndef __DEF_DATE_GENERATOR
 #define __DEF_DATE_GENERATOR
 
-#include "probe.h"
+#include <probe.h>
 
 struct dateGenerator_t;
 

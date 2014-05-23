@@ -6,8 +6,8 @@
 #include <stdlib.h>    // Malloc, NULL, ...
 #include <assert.h>
 
-#include "ndesObjectFile.h"
-#include "motsim.h"
+#include <ndesObjectFile.h>
+#include <motsim.h>
 
 /*
  * @brief Les maillons de la files sont représentés par cette structure

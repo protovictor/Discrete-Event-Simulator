@@ -21,9 +21,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "motsim.h"
-#include "event.h"
-#include "probe.h"
+#include <motsim.h>
+#include <event.h>
+#include <probe.h>
 
 /**
  * @brief Structure permettant la gestion des sondes exhaustives

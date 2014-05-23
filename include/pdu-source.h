@@ -1,9 +1,9 @@
 /*     Une source de PDU permet de produire des PDUs */
 
-#include "random-generator.h"
-#include "date-generator.h"
-#include "pdu.h"
-#include "motsim.h"
+#include <random-generator.h>
+#include <date-generator.h>
+#include <pdu.h>
+#include <motsim.h>
 
 struct PDUSource_t; //!< Le type d'une source
 
