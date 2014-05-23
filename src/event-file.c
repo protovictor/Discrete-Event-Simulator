@@ -3,8 +3,8 @@
 
 #include <stdio.h>     // printf, ...
 
-#include <event.h>
-#include <pdu.h>
+#include "event.h"
+#include "pdu.h"
 
 struct eventFile_t {
    int nombre;
@@ -59,20 +59,20 @@ void eventFile_insert(struct eventFile_t * file, struct event_t * event)
 
    file->nombre++;
 
- 
+
 }
 
 struct event_t * eventFile_extract(struct eventFile_t * file)
-{  
-   
-  
+{
+
+
   struct event_t * premier = NULL;
 
    if (file->premier) {
       premier = file->premier;
       file->premier = premier->next;
       // Si c'était le seul
-      if (file->dernier == premier) { 
+      if (file->dernier == premier) {
          assert(premier->next == NULL);
 	// assert(file->nombre == 1);
          if(file->nombre ==1 )
@@ -83,7 +83,7 @@ struct event_t * eventFile_extract(struct eventFile_t * file)
       }
       file->nombre --;
    }
-   
+
    return premier;
 }
 

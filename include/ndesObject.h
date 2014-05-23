@@ -23,8 +23,8 @@
 
 #include <stddef.h>   // offsetof
 
-#include <motsim.h>
-#include <probe.h>
+#include "motsim.h"
+#include "probe.h"
 
 /**
  * @brief Le type général de tous les objets
@@ -46,17 +46,17 @@ struct ndesObject_t {
  *  @brief Comment manipuler un type d'objet particulier
  *
  * C'est une instance de cette structure qui définit un type
- * particulier d'objets 
+ * particulier d'objets
  */
 struct ndesObjectType_t {
-   char * name;                 //!< Le nom du type 
+   char * name;                 //!< Le nom du type
    struct ndesObject_t * (*getObject)(void*);
    void   (*setObject)(void *, struct ndesObject_t *);
    void * (*malloc)() ;         //!< Allocation d'une instance
    void   (*init)(void *);      //!< Initialisation
    void * (*free)(void *) ;     //!< Destruction d'une instance
    int    size;                 //!< La taille de la structure privée
-   int    objectOffset; 
+   int    objectOffset;
    void * next;
 };
 
@@ -105,7 +105,7 @@ int ndesObjectType##_getObjectId(struct ndesObjectType##_t * o) \
 {    \
    return o->ndesObject->id; \
 }
-   
+
 /**
  * @brief Déclaration pour le .h
  */
@@ -113,7 +113,7 @@ int ndesObjectType##_getObjectId(struct ndesObjectType##_t * o) \
 struct ndesObject_t * ndesObjectType##_getObject(struct ndesObjectType##_t * o); \
 void ndesObjectType##_setObject(struct ndesObjectType##_t * o,  struct ndesObject_t *ndesObject); \
 int ndesObjectType##_getObjectId(struct ndesObjectType##_t * o);
-   
+
 /**
  * @brief Valeurs par défaut des champs de définition du type
  */
@@ -219,7 +219,7 @@ void ndesObject_defaultSetObject(void * ob, struct ndesObject_t * ndesObject);
  *
  * Cette fonction permet de créer un objet dont le type est passé en
  * paramètre. Elle fera pour cela appel aux fonctions d'allocation,
- * d'initialisation définies par le type en question. 
+ * d'initialisation définies par le type en question.
  */
 void * ndesObject_createObject(struct ndesObjectType_t * ndesObjectType);
 

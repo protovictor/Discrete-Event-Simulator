@@ -1,15 +1,15 @@
 /*
  * Un "multiplexeur FCFS" permet d'associer une destination unique à
  * un nombre quelconque de sources.
- * 
+ *
  * Les PDUs soumises par les sources sont transmises immédiatement à
  * la destination dans l'ordre où elles arrivent.
  */
 
 #include <stdlib.h>    // Malloc, NULL, exit...
 
-#include <motsim.h>
-#include <muxfcfs.h>
+#include "motsim.h"
+#include "muxfcfs.h"
 
 struct muxfcfs_t {
 

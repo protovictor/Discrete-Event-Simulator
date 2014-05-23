@@ -1,10 +1,10 @@
-#include <random-generator.h>
-#include <date-generator.h>
-#include <pdu.h>
-#include <pdu-sink.h>
-#include <pdu-source.h>
-#include <event.h>
-#include <motsim.h>
+#include "random-generator.h"
+#include "date-generator.h"
+#include "pdu.h"
+#include "pdu-sink.h"
+#include "pdu-source.h"
+#include "event.h"
+#include "motsim.h"
 
 
 /* We declare the structure which holds the list of sessions and their parameters */
@@ -15,9 +15,9 @@ struct SessionList_t;
 struct PDUSourceList_t;
 
 /**
- * @brief This function creates an empty list of sessions 
+ * @brief This function creates an empty list of sessions
  * @param dateGen the generator for each session start date
- * @param PDUdateGen the generator for each request/reply start date 
+ * @param PDUdateGen the generator for each request/reply start date
  * @param SizeGen the generator for each request/reply size packet
  * @param filePDU the filePDU which contains the PDUs
  */
@@ -35,7 +35,7 @@ void SessionList_Start(struct SessionList_t *SessionList);
 
 /**
  * @brief This function creates an empty list of different sessions
- * where each one of them is created separately and added to the list 
+ * where each one of them is created separately and added to the list
  * before the simulation starts.
  * Created for the case when different users are sending requests to a server,
  * but each one has a different behaviour (known at the beggining of the
@@ -45,9 +45,9 @@ struct SessionList_t* SessionList_CreateSpecific();
 
 /**
  * @brief The function sets the start time of each session to be deterministic
- * (We specifically know the time when each session starts, and this is a member 
+ * (We specifically know the time when each session starts, and this is a member
  * of the list startDate)
- * @param SessionList a pointer to the list of sessions 
+ * @param SessionList a pointer to the list of sessions
  * @param startDate a pointer to the list of date values
  */
 //void SessionList_setDeterministic(struct SessionList_t* SessionList, double *startDate);

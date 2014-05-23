@@ -6,8 +6,8 @@
  * exemple un lien.
  */
 
-#include <pdu.h>
-#include <motsim.h>
+#include "pdu.h"
+#include "motsim.h"
 
 struct srvGen_t;
 

@@ -21,9 +21,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <motsim.h>
-#include <event.h>
-#include <probe.h>
+#include "motsim.h"
+#include "event.h"
+#include "probe.h"
 
 /**
  * @brief Structure permettant la gestion des sondes exhaustives
@@ -108,9 +108,9 @@ struct EMA_t {
    double           min, max;
    double           lastSample;
    double           lastSampleDate;
-   double           period;          // Certaines probes ont des choses à faire 
+   double           period;          // Certaines probes ont des choses à faire
 
-   union probeData_t { 
+   union probeData_t {
       struct sampleSet_t     * sampleSet;
       struct graphBar_t      * graphBar;
       struct mean_t          * mean;
@@ -126,7 +126,7 @@ struct EMA_t {
    // Les métas sondes
    struct probe_t * sampleProbe;      // Sur les échantillons
    struct probe_t * meanProbe;        // Sur la moyenne
-   struct probe_t * throughputProbe ; // 
+   struct probe_t * throughputProbe ; //
 				      // Sur le "débit" (cf notes relatives)
    // Les méthodes de manipulation
 
@@ -170,7 +170,7 @@ struct probe_t * probe_chain(struct probe_t * p1, struct probe_t * p2)
 
    p1->nextProbe = p2;
    printf_debug(DEBUG_PROBE, "\"%s\" (%p, type %s) chained after \"%s\" (%p, type %s)\n",
-		p2?probe_getName(p2):"(null)", p2, p2?probeTypeName(p2->probeType):"(null)", 
+		p2?probe_getName(p2):"(null)", p2, p2?probeTypeName(p2->probeType):"(null)",
 		probe_getName(p1), p1, probeTypeName(p1->probeType));
    return p1;
 }
@@ -257,26 +257,26 @@ void probe_timeSliceReset(struct probe_t * pr)
 void probe_reset(struct probe_t * probe)
 {
    printf_debug(DEBUG_PROBE, "about to reset \"%s\" (type %d)\n",
-		probe_getName(probe), 
+		probe_getName(probe),
 		probe->probeType);
    if (probe->persistent){
-      return; 
+      return;
    }
    switch (probe->probeType) {
-      case exhaustiveProbeType : 
+      case exhaustiveProbeType :
 	 probe_resetExhaustive(probe);
       break;
-      case graphBarProbeType : 
+      case graphBarProbeType :
 	 probe_resetGraphBar(probe);
       break;
-      case meanProbeType : 
+      case meanProbeType :
 	 probe_resetMean(probe);
       break;
-      case timeSliceAverageProbeType : 
-      case timeSliceThroughputProbeType : 
+      case timeSliceAverageProbeType :
+      case timeSliceThroughputProbeType :
 	 probe_timeSliceReset(probe);
       break;
-      case EMAProbeType : 
+      case EMAProbeType :
 	 probe_EMAReset(probe);
       break;
       case slidingWindowProbeType :
@@ -320,7 +320,7 @@ struct probe_t * probe_createRaw(enum probeType_t probeType)
    result->name = strdup("Generic probe");
    result->nextProbe = NULL;
    result->period = 0.0;
-   
+
    // Les métas probes
    result->meanProbe = NULL;
    result->throughputProbe = NULL;
@@ -365,7 +365,7 @@ struct probe_t * probe_EMACreate(double a)
    result->data.ema = (struct EMA_t *) sim_malloc(sizeof(struct EMA_t));
 
    result->data.ema->a = a;
-   result->data.ema->avg = 0.0;   
+   result->data.ema->avg = 0.0;
    result->data.ema->bwAvg = 0.0;
    result->data.ema->value = 0.0;
    result->data.ema->previousTime = 0;
@@ -375,7 +375,7 @@ struct probe_t * probe_EMACreate(double a)
    return result;
 }
 
-/** 
+/**
  * @brief Création d'une sonde à fenêtre glissante
  * @param windowLength Nombre d'échantillons conservés
  *
@@ -441,7 +441,7 @@ void probe_periodicNextEvent(struct probe_t * pr)
 void probe_scheduleNextEvent(struct probe_t * pr)
 {
    printf_debug(DEBUG_PROBE_VERB, "about to schedule next event for \"%s\"  (type %s)\n",
-		probe_getName(pr), 
+		probe_getName(pr),
 		probeTypeName(pr->probeType));
 
    switch (pr->probeType) {
@@ -547,7 +547,7 @@ double probe_timeSliceMean(struct probe_t * pr)
 {
    // On néglige les derniers échantillons WARNING : est-ce raisonable ?
    printf_debug(DEBUG_TBD, "Incomplete average\n");
- 
+
    return 0.0;
 }
 
@@ -593,7 +593,7 @@ void probe_sampleExhaustive(struct probe_t * probe, double value)
       currentSet = probe->data.sampleSet;
       //      printf_debug(DEBUG_ALWAYS, "***(pr %p, %s) New set built : %p %p\n", probe, probe_getName(probe), probe->data.sampleSet, probe->data.sampleSet->prev);
    }
-  
+
    currentSet->dates[probe->nbSamples%PROBE_NB_SAMPLES_MAX] = motSim_getCurrentTime();
    currentSet->samples[probe->nbSamples%PROBE_NB_SAMPLES_MAX] = value;
    printf_debug(DEBUG_PROBE, "OUT\n");
@@ -628,12 +628,12 @@ void probe_slidingWindowSample(struct probe_t * pr, double v)
 
    // On incrémente le pointeur vers le dernier
    pr->data.window->last++;
-   if (pr->data.window->last == pr->data.window->capacity) 
+   if (pr->data.window->last == pr->data.window->capacity)
       pr->data.window->last = 0;
 
    // On incrémente la taille
    pr->data.window->length++;
-   if (pr->data.window->length > pr->data.window->capacity) 
+   if (pr->data.window->length > pr->data.window->capacity)
       pr->data.window->length = pr->data.window->capacity;
 
    // On met le truc dans le machin
@@ -695,7 +695,7 @@ double probe_IAMeanExhaustive(struct probe_t * probe)
       currentSet = currentSet->prev;
    }
    result = (last - currentSet->dates[0]) / (probe->nbSamples -1);
-  
+
    //   printf("IAMeanExhaustive : last = %f, first = %f, nb = %ld => %f\n", last, currentSet->dates[0], probe->nbSamples, result);
 
    return result;
@@ -754,7 +754,7 @@ struct probe_t * probe_createGraphBar(double min, double max, unsigned long nbBa
    for (i = 0; i < nbBar; i++){
       result->data.graphBar->value[i] = 0.0;
    }
- 
+
    printf_debug(DEBUG_PROBE, "graphBar[%f, %f] with %ld bars\n", min, max, nbBar);
 
    return result;
@@ -790,7 +790,7 @@ double probe_meanGraphBar(struct probe_t * probe)
    unsigned long n;
    double result = 0.0;
    struct graphBar_t * gb = probe->data.graphBar;
-   
+
    for (n = 0 ; n < gb->nbBar; n++) {
      //     printf("[%f, %f] Contribution %d (%f) = %d sur %d\n", gb->min, gb->max, n, gb->min + (gb->max - gb->min)*(n + 0.5)/ gb->nbBar, gb->value[n], probe->nbSamples);
      result += (gb->min + (gb->max - gb->min)*(n + 0.5) / gb->nbBar ) * (gb->normalized? gb->value[n]:(gb->value[n]/probe->nbSamples));
@@ -886,7 +886,7 @@ double probe_EMAThroughput(struct probe_t * probe)
 
 void probe_sample(struct probe_t * probe, double value)
 {
- 
+
    if (probe==NULL)
       return;
    printf_debug(DEBUG_PROBE_VERB, "about to sample %f in \"%s\" (%p, type %s, %lu samples)\n",
@@ -904,23 +904,23 @@ void probe_sample(struct probe_t * probe, double value)
    }
 #endif
    switch (probe->probeType) {
-      case exhaustiveProbeType : 
+      case exhaustiveProbeType :
 	probe_sampleExhaustive(probe, value);
       break;
-      case meanProbeType : 
+      case meanProbeType :
 	probe_sampleMean(probe, value);
       break;
-      case graphBarProbeType : 
+      case graphBarProbeType :
 	probe_sampleGraphBar(probe, value);
       break;
-      case timeSliceAverageProbeType : 
-      case timeSliceThroughputProbeType : 
+      case timeSliceAverageProbeType :
+      case timeSliceThroughputProbeType :
 	probe_timeSliceSample(probe, value);
       break;
-      case slidingWindowProbeType : 
+      case slidingWindowProbeType :
 	probe_slidingWindowSample(probe, value);
       break;
-      case EMAProbeType : 
+      case EMAProbeType :
 	probe_EMASample(probe, value);
       break;
       case periodicProbeType :
@@ -957,7 +957,7 @@ void probe_sample(struct probe_t * probe, double value)
       probe_sample(probe->throughputProbe, probe_throughput(probe));
    }
 
-   // On chaine si nécessaire 
+   // On chaine si nécessaire
    if (probe->nextProbe != NULL){
       probe_sample(probe->nextProbe, value);
    }
@@ -984,7 +984,7 @@ double probe_exhaustiveGetSample(struct probe_t * probe, unsigned long n)
    printf_debug(DEBUG_PROBE, "got the key\n");
 
    return currentSet->samples[n%PROBE_NB_SAMPLES_MAX];
-   
+
 }
 
 /*
@@ -1008,25 +1008,25 @@ double probe_timeSliceThroughputMean(struct probe_t * probe)
 double probe_mean(struct probe_t * probe)
 {
    switch (probe->probeType) {
-      case exhaustiveProbeType : 
+      case exhaustiveProbeType :
 	 return probe_meanExhaustive(probe);
       break;
-      case meanProbeType : 
+      case meanProbeType :
 	 return probe_meanMean(probe);
       break;
-      case graphBarProbeType : 
+      case graphBarProbeType :
 	 return probe_meanGraphBar(probe);
       break;
-      case slidingWindowProbeType : 
+      case slidingWindowProbeType :
 	 return probe_slidingWindowMean(probe);
       break;
-      case timeSliceAverageProbeType : 
+      case timeSliceAverageProbeType :
 	return probe_timeSliceAverageMean(probe);
       break;
-      case timeSliceThroughputProbeType : 
+      case timeSliceThroughputProbeType :
 	return probe_timeSliceThroughputMean(probe);
       break;
-      case EMAProbeType : 
+      case EMAProbeType :
 	return probe_EMAMean(probe);
       break;
 
@@ -1042,10 +1042,10 @@ double probe_mean(struct probe_t * probe)
 double probe_IAMean(struct probe_t * probe)
 {
    switch (probe->probeType) {
-      case exhaustiveProbeType : 
+      case exhaustiveProbeType :
 	 return probe_IAMeanExhaustive(probe);
       break;
-      case meanProbeType : 
+      case meanProbeType :
 	 return probe_IAMeanMean(probe);
       break;
 
@@ -1096,13 +1096,13 @@ void probe_exhaustiveDumpFd(struct probe_t * ep, int fd, int format)
 #ifdef DEBUG_NDES
    if (!strncmp(probe_getName(ep), "[DB]", 4)) {
       printf_debug(DEBUG_ALWAYS, "about to dump %s (type \"%s\") : %lu samples\n",
-	   	probe_getName(ep), 
+	   	probe_getName(ep),
 		probeTypeName(ep->probeType),
 		ep->nbSamples);
    }
 #endif
    printf_debug(DEBUG_PROBE, "about to dump %s (type \"%s\") : %lu samples\n",
-		probe_getName(ep), 
+		probe_getName(ep),
 		probeTypeName(ep->probeType),
 		ep->nbSamples);
 
@@ -1146,21 +1146,21 @@ void probe_dumpFd(struct probe_t * probe, int fd, int format)
 {
 
    printf_debug(DEBUG_PROBE, "about to dump %s (type \"%s\") : %lu samples\n",
-		probe_getName(probe), 
+		probe_getName(probe),
 		probeTypeName(probe->probeType),
 		probe->nbSamples);
 
    switch (probe->probeType) {
-      case exhaustiveProbeType : 
+      case exhaustiveProbeType :
 	 probe_exhaustiveDumpFd(probe, fd, format);
       break;
-      case graphBarProbeType : 
+      case graphBarProbeType :
 	 probe_graphBarDumpFd(probe, fd, format);
       break;
-      case timeSliceAverageProbeType : 
+      case timeSliceAverageProbeType :
 	 probe_timeSliceAverageDumpFd(probe, fd, format);
       break;
-      case timeSliceThroughputProbeType : 
+      case timeSliceThroughputProbeType :
 	 probe_timeSliceThroughputDumpFd(probe, fd, format);
       break;
       case periodicProbeType :
@@ -1251,24 +1251,24 @@ double probe_slidingWindowThroughput(struct probe_t * pr)
 /*
  * Consultation du débit. On considère ici chaque nouvelle valeur
  * comme la taille d'une nouvelle PDU. La fonction suivante permet
- * alors de connaitre le débit qui en  découle. 
+ * alors de connaitre le débit qui en  découle.
  * La méthode de calcul est évidemment dépendante de la nature de la
  * sonde et sa précision est donc variable
  */
 double probe_throughput(struct probe_t * probe)
 {
    switch (probe->probeType) {
-      case exhaustiveProbeType : 
+      case exhaustiveProbeType :
 	 return probe_exhaustiveThroughput(probe);
       break;
-      case meanProbeType : 
+      case meanProbeType :
 	 return probe_meanThroughput(probe);
       break;
-      case graphBarProbeType : 
+      case graphBarProbeType :
 	 return probe_graphBarThroughput(probe);
       break;
-      case slidingWindowProbeType : 
-	 return probe_slidingWindowThroughput(probe);  
+      case slidingWindowProbeType :
+	 return probe_slidingWindowThroughput(probe);
       break;
       case EMAProbeType :
          return probe_EMAThroughput(probe);
@@ -1323,10 +1323,10 @@ double probe_varianceExhaustive(struct probe_t * probe)
 double probe_variance(struct probe_t * probe)
 {
    switch (probe->probeType) {
-      case exhaustiveProbeType : 
+      case exhaustiveProbeType :
 	return probe_varianceExhaustive(probe);
       break;
-      case graphBarProbeType : 
+      case graphBarProbeType :
 	return probe_varianceGraphBar(probe);
       break;
       default :
@@ -1376,10 +1376,10 @@ double probe_demiIntervalleConfiance5pc(struct probe_t * p)
    double result = 0.0;
 
    switch (p->probeType) {
-      case exhaustiveProbeType : 
+      case exhaustiveProbeType :
          result = probe_exhaustiveDemiIntervalleConfiance5pc(p);
       break;
-      case  timeSliceAverageProbeType: 
+      case  timeSliceAverageProbeType:
          result = probe_timeSliceAverageDemiIntervalleConfiance5pc(p);
       break;
       default :
@@ -1530,7 +1530,7 @@ int probe_graphBarGetMinValue(struct probe_t * p)
    };
 
    return result;
-} 
+}
 
 /*
  * Lecture du nombre max d'échantillons dans un graphBar
@@ -1546,7 +1546,7 @@ int probe_graphBarGetMaxValue(struct probe_t * p)
    };
 
    return result;
-} 
+}
 
 int probe_graphBarGetValue(struct probe_t * p, int n)
 {
@@ -1558,7 +1558,7 @@ int probe_graphBarGetValue(struct probe_t * p, int n)
 
 /*
  * Les méta sondes !!
- * 
+ *
  * La sonde p2 observe une valeur de la sonde 1. p2 sera typiquement
  * une sonde périodique et p1 une sonde non exhaustive !
  */
@@ -1576,4 +1576,3 @@ void probe_addSampleProbe(struct probe_t * p1, struct probe_t * p2)
 {
   addProbe(p1->sampleProbe, p2);
 }
-

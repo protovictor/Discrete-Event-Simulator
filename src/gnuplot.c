@@ -15,8 +15,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <motsim.h>
-#include <gnuplot.h>
+#include "motsim.h"
+#include "gnuplot.h"
 
 
 /**
@@ -54,7 +54,7 @@ struct gnuplot_t {
 
    // Terminal daisy chaining
    struct gnuplot_t * prev;
-   struct gnuplot_t * next; 
+   struct gnuplot_t * next;
 };
 
 struct gnuplotProcess_t {
@@ -66,7 +66,7 @@ struct gnuplotProcess_t {
    struct gnuplot_t * lastTerminal;
 };
 
-struct gnuplotProcess_t * gnuplotProcess = NULL; 
+struct gnuplotProcess_t * gnuplotProcess = NULL;
 
 /**
  * @brief Send a command to a gnuplot process
@@ -75,7 +75,7 @@ void GPSendCmd(struct gnuplot_t * gp, char * cmd)
 {
    char buffer[512];
    //   int readBytes;
-   
+
    unsigned char cr = 0x0a;
 
    printf_debug(DEBUG_GNUPLOT, "GPSendCmd IN\n");
@@ -109,7 +109,7 @@ void GPSendCmd(struct gnuplot_t * gp, char * cmd)
    }
 
    printf_debug(DEBUG_GNUPLOT, "sending \"%s\"\n", cmd);
- 
+
    write(gnuplotProcess->stdin, cmd, strlen(cmd));
    write(gnuplotProcess->stdin, &cr, 1);
 /*
@@ -124,7 +124,7 @@ void GPSendCmd(struct gnuplot_t * gp, char * cmd)
  */
 void on_exitGnuplot(int exitStatus, void * gP)
 {
-   struct gnuplotProcess_t * gnuplotProcess = (struct gnuplotProcess_t *)gP; 
+   struct gnuplotProcess_t * gnuplotProcess = (struct gnuplotProcess_t *)gP;
    struct gnuplot_t * term, *prev;
    struct fileName_t * p;
    int n;
@@ -147,11 +147,11 @@ void on_exitGnuplot(int exitStatus, void * gP)
    for (n=0,term = gnuplotProcess->lastTerminal; term != NULL; term = term->prev, n++) {
       while (term->srcFileName) {
          printf_debug(DEBUG_GNUPLOT, "unlinking \"%s\"\n", term->srcFileName->fileName);
-	 
+
          if (unlink(term->srcFileName->fileName)) {
             perror("unlink ");
          }
-	 
+
          p = term->srcFileName;
          term->srcFileName = p->next;
          free(p);
@@ -186,7 +186,7 @@ int gnuplotProcessCreate()
    gnuplotProcess = (struct gnuplotProcess_t*) sim_malloc(sizeof(struct gnuplotProcess_t));
    gnuplotProcess->nbPlot = 0;
    gnuplotProcess->lastTerminal = NULL;
- 
+
    // Pipes
    if (pipe(pipeGPin)) {
       perror("pipe ");
@@ -235,7 +235,7 @@ int gnuplotProcessCreate()
    close(pipeGPin[0]);
    close(pipeGPout[1]);
 
-   // Don't forget the usefull ones 
+   // Don't forget the usefull ones
    gnuplotProcess->stdin = pipeGPin[1];
    gnuplotProcess->stdout = pipeGPout[0];
 
@@ -251,18 +251,18 @@ int gnuplotProcessCreate()
  * On passe par un fichier dont le nom est de la forme %d.%d-%s.gp
  * avec, dans l'ordre, le numéro de processus, le numéro de terminal
  * et le titre.
- * 
+ *
  * Le nom de fichier est sauvé pour effacer le fichier à la fin du
  * programme (par un on_exitGnuplot)
  */
 #define BUFFER_LENGTH 4096
 int gnuplot_displayProbe(struct gnuplot_t * gp, int with, struct probe_t * probe)
 {
-   char fileName[BUFFER_LENGTH];   
+   char fileName[BUFFER_LENGTH];
    struct fileName_t * p;
    int  fd;
    char cmd[BUFFER_LENGTH];
-   
+
    assert(gp != NULL);
 
    //! We need a title (wxt terminal)
@@ -336,7 +336,7 @@ int gnuplot_displayProbe(struct gnuplot_t * gp, int with, struct probe_t * probe
 
 int gnuplot_displayProbes(struct gnuplot_t * gp, int with, ...)
 {
-   char fileName[BUFFER_LENGTH];   
+   char fileName[BUFFER_LENGTH];
    struct fileName_t * p;
    int  fd;
    char cmd[BUFFER_LENGTH];
@@ -457,7 +457,7 @@ void gnuplot_setYRange(struct gnuplot_t * gp, double ymin, double ymax)
 
 /**
  * @brief Change the output file name
- * @param gp The gnuplot terminal 
+ * @param gp The gnuplot terminal
  * @param name The new file name
  */
 void gnuplot_setOutputFileName(struct gnuplot_t * gp, char * outputFileName)
@@ -477,7 +477,7 @@ void gnuplot_setTitle(struct gnuplot_t * gp, char * name)
 
 /**
  * @brief Select terminal type
- * @param gp The gnuplot terminal 
+ * @param gp The gnuplot terminal
  * @param terminalType The new terminal type
  */
 void gnuplot_setTerminalType(struct gnuplot_t * gp, int terminalType)

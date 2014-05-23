@@ -1,73 +1,79 @@
-#include <motsim.h>
-#include <gnuplot.h>
-#include <http.h>
-#include <probe.h>
-
-//void tracer(struct probe_t *pr, char *name, int nbBar);
+#include <stdio.h>
+#include "motsim.h"
+#include "tcpmodel.h"
+#include "pdu-sink.h"
+#include "srv-gen.h"
 
 
  int main()
 {
 
-  struct probe_t           *sejProbe, *iaProbe, *srvProbe;
   struct TCP_client_t      *Client;
   struct TCP_server_t      *WebServer;
-  struct randomGenerator_t *mainObjSize, *embObjNr, *embObjSize; 
+
+  struct randomGenerator_t *mainObjSize, *embObjNr, *embObjSize;
   struct dateGenerator_t   *dateGen;
-  double alpha, beta;
-  double duration = 100000.0;
-  
+
+  struct probe_t           *sejProbe, *iaProbe, *rtrProbe;
+  struct PDUSink_t         *sink;
+  struct filePDU_t         *filePDU;
+  struct srvGen_t          *router;  /* the router who forwards the packets to the webserver */
+
+  double duration = 100000.0;        /* the maximum duration of the simulation */
+  double mean = 50;                  /* mean = 50ms - exponential distribution*/
+
   motSim_create();
+  sink = PDUSink_create();
 
-  alpha = 1.31;
-  beta = 1.41;
 
-  mainObjSize = randomGenerator_createDoubleLognormal(alpha, beta);
-  randomGenerator_setMinMax(mainObjSize, 0, 1);
-  alpha = -0.75; 
-  beta = 2.36;
+  router = srvGen_create(sink, (processPDU_t)PDUSink_processPDU);
+  srvGen_setServiceTime(router, serviceTimeExp, mean);
 
-  embObjSize = randomGenerator_createDoubleLognormal(alpha, beta);
-  randomGenerator_setMinMax(embObjSize, 0, 1);
- 
-  alpha = 0.24; 
-  beta = 23.42;
-  embObjNr = randomGenerator_createDoubleGamma(alpha, beta);
-  randomGenerator_setMinMax(embObjNr, 0, 1);
+  filePDU = filePDU_create(router, (processPDU_t)srvGen_processPDU);
 
-  Client = TCP_clientCreate(mainObjSize, embObjNr, embObjSize); 
- 
+  /* We create random generators for the request parameters*/
+  mainObjSize = randomGenerator_createDouble();
+  embObjNr = randomGenerator_createDouble();
+  embObjSize = randomGenerator_createDouble();
+  /* And we set them to default distributions and parameters */
+  Request_LoadDefault(mainObjSize, embObjNr, embObjSize);
+
+  /* Just a generic client , in fact it is created just to hold the parameters of the requested page */
+  Client = TCP_clientCreate(mainObjSize, embObjNr, embObjSize, sink, (processPDU_t)PDUSink_processPDU);
+
+
  /*------------------------------------------------------------*/
-  alpha = 0.5;
-  beta = 4.44;
+  double alpha = 0.5;
+  double beta = 4.44;
   dateGen = dateGenerator_createWeibull(alpha, beta);
 
-  WebServer = TCP_serverCreate(dateGen, Client, filePDU_processPDU);
+  WebServer = TCP_serverCreate(dateGen, filePDU, (processPDU_t)filePDU_processPDU);
 
-  TCP_clientSetDestination(Client, WebServer);
 
   //------------------------- Sensors -------------------
- 
- // A sensor of inter-arrivals 
+
+ // A sensor of inter-arrivals of embedded objects
        iaProbe = probe_createExhaustive();
        dateGenerator_addInterArrivalProbe(dateGen, iaProbe);
 
- // A sensor for the journey/sejour 
-    //   sejProbe = probe_createExhaustive(); 
-    //   filePDU_addSejournProbe(filePDU, sejProbe);
+ // A sensor for the journey/sejour
+       sejProbe = probe_createExhaustive();
+       filePDU_addSejournProbe(filePDU, sejProbe);
 
- // A sensor for the service time 
-    //   srvProbe = probe_createExhaustive();
-    //   srvGen_addServiceProbe(server, srvProbe);
+ // A sensor for the router service time
+       rtrProbe = probe_createExhaustive();
+       srvGen_addServiceProbe(router, rtrProbe);
 
- //--------------------------------------
-
+ //------------------------------------------------------
 
   TCP_session_start(Client, WebServer);
+
   motSim_runUntil(duration);
   motSim_printStatus();
 
   printf("Average Inter-arrival: %f \n", probe_mean(iaProbe));
+  printf("Mean time of journey: %f \n", probe_mean(sejProbe));
+  printf("Mean time of service: %f \n", probe_mean(rtrProbe));
 
 
 return 0;

@@ -7,9 +7,9 @@
 #ifndef __DEF_PDU
 #define __DEF_PDU
 
-#include <motsim.h>
-#include <probe.h>
-#include <ndesObject.h>
+#include "motsim.h"
+#include "probe.h"
+#include "ndesObject.h"
 
 /*
  * Le type est visible car utilisé par différents modules vu que c'est

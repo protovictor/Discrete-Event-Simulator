@@ -15,7 +15,7 @@
 #ifndef __DEF_RANDOM_GENERATOR
 #define __DEF_RANDOM_GENERATOR
 
-#include <probe.h>
+#include "probe.h"
 
 
 struct randomGenerator_t;
@@ -45,7 +45,7 @@ struct randomGenerator_t;
 #define rGDistLognormal    5
 #define rGDistWeibull      6
 #define rGDistGamma        7
-#define rGDistComposed     8
+
 
 #define rGDistDefault rGDistUniform
 /*
@@ -80,9 +80,7 @@ struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
  */
 struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(int nbValues,
                                      unsigned int * values, double * proba);
- 
-// Composed Web Request Size
-struct randomGenerator_t * randomGenerator_createRequestSize();
+
 
 // Des entiers longs non signÃ©s
 struct randomGenerator_t * randomGenerator_createULong(int distribution,
@@ -94,7 +92,7 @@ struct randomGenerator_t * randomGenerator_createDouble();
 // Des rÃ©els double prÃ©cision, avec une distribution exp de paramÃ¨tre lambda
 struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda);
 
-/* 
+/*
  * A double range [min .. max]
  */
 struct randomGenerator_t * randomGenerator_createDoubleRange(double min,
@@ -103,12 +101,12 @@ struct randomGenerator_t * randomGenerator_createDoubleRange(double min,
 struct randomGenerator_t * randomGenerator_createDoubleDiscrete(
                                      int nbValues,
                                      double * values);
- 
+
 struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(
                                      int nbValues,
                                      double * values,
                                      double * proba);
- 
+
 /*==========================================================================*/
 
 // Use a (previously built) probe to re-run a sequence
@@ -140,7 +138,7 @@ void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
  *
  * Le fichier doit être un fichier texte orienté ligne où chaque ligne
  * contient un entier (la valeur) suivi d'un réel (la probabilité associée).
- */ 
+ */
 void randomGenerator_setDistributionDiscreteFromFile(struct randomGenerator_t * rg,
 						     char * fileName);
 
@@ -200,13 +198,22 @@ void randomGenerator_setDistributionWeibull(struct randomGenerator_t * rg, doubl
 // Gamma distribution
 void randomGenerator_setDistributionGamma(struct randomGenerator_t * rg, double alpha, double beta);
 
-// Composed 
-void randomGenerator_setDistributionComposed(struct randomGenerator_t * rg,  double main_alpha, double main_beta, double inline_alpha, double inline_beta, double nalpha, double nbeta);
 
 /*
  * Change lambda
  */
 void randomGenerator_setLambda(struct randomGenerator_t * rg, double lambda);
+
+/*
+ *  Change alpha
+ */
+void randomGenerator_setAlpha(struct randomGenerator_t *rg, double alpha);
+
+/*
+ *  Change beta
+ */
+void randomGenerator_setBeta(struct randomGenerator_t *rg, double beta);
+
 
 
 /*
@@ -226,13 +233,28 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
  */
 double randomGenerator_getExpectation(struct randomGenerator_t * rg);
 
+/*
+ * Next value with Weibull distribution
+ */
 double randomGenerator_WeibullGetNext(struct randomGenerator_t * rg);
+
+/*
+ * Next value with Lognormal distribution
+ */
+double randomGenerator_LognormalGetNext(struct randomGenerator_t *rg);
+
+/*
+ * Next value with Gamma distribution
+ */
 double randomGenerator_GammaGetNext(struct randomGenerator_t * rg);
-double randomGenerator_ComposedGetNext(struct randomGenerator_t *rg);
+
+/*
+ * Next value with ITS distribution
+ */
 double randomGenerator_ITSGetNext(struct randomGenerator_t * rg);
 
 /*==========================================================================*/
-/*   Probes                                                                 */ 
+/*   Probes                                                                 */
 /*==========================================================================*/
 /**
  * @brief Ajout d'une sonde sur les valeurs générées
@@ -240,9 +262,5 @@ double randomGenerator_ITSGetNext(struct randomGenerator_t * rg);
 
 void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
 				   struct probe_t * p);
-
-unsigned long randomGenerator_getnbSamples(struct randomGenerator_t * rg);
-
-void randomGenerator_setMinMax(struct randomGenerator_t *rg, double min, double max);
 
 #endif

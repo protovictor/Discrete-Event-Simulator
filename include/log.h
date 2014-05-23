@@ -15,8 +15,8 @@
 
 #include <stdarg.h>
 
-#include <motsim.h>
-#include <ndesObject.h>
+#include "motsim.h"
+#include "ndesObject.h"
 
 /**
  * Exporté pour ndesObject qui logue mais ne doit pas logué ce qui a
@@ -58,7 +58,7 @@ int ndesLog_dump(char * fileName);
 
 #else  // Si NDES_USES_LOG n'est pas défini
 
-#define ndesLog_init() 
+#define ndesLog_init()
 #define ndesLog_enable()
 #define ndesLog_disable()
 #define ndesLog_logLine(ndesObject, line)

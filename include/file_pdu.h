@@ -8,8 +8,8 @@
 #ifndef __DEF_LISTE_PDU
 #define __DEF_LISTE_PDU
 
-#include <pdu.h>
-#include <probe.h>
+#include "pdu.h"
+#include "probe.h"
 
 struct filePDU_t;
 
@@ -25,7 +25,7 @@ enum filePDU_dropStrategy {
 };
 
 /** @brief Création d'une file.
- * 
+ *
  *  @param destination l'entité aval (ou NULL ai aucune)
  *  @param destProcessPDU la fonction de traitement de l'entité aval
  *  (ou NULL si aucune entité)
@@ -89,7 +89,7 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file);
  * @param file la file depuis laquelle on souhaite extraire la
  * première PDU
  * @return la première PDU ou NULL si la file est vide
- * 
+ *
  * Ici la signature est directement compatible avec le modÃ¨le
  * d'entrèe-sortie de NDES.
  */
@@ -107,7 +107,7 @@ int filePDU_size(struct filePDU_t * file);
 
 /**
  * @brief Taille cumulée des n premières PDUs
- * @param file la file 
+ * @param file la file
  * @param n le nombre (positif ou nul) de PDUs
  * @return le cumul des tailles des n premières PDUs de la file
  */

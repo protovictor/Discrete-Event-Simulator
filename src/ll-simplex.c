@@ -1,7 +1,8 @@
-#include <motsim.h>
-#include <event.h>
-#include <ll-simplex.h>
-#include <file_pdu.h>
+#include "motsim.h"
+#include "event.h"
+#include "ll-simplex.h"
+#include "file_pdu.h"
+
 /*
  * Caractéristiques d'une couche liaison simplex
  */
@@ -110,7 +111,7 @@ void llSimplex_endOfTransmission(void * l)
 
    // On va voir en amont si par hasard une nouvelle PDU n'attend pas ...
    if ((lls->lastSource) && (lls->lastGetPDU)){
-      (void)llSimplex_processPDU(lls, lls->lastGetPDU, lls->lastSource); 
+      (void)llSimplex_processPDU(lls, lls->lastGetPDU, lls->lastSource);
    }
    printf_debug(DEBUG_PDU, "out\n");
 }
@@ -127,7 +128,7 @@ int llSimplex_processPDU(void * l,
    struct llSimplex_t * lls = (struct llSimplex_t * ) l;
    struct PDU_t * pdu;
 
-   printf_debug(DEBUG_PDU, "in\n"); 
+   printf_debug(DEBUG_PDU, "in\n");
 
    // Si c'est juste pour tester si je suis pret
    if ((getPDU == NULL) || (source == NULL)) {
@@ -143,7 +144,7 @@ int llSimplex_processPDU(void * l,
 	 printf_debug(DEBUG_PDU, "On prepare la fin de transmission a %lf\n",
 		      motSim_getCurrentTime() + PDU_size(pdu)*8.0/lls->throughput);
          event_add(llSimplex_endOfTransmission,
-   		l, 
+   		l,
 		motSim_getCurrentTime() + PDU_size(pdu)*8.0/lls->throughput);
          lls->lastSource = NULL;
          lls->lastGetPDU = NULL;
@@ -154,7 +155,7 @@ int llSimplex_processPDU(void * l,
          result = 0;
       }
    }
-   printf_debug(DEBUG_PDU, "out %d\n", result); 
+   printf_debug(DEBUG_PDU, "out %d\n", result);
 
    return result;
 }
@@ -172,4 +173,3 @@ struct PDU_t * llSimplex_getPDU(void * l)
 
    return result;
 }
-

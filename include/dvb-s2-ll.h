@@ -15,8 +15,7 @@
 #ifndef __DEF_DVBS2_LL
 #define __DEF_DVBS2_LL
 
-#include <pdu.h>
-#include <dvb-s2-ll.h>
+#include "pdu.h"
 
 #define NB_MODCOD_MAX 4
 
@@ -125,7 +124,7 @@ int DVBS2ll_nbModcod(struct DVBS2ll_t * dvbs2ll);
 
 /*
  * Capacité d'une BBFRAME associée au MODCOD d'indice fourni
- */ 
+ */
 unsigned int DVBS2ll_bbframePayloadBitSize(struct DVBS2ll_t * dvbs2ll, int mcIdx);
 
 /*
@@ -135,7 +134,7 @@ unsigned int DVBS2ll_bitsPerSymbol(struct DVBS2ll_t * dvbs2ll, int mcIdx);
 
 /*
  * Temps d'émission d'une BBFRAME associée au MODCOD d'indice fourni
- */ 
+ */
 double DVBS2ll_bbframeTransmissionTime(struct DVBS2ll_t * dvbs2ll, int mcIdx);
 
 /*

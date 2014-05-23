@@ -5,9 +5,10 @@
 #include <strings.h>   // bzero
 #include <time.h>
 
-#include <event-file.h>
-#include <pdu.h>
-#include <log.h>
+#include "event-file.h"
+#include "pdu.h"
+#include "log.h"
+
 
 struct resetClient_t {
    void * data;
@@ -69,7 +70,7 @@ void motSim_periodicMessage(void * foo)
 void mainHandler(int sig)
 {
    if (sig == SIGCHLD) {
-   } else { 
+   } else {
       motSim_exit(200+sig);
    }
 }
@@ -151,11 +152,11 @@ void motSim_create()
 
 void motSim_addEvent(struct event_t * event)
 {
-  
+
    printf_debug(DEBUG_EVENT, "New event (%p) at %6.3f (%d ev)\n", event, event_getDate(event), __motSim->nbInsertedEvents);
 
    assert(__motSim->currentTime <= event_getDate(event));
- 
+
    eventFile_insert(__motSim->events, event);
    __motSim->nbInsertedEvents++;
 
@@ -246,7 +247,7 @@ void motSim_runUntil(double date)
       __motSim->actualStartTime = time(NULL);
    }
    event = eventFile_nextEvent(__motSim->events);
-   
+
    while ((event) && (event_getDate(event) <= date)) {
       event = eventFile_extract(__motSim->events);
       printf_debug(DEBUG_EVENT, "next event at %f\n", event_getDate(event));
@@ -254,9 +255,9 @@ void motSim_runUntil(double date)
       __motSim->currentTime = event_getDate(event);
       event_run(event);
       __motSim->nbRanEvents ++;
-      
+
       /*
-afficher le message toutes les 
+afficher le message toutes les
       n secondes de temps réel
  ou x % du temps simule passe
 
@@ -267,7 +268,7 @@ afficher le message toutes les
 }
 
 /*
- * On vide la liste des événements 
+ * On vide la liste des événements
  */
 void motSim_purge()
 {
@@ -276,9 +277,9 @@ void motSim_purge()
    printf_debug(DEBUG_MOTSIM, "about to purge events\n");
 
    event = eventFile_extract(__motSim->events);
-   
+
    while (event){
-       
+
       printf_debug(DEBUG_MOTSIM, "next event at %f\n", event_getDate(event));
       assert(__motSim->currentTime <= event_getDate(event));
       __motSim->currentTime = event_getDate(event);
@@ -365,7 +366,7 @@ void motSim_insertNewEvent(void (*run)(void *data), void * data, double date)
 void motSim_printStatus()
 {
    printf("[MOTSI] Date = %f\n", __motSim->currentTime);
-   printf("[MOTSI] Events : %ld created (%ld m + %ld r)/%ld freed\n", 
+   printf("[MOTSI] Events : %ld created (%ld m + %ld r)/%ld freed\n",
 	  event_nbCreate, event_nbMalloc, event_nbReuse, event_nbFree);
    printf("[MOTSI] Simulated events : %d in, %d out, %d pr.\n",
 	  __motSim->nbInsertedEvents, __motSim->nbRanEvents, eventFile_length(__motSim->events));
@@ -382,7 +383,7 @@ void motSim_printStatus()
 
 
 /*==========================================================================*/
-/*      Mise en oeuvre de la notion de campagne.                            */ 
+/*      Mise en oeuvre de la notion de campagne.                            */
 /*==========================================================================*/
 void motSim_campaignRun(struct motSimCampaign_t * c)
 {
@@ -401,7 +402,7 @@ void motSim_campaignRun(struct motSimCampaign_t * c)
 
 
       // On lance l'instance de simulation
- 
+
       // On échantillonne les mesures inter-simu
    }
 }

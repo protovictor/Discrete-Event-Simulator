@@ -10,11 +10,12 @@
  */
 #include <stdlib.h>    // Malloc, NULL, exit...
 
-#include <event.h>
-#include <pdu-source.h>
+#include "event.h"
+#include "pdu-source.h"
 
-#include <ndesObject.h>
-#include <log.h>
+#include "ndesObject.h"
+#include "log.h"
+
 
 /**
  * @brief Une source générique de PDU
@@ -41,7 +42,7 @@ struct PDUSource_t{
 defineObjectFunctions(PDUSource);
 struct ndesObjectType_t PDUSourceType = {
   ndesObjectTypeDefaultValues(PDUSource)
-}; 
+};
 
 struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
 				      void * destination,
@@ -65,14 +66,14 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
 
    // Ajout à la liste des choses à réinitialiser avant une prochaine simu
  //  motsim_addToResetList(result, (void (*)(void *))PDUSource_start);
-   
+
    return result;
 }
 
 
 /**
  *  @brief Création d'un générateur déterministe
- * 
+ *
  *  @param sequence Un tableau de {date, size} définissant chaque PDU
  *  @param destination L'entité aval
  *  @param destProcessPDU La fonction de traitement de la destination
@@ -118,12 +119,12 @@ void PDUSource_addPDUGenerationSizeProbe(struct PDUSource_t * src, struct probe_
  * Spécification du générateur de taille de PDU associé
  */
 void PDUSource_setPDUSizeGenerator(struct PDUSource_t * src, struct randomGenerator_t * rg)
-{  
-   src->sizeGen = rg; 
+{
+   src->sizeGen = rg;
 }
 
 /** @brief émission de la PDU courante et création de la prochaine
- * 
+ *
  * C'est cette fonction qui émet la PDU courante. Elle doit donc être
  * invoquée au bon moment (au travers d'un événement qu'elle aura
  * elle-même créé, en fait !)
@@ -137,19 +138,19 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
 {
    double date;
    struct event_t * event;
-   unsigned int size = 0; 
+   unsigned int size = 0;
 
    printf_debug(DEBUG_SRC, " IN\n");
- 
+
    // Suppression de la PDU précédente si pas consommée
    if (source->pdu) {
       printf_debug(DEBUG_SRC, " Destruction de %d\n", PDU_id(source->pdu));
       PDU_free(source->pdu);
    }
-  
+
    // La prochaine devient la nouvelle
    source->pdu = source->nextPdu;
-   
+
    if (source->pdu) { // La première fois, c'est un coup à blanc
       // Transmission de la nouvelle PDU
       printf_debug(DEBUG_SRC, " PDU %d (size %u) sent at %6.3f\n",
@@ -160,7 +161,7 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
          probe_sample(source->PDUGenerationSizeProbe, (double)PDU_size(source->pdu));
       }
 
-      // On passe la PDU au suivant  
+      // On passe la PDU au suivant
       if ((source->destProcessPDU) && (source->destination)) {
          // On logue cet événement
  	ndesLog_logLineF(PDU_getObject(source->pdu),
@@ -170,7 +171,7 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
                                      source);
 
       }
-      
+
    }
 
    // Maintenant on prépare la prochaine PDU
@@ -193,7 +194,7 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
 
    } else {
       // On détermine la date de prochaine transmission
-      date = dateGenerator_nextDate(source->dateGen, motSim_getCurrentTime()); 
+      date = dateGenerator_nextDate(source->dateGen, motSim_getCurrentTime());
       // On choisi la taille
       size = source->sizeGen?randomGenerator_getNextUInt(source->sizeGen):0;
    }
@@ -201,13 +202,13 @@ void PDUSource_buildNewPDU(struct PDUSource_t * source)
    printf_debug(DEBUG_SRC, " next PDU to be sent at %f\n", date);
 
    // Un petit hack pour arrêter si une source déterministe a un {0.0, 0}
-   if ((date >= motSim_getCurrentTime() && ((date <= motSim_getFinishTime() && motSim_getFinishTime() != 0 ) || motSim_getFinishTime()==0  ) ) 
+   if ((date >= motSim_getCurrentTime() && ((date <= motSim_getFinishTime() && motSim_getFinishTime() != 0 ) || motSim_getFinishTime()==0  ) )
        && ((size != 0) || (source->dateGen))
       ) {
       // Création de la prochaine PDU
-      source->nextPdu = PDU_create(size, NULL); 
+      source->nextPdu = PDU_create(size, NULL);
 
-      printf_debug(DEBUG_SRC, " next PDU %d (size %u) created at %6.3f\n",  
+      printf_debug(DEBUG_SRC, " next PDU %d (size %u) created at %6.3f\n",
                 PDU_id(source->nextPdu), size, PDU_size(source->nextPdu),motSim_getCurrentTime());
 
       // On crée un événement pour cette date
@@ -246,7 +247,7 @@ struct PDU_t* PDUSource_getNextPDU(struct PDUSource_t* source)
 
 
 void PDUSource_start(struct PDUSource_t * source)
-{ 
+{
 
    // On ne sait jamais (cette fonction sert de reset)
    if (source->pdu) {
@@ -274,9 +275,8 @@ void PDUSource_start(struct PDUSource_t * source)
 
 struct probe_t *PDUSource_getPDUGenerationSizeProbe(struct PDUSource_t* source)
 {
-  return source->PDUGenerationSizeProbe; 
+  return source->PDUGenerationSizeProbe;
 }
-
 
 
 

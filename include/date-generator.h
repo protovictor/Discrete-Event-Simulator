@@ -10,7 +10,7 @@
 #ifndef __DEF_DATE_GENERATOR
 #define __DEF_DATE_GENERATOR
 
-#include <probe.h>
+#include "probe.h"
 
 struct dateGenerator_t;
 
@@ -55,5 +55,6 @@ struct dateGenerator_t * dateGenerator_createPeriodic(double period);
  * Prepare for record values in order to replay on each reset
  */
 void dateGenerator_recordThenReplay(struct dateGenerator_t *  d);
+
 
 #endif

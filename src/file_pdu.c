@@ -6,10 +6,10 @@
 #include <stdlib.h>    // Malloc, NULL, ...
 #include <assert.h>
 
-#include <file_pdu.h>
-#include <motsim.h>
-#include <ndesObject.h>
-#include <log.h>
+#include "file_pdu.h"
+#include "motsim.h"
+#include "ndesObject.h"
+#include "log.h"
 
 /*
 struct filePDU_t_elt {
@@ -97,13 +97,13 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file)
       file->premier = premier->next;
       // Si c'Ã©tait le seul
       if (file->dernier == premier) {
-        // assert(premier->next == NULL);
-         premier->next = NULL;
-         file->nombre = 1;
-	// assert(file->nombre == 1);
+         assert(premier->next == NULL);
+       // premier->next = NULL;
+       //  file->nombre = 1;
+	 assert(file->nombre == 1);
          file->dernier = NULL;
       } else {
-	 // assert(file->premier != NULL);
+	  assert(file->premier != NULL);
          file->premier->prev = NULL;
       }
       file->nombre --;
@@ -125,7 +125,7 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file)
    printf_debug(DEBUG_FILE, "out (pdu id %d)\n", PDU?PDU_id(PDU):-1);
    //   filePDU_dump(file);
    ndesLog_logLineF(PDU_getObject(PDU), "OUT %d", filePDU_getObjectId(file));
-   
+
    return PDU;
 }
 struct PDU_t * filePDU_getPDU(void * file)
@@ -142,7 +142,7 @@ struct PDU_t * filePDU_getPDU(void * file)
 void filePDU_setMaxSize(struct filePDU_t * file, unsigned long maxSize)
 {
    printf_debug(DEBUG_ALWAYS, "Taille max %ld bytes\n", maxSize);
-   file->maxSize = maxSize; 
+   file->maxSize = maxSize;
 }
 
 unsigned long filePDU_getMaxSize(struct filePDU_t * file)
@@ -152,7 +152,7 @@ unsigned long filePDU_getMaxSize(struct filePDU_t * file)
 
 void filePDU_setMaxLength(struct filePDU_t * file, unsigned long maxLength)
 {
-   file->maxLength = maxLength; 
+   file->maxLength = maxLength;
 }
 
 unsigned long filePDU_getMaxLength(struct filePDU_t * file)
@@ -168,7 +168,7 @@ unsigned long filePDU_getMaxLength(struct filePDU_t * file)
  */
 void filePDU_setDropStrategy(struct filePDU_t * file, enum filePDU_dropStrategy dropStrategy)
 {
-   file->dropStrategy = dropStrategy; 
+   file->dropStrategy = dropStrategy;
 }
 
 /*
@@ -195,7 +195,7 @@ void filePDU_reset(struct filePDU_t * file)
 }
 
 /** @brief Création d'une file.
- * 
+ *
  *  @param destination l'entité aval (ou NULL ai aucune)
  *  @param destProcessPDU la fonction de traitement de l'entité aval
  *  (ou NULL si aucune entité)
@@ -249,7 +249,7 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
 {
    struct PDU_t * pq;
    struct PDU_t * pduDel;
- 
+
    printf_debug(DEBUG_FILE, " file %p insert PDU %d size %d (Length = %d/%d, size = %lu/%d, strat %d)\n",
                 file, PDU_id(PDU), PDU_size(PDU),
                 file->nombre, file->maxLength, file->size, file->maxSize, file->dropStrategy );
@@ -259,7 +259,7 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
    // S'il s'agit d'une "drop head", on fait la place si besoin est !
    if (file->dropStrategy == filePDU_dropHead) {
       while ((((file->maxLength) && (file->maxLength < file->nombre + 1))    // Trop de PDUs
-             ||            
+             ||
 	    ((file->maxSize) && (file->maxSize < file->size + PDU_size(PDU))) // Trop de volume
 	    ) && (file->nombre)) {
  	 printf_debug(DEBUG_FILE, "need some room, head droping ...\n");
@@ -322,7 +322,7 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
       }
       ndesLog_logLineF(PDU_getObject(PDU), "DELETED BY %d", filePDU_getObjectId(file));
 
-      PDU_free(PDU); 
+      PDU_free(PDU);
       file->nbOverflow++;
    }
 
@@ -370,7 +370,7 @@ int filePDU_length(struct filePDU_t * file)
 
 /**
  * @brief Taille cumulée des n premières PDUs
- * @param file la file 
+ * @param file la file
  * @param n le nombre (positif ou nul) de PDUs
  * @return le cumul des tailles des n premières PDUs de la file
  */

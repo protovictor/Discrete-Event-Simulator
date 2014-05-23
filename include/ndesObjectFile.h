@@ -6,14 +6,14 @@
 #ifndef __DEF_LISTE_NDES_OBJECT
 #define __DEF_LISTE_NDES_OBJECT
 
-#include <ndesObject.h>
-#include <probe.h>
+#include "ndesObject.h"
+#include "probe.h"
 
 //struct ndesObjectFile_t;
 
 /**
  *  @brief Création d'une file.
- * 
+ *
  *  @param type permet de définir le type d'objets de la liste
  *  @return Une strut ndesObjectFile_t * allouée et initialisée
  *
@@ -43,7 +43,7 @@ struct ndesObject_t * ndesObjectFile_extract(struct ndesObjectFile_t * file);
  * @param file la file depuis laquelle on souhaite extraire la
  * première PDU
  * @return la première PDU ou NULL si la file est vide
- * 
+ *
  * Ici la signature est directement compatible avec le modÃ¨le
  * d'entrèe-sortie de NDES.
  */

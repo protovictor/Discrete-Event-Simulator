@@ -2,8 +2,8 @@
 #include <stdlib.h>    // Malloc, NULL, exit...
 #include <assert.h>
 
-#include <event.h>
-#include <motsim.h>
+#include "event.h"
+#include "motsim.h"
 
 /*
  * Une file d'événements libres
@@ -19,9 +19,14 @@ struct event_t * event_create(void (*run)(void *data), void * data, double date)
 {
    struct event_t * result;
 
-   result = (struct event_t *)sim_malloc(sizeof(struct event_t));
-   event_nbMalloc ++;
-  
+   if (freeEvent) {
+      result = freeEvent;
+      freeEvent = result->next;
+      event_nbReuse++;
+   } else {
+      result = (struct event_t *)sim_malloc(sizeof(struct event_t));
+      event_nbMalloc ++;
+   }
    assert(result);
    event_nbCreate ++;
 
@@ -75,18 +80,18 @@ void free_event(struct event_t * ev)
 }
 
 void event_run(struct event_t * event)
-{  
-   printf_debug(DEBUG_EVENT, " running ev %p at %f\n", event, event->date); 
-   event->run(event->data); 
-   if (event->type &EVENT_PERIODIC) 
-   { 
+{
+   printf_debug(DEBUG_EVENT, " running ev %p at %f\n", event, event->date);
+   event->run(event->data);
+   if (event->type &EVENT_PERIODIC)
+   {
       event->date += event->period;
       motSim_addEvent(event);
-   } 
+   }
    else {
       free_event(event);
    }
- 
+
 }
 
 double event_getDate(struct event_t * event)

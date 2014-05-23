@@ -20,7 +20,7 @@
 #endif
 
 #define NDES_USES_LOG // Nécessaire localement
-#include <log.h>
+#include "log.h"
 
 #ifdef NDES_USES_LOG_IS_SET
 #   define NDES_USES_LOG
@@ -29,13 +29,13 @@
 #endif
 
 
-#include <ndesObjectFile.h>
+#include "ndesObjectFile.h"
 
 /**
  * @brief définition d'une entrée dans les log
  */
 struct  ndesLogEntry_t {
-   declareAsNdesObject; //< C'est un ndesObject 
+   declareAsNdesObject; //< C'est un ndesObject
 
    motSimDate_t date ; //< Date d'occurence de l'événement
    char * msg;         //< Représentation textuelle
@@ -88,7 +88,7 @@ struct ndesLogEntry_t * ndesLogEntry_create(struct ndesObject_t * object,
 
 /**
  * @brief Structure du log
- * 
+ *
  * On peut en avoir plusieurs si besoin est.
  */
 struct ndesLog_t {
@@ -123,7 +123,7 @@ struct ndesLog_t * ndesLog_create()
 
    // On crée l'objet
    result = (struct ndesLog_t *)sim_malloc(sizeof(struct ndesLog_t));
- 
+
    // Le journal est une liste de logEntry
    result->journal = ndesObjectFile_create(&ndesLogEntryType);
 
@@ -152,11 +152,11 @@ void ndesLog_logLine(struct ndesObject_t * ndesObject, char * line)
 /**
  * @brief Insertion d'une ligne de log avec des ndesObject
  */
-void ndesLog_logLineF(struct ndesObject_t * ndesObject, char * fmt, ...)           
+void ndesLog_logLineF(struct ndesObject_t * ndesObject, char * fmt, ...)
 {
    char msg[1024];
    va_list args;
- 
+
    printf_debug(DEBUG_ALWAYS, "Coucou IN\n");
 
    va_start(args, fmt);
@@ -186,7 +186,7 @@ int ndesLog_dump(char * fileName)
       printf("[LOG] %f %d \"%s\" !\n", le->date, ndesObject_getId(le->object), le->msg);
    }
    ndesObjectFile_deleteIterator(ofi);
-   
+
    return -1;
 }
 

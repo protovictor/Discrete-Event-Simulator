@@ -1,9 +1,9 @@
 /*     Une source de PDU permet de produire des PDUs */
 
-#include <random-generator.h>
-#include <date-generator.h>
-#include <pdu.h>
-#include <motsim.h>
+#include "random-generator.h"
+#include "date-generator.h"
+#include "pdu.h"
+#include "motsim.h"
 
 struct PDUSource_t; //!< Le type d'une source
 
@@ -20,17 +20,17 @@ struct dateSize {
 /**
  * @brief création d'une source de PDUs
  *
- * A chaque source est attribuée une destination et une 
+ * A chaque source est attribuée une destination et une
  * fonction permettant de soumettre à cette destination
  * les PDU produites
- * 
+ *
  */
 struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
 				      void * destination,
 				      processPDU_t destProcessPDU);
 
 /** @brief Création d'un générateur déterministe
- * 
+ *
  *  @param sequence Un tableau de {date, size} définissant chaque PDU
  *  @param destination L'entité aval
  *  @param destProcessPDU La fonction de traitement de la destination

@@ -1,7 +1,7 @@
 #include <stdlib.h>    // Malloc, NULL, ...
 #include <assert.h>
 
-#include <pdu.h>
+#include "pdu.h"
 
 static int pduNB = 0;
 
@@ -42,7 +42,7 @@ motSimDate_t PDU_getCreationDate(struct PDU_t * PDU){
    return PDU->creationDate;
 }
 
-struct PDU_t * PDU_create(int size, void * private) 
+struct PDU_t * PDU_create(int size, void * private)
 {
    struct PDU_t * PDU ;
 

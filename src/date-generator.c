@@ -6,9 +6,10 @@
 #include <stdlib.h>    // Malloc, NULL, exit...
 #include <math.h>      // log
 
-#include <motsim.h>
-#include <probe.h>
-#include <random-generator.h>  
+#include "motsim.h"
+#include "probe.h"
+#include "random-generator.h"
+#include "date-generator.h"
 
 /**
  * @brief Implantation des générateurs de dates.
@@ -20,7 +21,7 @@
 struct dateGenerator_t {
    /** Le generateur aleatoire sur lequel on se fonde. C'est
        concrètement lui qui va générer les dates successives.*/
-   struct randomGenerator_t *randGen; 
+   struct randomGenerator_t *randGen;
 
    /** Une sonde sur les inter arrivees. Elle permettra par exemple
        de vérifier qu'on est conforme à ce que l'on souhaite. */
@@ -38,9 +39,11 @@ struct dateGenerator_t {
  *  @param currentTime la date actuelle
  */
 double dateGenerator_nextDate(struct dateGenerator_t * dateGen, double currentTime)
-{  
+{
+
+
    double result =  randomGenerator_getNextDouble(dateGen->randGen);
-   
+
    if (dateGen->interArrivalProbe){
       probe_sample(dateGen->interArrivalProbe, result);
       printf_debug(DEBUG_GENE, " Mean = %6.3f\n", probe_mean(dateGen->interArrivalProbe));
@@ -50,7 +53,7 @@ double dateGenerator_nextDate(struct dateGenerator_t * dateGen, double currentTi
 }
 
 /** @brief Insertion d'une sonde sur les inter-arrivees.
- * 
+ *
  * @param dateGen le générateur de date sur lequel greffer la sonde
  * @param probe la sonde à y appliquer
  */
@@ -85,7 +88,7 @@ double loi_expo(struct dateGenerator_t * dateGen, double currentTime)
 }
 */
 
-/*
+/**
  * Création d'une loi avec interarrivé exponentielle
  */
 struct dateGenerator_t * dateGenerator_createExp(double lambda)
@@ -99,8 +102,8 @@ struct dateGenerator_t * dateGenerator_createExp(double lambda)
   return result;
 }
 
- /*
-  *  Lognormal distributed interarrival time
+ /**
+  *  Lognormal distribution (for generating random dates)
   */
 
 struct dateGenerator_t * dateGenerator_createLognormal(double alpha, double beta)
@@ -110,25 +113,27 @@ struct dateGenerator_t * dateGenerator_createLognormal(double alpha, double beta
   result->interArrivalProbe = NULL;
 
   result->randGen = randomGenerator_createDoubleLognormal(alpha, beta);
-  
-  return result;  
+
+  return result;
 }
 
  /**
-  *  Weibull distributed interarrival time       - recommended!!!
+  *  Weibull distribution (for generating random dates)
   */
-  
+
 struct dateGenerator_t *dateGenerator_createWeibull(double alpha, double beta)
 {
   struct dateGenerator_t * result = (struct dateGenerator_t * )
                      sim_malloc(sizeof(struct dateGenerator_t));
   result->interArrivalProbe = NULL;
   result->randGen = randomGenerator_createDoubleWeibull(alpha, beta);
+
+  return result;
 }
 
  /**
   *  Gamma distributed interarrival time
-  */ 
+  */
 
 struct dateGenerator_t *dateGenerator_createGamma(double alpha, double beta)
 {
@@ -136,10 +141,12 @@ struct dateGenerator_t *dateGenerator_createGamma(double alpha, double beta)
                      sim_malloc(sizeof(struct dateGenerator_t));
   result->interArrivalProbe = NULL;
   result->randGen = randomGenerator_createDoubleGamma(alpha, beta);
+
+  return result;
 }
 
 
-/*
+/**
  * Modification du paramètre lambda
  */
 void dateGenerator_setLambda(struct dateGenerator_t * dateGen, double lambda)
@@ -147,17 +154,25 @@ void dateGenerator_setLambda(struct dateGenerator_t * dateGen, double lambda)
    randomGenerator_setLambda(dateGen->randGen, lambda);
 }
 
+/**
+ * The function modifies the alpha parameter
+ */
 void dateGenerator_setAlpha(struct dateGenerator_t * dateGen, double alpha)
 {
    randomGenerator_setAlpha(dateGen->randGen, alpha);
 }
+
+
+/**
+ * The function modifies the beta parameter
+ */
 
 void dateGenerator_setBeta(struct dateGenerator_t * dateGen, double beta)
 {
    randomGenerator_setBeta(dateGen->randGen, beta);
 }
 
-/*
+/**
  * Création d'une loi avec interarrivé constante
  */
 struct dateGenerator_t * dateGenerator_createPeriodic(double period)
@@ -172,11 +187,11 @@ struct dateGenerator_t * dateGenerator_createPeriodic(double period)
   return result;
 }
 
-
 /*
  * Prepare for record values in order to replay on each reset
  */
 void dateGenerator_recordThenReplay(struct dateGenerator_t *  d){
   randomGenerator_recordThenReplay(d->randGen);
 };
+
 

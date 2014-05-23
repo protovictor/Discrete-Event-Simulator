@@ -8,32 +8,33 @@
  */
 #include <assert.h>
 
-#include <motsim.h>
-#include <event.h>
-#include <date-generator.h>
-#include <srv-gen.h>
-#include <ndesObject.h>
-#include <log.h>
+#include "motsim.h"
+#include "event.h"
+#include "date-generator.h"
+#include "srv-gen.h"
+#include "ndesObject.h"
+#include "log.h"
 
 #include <stdlib.h>    // Malloc, NULL, exit...
+
 
 enum srvState_t {
   srvStateIdle,
   srvStateBusy
 };
 
-/** 
+/**
  * @brief Définition d'un serveur générique
  */
 struct srvGen_t {
-   declareAsNdesObject; //< C'est un ndesObject 
+   declareAsNdesObject; //< C'est un ndesObject
 
    enum srvState_t          srvState;
    struct PDU_t           * currentPDU;   // The PDU being served
    float                    serviceStartTime;
 
    // Dealing with service time
-   // C'est un peu de la merde parceque mes dates ne savent pas 
+   // C'est un peu de la merde parceque mes dates ne savent pas
    // gérer un débit, ...
    struct dateGenerator_t * dateGenerator;
    enum serviceTime_t       serviceTime;
@@ -41,7 +42,7 @@ struct srvGen_t {
 
    // Gestion du destinataire
    void * destination;          // L'objet auquel sont destinées les PDUs
-   processPDU_t destProcessPDU; // La fonction permettant d'envoyer la PDU   
+   processPDU_t destProcessPDU; // La fonction permettant d'envoyer la PDU
 
    // WARNING : les attributs suivants ne nous permettent pas de
    // préparer la réception de plusieurs PDU !!
@@ -101,7 +102,7 @@ void srvGen_terminateProcess(struct srvGen_t * srv);
 void srvGen_startService(struct srvGen_t * srv, struct PDU_t * pdu)
 {
    struct event_t * event;
-   double date ; 
+   double date ;
 
    assert(pdu != NULL);
 
@@ -155,7 +156,7 @@ void srvGen_terminateProcess(struct srvGen_t * srv)
    }
 
    // On propose la PDU à la destination
-   (void)srv->destProcessPDU(srv->destination, srvGen_getPDU, srv);
+   (void)srv->destProcessPDU(srv->destination, (getPDU_t)srvGen_getPDU, srv);
 
    // On va chercher la prochaine s'il y en a une
    // WARNING : et s'il y en a deux ?
@@ -167,7 +168,7 @@ void srvGen_terminateProcess(struct srvGen_t * srv)
          ndesLog_logLineF(PDU_getObject(pdu), "IN %d", srvGen_getObjectId(srv));
          srvGen_startService(srv, pdu);
       } else { // Si elle ne l'est plus, inutile d'y revenir pour le moment
-         srv->source = NULL; 
+         srv->source = NULL;
       }
    }
 }
@@ -220,7 +221,7 @@ int srvGen_processPDU(struct srvGen_t * server,
 struct PDU_t * srvGen_getPDU(struct srvGen_t * srv)
 {
    struct PDU_t * pdu = srv->currentPDU;
-   
+
    srv->currentPDU = NULL;
 
    ndesLog_logLineF(PDU_getObject(pdu), "OUT %d", srvGen_getObjectId(srv));

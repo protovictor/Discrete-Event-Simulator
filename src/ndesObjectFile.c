@@ -6,8 +6,8 @@
 #include <stdlib.h>    // Malloc, NULL, ...
 #include <assert.h>
 
-#include <ndesObjectFile.h>
-#include <motsim.h>
+#include "ndesObjectFile.h"
+#include "motsim.h"
 
 /*
  * @brief Les maillons de la files sont représentés par cette structure
@@ -125,7 +125,7 @@ void ndesObjectFile_insertObject(struct ndesObjectFile_t * file,
                                  struct ndesObject_t * object)
 {
    struct ndesObjectFileElt_t * pq;
- 
+
    printf_debug(DEBUG_FILE, " file %p insert object %d (Length = %d)\n",
                 file, ndesObject_getId(object),
                 file->nombre);
@@ -186,7 +186,7 @@ void ndesObjectFile_dump(struct ndesObjectFile_t * file)
  */
 struct ndesObjectFileIterator_t {
    struct ndesObjectFile_t    * ndesObjectFile;
-   struct ndesObjectFileElt_t * position;   
+   struct ndesObjectFileElt_t * position;
 };
 
 /*

@@ -9,10 +9,10 @@
 #include <stdlib.h>    // Malloc, NULL, exit...
 #include <assert.h>
 
-#include <motsim.h>
-#include <event.h>
+#include "motsim.h"
+#include "event.h"
 
-#include <dvb-s2-ll.h>
+#include "dvb-s2-ll.h"
 
 /*
  * Caractérisation d'un MODCOD
@@ -65,7 +65,7 @@ void DVBS2ll_reset(struct DVBS2ll_t * dvbs2ll)
 /*
  * Création d'une entité DVB-S2 couche 2. Attention, elle ne contient
  * aucun MODCOD par défaut, il faut en ajouter.
- * 
+ *
  * Le débit est donnée en symboles/seconde
  */
 struct DVBS2ll_t * DVBS2ll_create(void * destination,
@@ -74,7 +74,7 @@ struct DVBS2ll_t * DVBS2ll_create(void * destination,
 				  unsigned int FECFrameBitLength)
 {
    struct DVBS2ll_t * result = (struct DVBS2ll_t * )sim_malloc(sizeof(struct DVBS2ll_t));
- 
+
    if (result) {
       result->nbModCods = 0;
       result->destination = destination;
@@ -85,7 +85,7 @@ struct DVBS2ll_t * DVBS2ll_create(void * destination,
       result->getPDU = NULL;
       result->dummyFecFrameProbe = NULL;
       result->available = 1;
- 
+
       // Ajout à la liste des choses à réinitialiser avant une prochaine simu
       motsim_addToResetList(result, (void (*)(void *))DVBS2ll_reset);
 
@@ -109,7 +109,7 @@ void DVBS2ll_setSource(struct DVBS2ll_t * dvbs2ll, void * source, getPDU_t getPD
  * Ajout d'un MODCOD. Le codage est paramétré par le nombre de bits
  * par BBFRAME et la modulation par le nombre de bits par symbole.
  * La valeur retournée est l'indice de ce nouveau MODCOD.
- * 
+ *
  * WARNING  il serait bon de cacher la taille et de ne montrer que le codage
  */
 int DVBS2ll_addModcod(struct DVBS2ll_t * dvbs2ll, unsigned int bbframeBitLength, unsigned int bitsPerSymbol)
@@ -167,7 +167,7 @@ int DVBS2ll_nbModcod(struct DVBS2ll_t * dvbs2ll)
 
 /*
  * Capacité d'une BBFRAME associée au MODCOD d'indice fourni
- */ 
+ */
 unsigned int DVBS2ll_bbframePayloadBitSize(struct DVBS2ll_t * dvbs2ll, int mcIdx)
 {
    return dvbs2ll->modcod[mcIdx].bitLength;
@@ -185,7 +185,7 @@ unsigned int DVBS2ll_bitsPerSymbol(struct DVBS2ll_t * dvbs2ll, int mcIdx)
  * Temps d'émission d'une BBFRAME associée au MODCOD d'indice fourni
  * Si l'indice n'est pas celui d'un MODCOD géré, le temps donné sera
  * celui de l'émission d'une DUMMY PLFRAME
- */ 
+ */
 double DVBS2ll_bbframeTransmissionTime(struct DVBS2ll_t * dvbs2ll, int mcIdx)
 {
   if (mcIdx < dvbs2ll->nbModCods) {
@@ -267,7 +267,7 @@ void  DVBS2ll_endPropagation(struct DVBS2ll_t * dvbs2ll)
  * Emission d'une PDU au travers d'un MODCOD sélectionné. La PDU doit
  * être d'une taille inférieure ou égale à la taille de charge utile du
  * MODCOD choisi.
- * 
+ *
  * L'indice du MODCOD a utiliser est passe dans le champ prive de la PDU
  */
 void DVBS2ll_sendPDU(struct DVBS2ll_t * dvbs2ll, struct PDU_t * pdu)
@@ -286,7 +286,7 @@ void DVBS2ll_sendPDU(struct DVBS2ll_t * dvbs2ll, struct PDU_t * pdu)
    // demande d'émission d'une trame de bourage (DUMMY PLFRAME)
    if (pdu) {
      mc  = (int)(long)PDU_private(pdu);
-  
+
       bitLength = dvbs2ll->modcod[mc].bitLength;
       //bitsPerSymbol = dvbs2ll->modcod[mc].bitsPerSymbol;
 
@@ -296,7 +296,7 @@ void DVBS2ll_sendPDU(struct DVBS2ll_t * dvbs2ll, struct PDU_t * pdu)
       if (dvbs2ll->modcod[mc].actualPayloadBitSizeProbe) {
          probe_sample(dvbs2ll->modcod[mc].actualPayloadBitSizeProbe, 8.0*(double)PDU_size(pdu));
       }
-   } else { // On insère une DUMMY 
+   } else { // On insère une DUMMY
       mc = dvbs2ll->nbModCods; // Représente une DUMMY PLFRAME,
       if( dvbs2ll->dummyFecFrameProbe) {
 	 probe_sampleEvent(dvbs2ll->dummyFecFrameProbe);
@@ -355,7 +355,7 @@ int DVBS2ll_processPDU(struct DVBS2ll_t * dvbs2ll,
       assert(source != NULL);
 
       pdu = getPDU(source);
-  
+
       DVBS2ll_sendPDU(dvbs2ll, pdu);
    }
 }

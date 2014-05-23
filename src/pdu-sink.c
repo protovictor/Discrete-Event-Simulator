@@ -6,16 +6,16 @@
 #include <stdio.h>     // printf
 #include <stdlib.h>    // Malloc, NULL, exit...
 
-#include <pdu-sink.h>
+#include "pdu-sink.h"
 
-#include <ndesObject.h>
-#include <log.h>
+#include "ndesObject.h"
+#include "log.h"
 
 /**
  * @brief structure d'un puits
  */
 struct PDUSink_t {
-   declareAsNdesObject; //< C'est un ndesObject 
+   declareAsNdesObject; //< C'est un ndesObject
    struct probe_t * insertProbe;
 };
 
@@ -54,12 +54,12 @@ void PDUSink_addInputProbe(struct PDUSink_t * sink, struct probe_t * insertProbe
 int PDUSink_processPDU(void * s, getPDU_t getPDU, void * source)
 {
    printf_debug(DEBUG_PDU, "in\n");
-  
+
    struct PDUSink_t * pduSink = (struct PDUSink_t * )s;
    struct PDU_t * pdu = getPDU(source);
 
    // Si c'est juste pour tester si je suis pret
-   if ((getPDU == NULL) || (source == NULL)) { 
+   if ((getPDU == NULL) || (source == NULL)) {
       printf_debug(DEBUG_PDU, "c'etait un test\n");
       return 1;
    }

@@ -1,7 +1,7 @@
 /*
  * Implantation des gÃ©nÃ©rateurs alÃ©atoires. C'est encore un beau
  * fouilli ! Il faut arriver Ã  distinguer proprement les divers
- * Ã©lÃ©ments. Il y a schÃ©matiquement trois niveaux dans ces objets : 
+ * Ã©lÃ©ments. Il y a schÃ©matiquement trois niveaux dans ces objets :
  *
  *  - Le type des donnÃ©es renvoyÃ©es (entier, rÃ©el, ...)
  *  - La distribution
@@ -16,9 +16,10 @@
 
 #include <assert.h>
 
-#include <motsim.h>
-#include <file_pdu.h>
-#include <random-generator.h>
+#include "motsim.h"
+#include "file_pdu.h"
+#include "random-generator.h"
+
 
 #define PI 3.141592
 
@@ -45,7 +46,7 @@ struct randomGenerator_t {
          unsigned int min;
          unsigned int max;
       } uir;
-      // Pour un ensemble discret de valeurs entiÃ¨res 
+      // Pour un ensemble discret de valeurs entiÃ¨res
       struct uIDiscreteParameter_t{
          int nbValues;
          unsigned int * value;
@@ -59,33 +60,33 @@ struct randomGenerator_t {
          double min;
          double max;
       } d;
-      
+
    } param;
-    
-   //!< Parameters describing the distribution 
+
+   //!< Parameters describing the distribution
    struct {
       double min, max; // Extreme values
       union {
          double lambda; //!< Exponential distribution
-         
+
          struct {       //!< Lognormal, Gamma, Weibull distributions
           double alpha;
           double beta;
          }distr;
-         
+
          struct {       //!< For the http model (webpage size)
           struct randomGenerator_t * szmain;
           struct randomGenerator_t * szin;
           struct randomGenerator_t * nin;
          }comp;
-         
+
          struct {       //!< Discrete distribution
             int nbProba;
             double * proba;
          } discrete;
-         
+
          struct {           //!< ITS distribution
-            int nbParam;    //!< Quantile function number of parameters 
+            int nbParam;    //!< Quantile function number of parameters
             double p1, p2;  //!< Parameters values
 	    union {
                double(*q0par)(double x);
@@ -94,10 +95,10 @@ struct randomGenerator_t {
             } q;    //!< Quantile function
          } its;
       } d;
-   } distParam; 
+   } distParam;
 
    // Prochaine valeur alÃ©atoire conformÃ©ment Ã  la distribution
-   double (*distGetNext)(struct randomGenerator_t * rg); 
+   double (*distGetNext)(struct randomGenerator_t * rg);
 
    // ParamÃ¨tres de la source d'alÃ©a utilisÃ©e
    union {
@@ -106,7 +107,7 @@ struct randomGenerator_t {
    } aleaSrc;
 
    // La fonction donnant la prochaine valeur alÃ©atoire entre 0 et 1
-   double (*aleaGetNext)(struct randomGenerator_t * rg); 
+   double (*aleaGetNext)(struct randomGenerator_t * rg);
 
    // Une sonde sur les valeurs gÃ©nÃ©rÃ©es
    struct probe_t * valueProbe;
@@ -121,11 +122,11 @@ struct randomGenerator_t {
  * Aproximation of lower incomplete gamma function
  */
 
-double incgamma(double x, double alpha)   
+double incgamma(double x, double alpha)
 {
- double sum = 0;  
+ double sum = 0;
  double term = 1.0 / alpha;
- int n=1; 
+ int n=1;
     while(term!=0)
     {
          sum  += term;
@@ -143,7 +144,7 @@ inline double randomGenerator_erand48GetNext(struct randomGenerator_t * rg)
 {
   //   double result = drand48();
    double result = erand48(rg->aleaSrc.xsubi);
-       
+
 
    if (rg->values)
       probe_sample(rg->values, result);
@@ -160,7 +161,7 @@ void randomGenerator_erand48Init(struct randomGenerator_t * rg)
 
    bzero(rg->aleaSrc.xsubi, 3);
    rg->aleaGetNext = randomGenerator_erand48GetNext;
-   
+
 }
 
 /*
@@ -193,7 +194,7 @@ inline double randomGenerator_noDistGetNext(struct randomGenerator_t * rg)
 }
 
 /*
- * Next value with uniform distribution  
+ * Next value with uniform distribution
  */
 inline double randomGenerator_uniformGetNext(struct randomGenerator_t * rg)
 {
@@ -201,11 +202,11 @@ inline double randomGenerator_uniformGetNext(struct randomGenerator_t * rg)
 }
 
 /*
- * Initialisation of uniform distribution  
+ * Initialisation of uniform distribution
  */
 void randomGenerator_uniformInit(struct randomGenerator_t * rg)
 {
-   assert(rg->distribution == rGDistUniform); 
+   assert(rg->distribution == rGDistUniform);
 
    //Les sources sont censÃ©es Ãªtre uniformes entre 0 et 1 ...
    rg->distParam.min = 0.0;
@@ -215,7 +216,7 @@ void randomGenerator_uniformInit(struct randomGenerator_t * rg)
 }
 
 /*
- * Next value with exponential distribution  
+ * Next value with exponential distribution
  */
 double randomGenerator_exponentialGetNext(struct randomGenerator_t * rg)
 {
@@ -224,7 +225,6 @@ double randomGenerator_exponentialGetNext(struct randomGenerator_t * rg)
 
    //  Les sources sont censÃ©es Ãªtre uniformes ...
    alea = rg->aleaGetNext(rg);
-   printf("alea: %f \n", alea);
    result =  - log(alea) /rg->distParam.d.lambda;
 
 /*
@@ -236,16 +236,60 @@ double randomGenerator_exponentialGetNext(struct randomGenerator_t * rg)
 
 
 /*
- * Initialisation of exponential distribution  
+ * Initialisation of exponential distribution
  */
 void randomGenerator_exponentialInit(struct randomGenerator_t * rg, double lambda)
 {
-   assert(rg->distribution == rGDistExponential); 
+   assert(rg->distribution == rGDistExponential);
    rg->distParam.min = 0.0;
    rg->distParam.max = DBL_MAX;
 
    rg->distParam.d.lambda = lambda;
    rg->distGetNext = randomGenerator_exponentialGetNext;
+}
+
+/*
+ * Initialisation of weibull distribution
+ */
+void randomGenerator_WeibullInit(struct randomGenerator_t * rg, double alpha, double beta)
+{
+      assert(rg->distribution == rGDistWeibull);
+      rg->distParam.min = 0.0;
+      rg->distParam.max = DBL_MAX;
+
+      rg->distParam.d.distr.alpha = alpha;
+      rg->distParam.d.distr.beta  = beta;
+
+      rg->distGetNext = randomGenerator_WeibullGetNext;
+}
+
+ /* Initialisation of Gamma distribution */
+
+void randomGenerator_GammaInit(struct randomGenerator_t *rg, double alpha, double beta)
+{
+      assert(rg->distribution == rGDistGamma);
+      rg->distParam.min = 0.0;
+      rg->distParam.max = DBL_MAX;
+
+   rg->distParam.d.distr.alpha = alpha;
+   rg->distParam.d.distr.beta  = beta;
+
+   rg->distGetNext = randomGenerator_GammaGetNext;
+}
+
+/*
+ * Initialisation of the Lognormal distribution
+ */
+void randomGenerator_LognormalInit(struct randomGenerator_t *rg, double alpha, double beta)
+{
+      assert(rg->distribution == rGDistLognormal);
+      rg->distParam.min = 0.0;
+      rg->distParam.max = DBL_MAX;
+
+   rg->distParam.d.distr.alpha = alpha;
+   rg->distParam.d.distr.beta  = beta;
+   rg->distGetNext = randomGenerator_LognormalGetNext;
+
 }
 
 
@@ -255,21 +299,9 @@ double randomGenerator_WeibullGetNext(struct randomGenerator_t * rg)
       double alea, result;
       alea = rg->aleaGetNext(rg);
 
-        result = rg->distParam.d.distr.beta *  pow(-log(1-alea), 
+        result = rg->distParam.d.distr.beta *  pow(-log(1-alea),
                                        1/rg->distParam.d.distr.alpha);
      return result;
-}
-
-void randomGenerator_WeibullInit(struct randomGenerator_t * rg, double alpha, double beta)
-{
-      assert(rg->distribution == rGDistWeibull);   
-      rg->distParam.min = 0.0;
-      rg->distParam.max = DBL_MAX;
-  
-      rg->distParam.d.distr.alpha = alpha;
-      rg->distParam.d.distr.beta  = beta; 
-      
-      rg->distGetNext = randomGenerator_WeibullGetNext;
 }
 
 
@@ -279,95 +311,29 @@ double randomGenerator_GammaGetNext(struct randomGenerator_t * rg)
 {
    double alea, result;
    alea = rg->aleaGetNext(rg);
-   
-   result = ( tgamma(rg->distParam.d.distr.alpha) - incgamma(rg->distParam.d.distr.alpha, rg->distParam.d.distr.beta/alea ) ) / tgamma(rg->distParam.d.distr.alpha); 
+
+   result = ( tgamma(rg->distParam.d.distr.alpha) - incgamma(rg->distParam.d.distr.alpha, rg->distParam.d.distr.beta/alea ) ) / tgamma(rg->distParam.d.distr.alpha);
 
    return result;
 }
- /* Initialisation of Gamma distribution */
-
-void randomGenerator_GammaInit(struct randomGenerator_t *rg, double alpha, double beta)
-{
-      assert(rg->distribution == rGDistGamma);   
-      rg->distParam.min = 0.0;
-      rg->distParam.max = DBL_MAX;
-  
-   rg->distParam.d.distr.alpha = alpha;
-   rg->distParam.d.distr.beta  = beta; 
-
-   rg->distGetNext = randomGenerator_GammaGetNext;
-}
 
 
- // Next value with the Lognormal distribution
+ /* Next value with the Lognormal distribution */
 double randomGenerator_LognormalGetNext(struct randomGenerator_t *rg)
-{  
+{
       double alea;
       double result ;
 
-   // Lognormal distribution  
-  
+
    alea = rg->aleaGetNext(rg);
-  
-   result = exp (   rg->distParam.d.distr.alpha + 
-                    rg->distParam.d.distr.beta * sqrt(2) * pow(erf(2*alea - 1), -1) 
+
+   result = exp (   rg->distParam.d.distr.alpha +
+                    rg->distParam.d.distr.beta * sqrt(2) * pow(erf(2*alea - 1), -1)
                 );
 
    return result;
 
-}  
-
- // Initialisation of the Lognormal distribution
-void randomGenerator_LognormalInit(struct randomGenerator_t *rg, double alpha, double beta)
-{
-      assert(rg->distribution == rGDistLognormal);   
-      rg->distParam.min = 0.0;
-      rg->distParam.max = DBL_MAX;
-  
-   rg->distParam.d.distr.alpha = alpha;
-   rg->distParam.d.distr.beta  = beta; 
-   rg->distGetNext = randomGenerator_LognormalGetNext;
-
 }
-
-
-
-double randomGenerator_ComposedGetNext(struct randomGenerator_t *rg)
-{
-    double mainsize, inlinesize;
-    int inlinenumber;
-    double result;
-    
-    mainsize = randomGenerator_LognormalGetNext(rg->distParam.d.comp.szmain);
-    inlinesize = randomGenerator_LognormalGetNext(rg->distParam.d.comp.szin);
-    inlinenumber = (int) randomGenerator_GammaGetNext(rg->distParam.d.comp.nin);
-    
-    result = mainsize + inlinenumber * inlinesize;    
-
-    return result;
-}
-
-
-void randomGenerator_ComposedInit(struct randomGenerator_t *rg, 
-                                  double main_alpha, double main_beta,
-                                  double inline_alpha, double inline_beta,
-                                  double nalpha, double nbeta)
-{
-   assert(rg->distribution == rGDistComposed);
-   
-   rg->distParam.d.comp.szmain = randomGenerator_createDouble();
-   randomGenerator_setDistributionLognormal(rg->distParam.d.comp.szmain, main_alpha, main_beta);
-
-   rg->distParam.d.comp.szin = randomGenerator_createDouble();
-   randomGenerator_setDistributionLognormal(rg->distParam.d.comp.szin, inline_alpha, inline_beta);
-
-   rg->distParam.d.comp.nin = randomGenerator_createDouble();
-   randomGenerator_setDistributionGamma(rg->distParam.d.comp.nin, nalpha, nbeta);
-  
-  rg->distGetNext = randomGenerator_ComposedGetNext;  
-    
-}
-
 
 
 /*
@@ -375,18 +341,25 @@ void randomGenerator_ComposedInit(struct randomGenerator_t *rg,
  */
 void randomGenerator_setLambda(struct randomGenerator_t * rg, double lambda)
 {
-   assert(rg->distribution == rGDistExponential); 
+   assert(rg->distribution == rGDistExponential);
 
    rg->distParam.d.lambda = lambda;
 }
 
 
+/*
+ * Change alpha
+ */
 void randomGenerator_setAlpha(struct randomGenerator_t *rg, double alpha)
 {
   // assert(rg->distribution == rGDistBimodal);
    rg->distParam.d.distr.alpha = alpha;
 }
 
+
+/*
+ * Change beta
+ */
 void randomGenerator_setBeta(struct randomGenerator_t *rg, double beta)
 {
   // assert(rg->distribution == rGDistBimodal);
@@ -395,14 +368,14 @@ void randomGenerator_setBeta(struct randomGenerator_t *rg, double beta)
 
 
 /*
- * Next value with discrete distribution  
+ * Next value with discrete distribution
  *
  * On gÃ©nÃ¨re une valeur situÃ©e au milieu de l'intervalle
  */
 double randomGenerator_discreteGetNext(struct randomGenerator_t * rg)
 {
    unsigned int n = 0;
- 
+
    double alea = rg->aleaGetNext(rg);
 
    do  {
@@ -419,8 +392,8 @@ void randomGenerator_discreteInit(struct randomGenerator_t * rg,
 {
 
    int v;
- 
-   assert(rg->distribution == rGDistDiscrete); 
+
+   assert(rg->distribution == rGDistDiscrete);
 
    rg->distParam.d.discrete.nbProba = nb;
    rg->distParam.d.discrete.proba = (double *) sim_malloc(nb*sizeof(double));
@@ -510,7 +483,7 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg)
          result = rg->distGetNext(rg);
       break;
       case rGTypeDoubleRange :
-        // ATTENTION, il faudrait normaliser entre distParam.min et max 
+        // ATTENTION, il faudrait normaliser entre distParam.min et max
 	result = rg->param.d.min + rg->distGetNext(rg) * (rg->param.d.max - rg->param.d.min);
       break;
       case rGTypeDoubleEnum :
@@ -636,7 +609,7 @@ struct randomGenerator_t * randomGenerator_createDouble()
    result = randomGenerator_createRaw();
 
    // Data type
-   result->valueType = rGTypeDouble; 
+   result->valueType = rGTypeDouble;
     printf_debug(DEBUG_GENE, "OUT\n");
 
    return result;
@@ -658,49 +631,49 @@ struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda)
 struct randomGenerator_t * randomGenerator_createDoubleGamma(double alpha, double beta)
 {
    struct randomGenerator_t * result = (struct randomGenerator_t *)sim_malloc(sizeof(struct randomGenerator_t));
-  
+
    result = randomGenerator_createDouble();
-   
+
    randomGenerator_setDistributionGamma(result, alpha, beta);
-   
+
    return result;
 }
 
 struct randomGenerator_t * randomGenerator_createDoubleLognormal(double alpha, double beta)
 {
    struct randomGenerator_t * result = (struct randomGenerator_t *)sim_malloc(sizeof(struct randomGenerator_t));
-   
+
    result = randomGenerator_createDouble();
-    
+
    randomGenerator_setDistributionLognormal(result, alpha, beta);
-  
+
    return result;
 }
 
 struct randomGenerator_t * randomGenerator_createDoubleWeibull(double alpha, double beta)
 {
    struct randomGenerator_t * result = (struct randomGenerator_t *)sim_malloc(sizeof(struct randomGenerator_t));
-  
+
    result = randomGenerator_createDouble();
 
    randomGenerator_setDistributionWeibull(result, alpha, beta);
- 
+
    return result;
 }
 
 
-/* 
+/*
  * A double range [min .. max}, default distribution : uniform
  */
 struct randomGenerator_t * randomGenerator_createDoubleRange(double min,
 							     double max)
 {
    struct randomGenerator_t * result = (struct randomGenerator_t *)sim_malloc(sizeof(struct randomGenerator_t));
-   
+
    result = randomGenerator_createRaw();
 
    // Data type
-   result->valueType = rGTypeDoubleRange; 
+   result->valueType = rGTypeDoubleRange;
    result->param.d.min = min;
    result->param.d.max = max;
 
@@ -768,9 +741,9 @@ struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
    int v;
 
    // Data type
-   result->valueType = rGTypeUIntEnum; 
+   result->valueType = rGTypeUIntEnum;
 
-   //    Initialisation des valeurs 
+   //    Initialisation des valeurs
    result->param.uid.nbValues = nbValues;
    result->param.uid.value = (unsigned int *) sim_malloc(nbValues*sizeof(unsigned int));
    //    un bcopy ferait l'affaire
@@ -790,9 +763,9 @@ struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(
 				unsigned int * values,
 				double * proba)
 {
- 
+
    // Create a discrete UInt generator
-   struct randomGenerator_t * result 
+   struct randomGenerator_t * result
          = randomGenerator_createUIntDiscrete(nbValues, values);
 
    // Specifying an explicit distribution
@@ -832,13 +805,13 @@ struct randomGenerator_t * randomGenerator_createDoubleDiscrete(int nbValues,
                                      double * values)
 {
    int v;
- 
+
    struct randomGenerator_t * result = randomGenerator_createRaw();
 
    // Data type
-   result->valueType = rGTypeDoubleEnum; 
+   result->valueType = rGTypeDoubleEnum;
 
-   //    Initialisation des valeurs 
+   //    Initialisation des valeurs
    result->param.dd.nbValues = nbValues;
    result->param.dd.value = (double *) sim_malloc(nbValues*sizeof(double));
    //    un bcopy ferait l'affaire
@@ -853,7 +826,7 @@ struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(int nbValue
                                      double * values, double * proba)
 {
    // Create a discrete double generator
-   struct randomGenerator_t * result 
+   struct randomGenerator_t * result
          = randomGenerator_createDoubleDiscrete(nbValues, values);
 
    // Specifying an explicit distribution
@@ -909,17 +882,6 @@ void randomGenerator_setUniformMinMaxDouble(struct randomGenerator_t * rg, doubl
   rg->param.d.max = max;
 }
 
-void randomGenerator_setDistributionComposed(struct randomGenerator_t * rg, double main_alpha, double main_beta, double inline_alpha, double inline_beta, double nalpha, double nbeta)
-{
- 
-  rg->distribution = rGDistComposed;
-  
-
-  randomGenerator_ComposedInit(rg, main_alpha, main_beta, inline_alpha, inline_beta, nalpha, nbeta);
-
-}
-
-
 // Choix d'une loi exponentielle
 void randomGenerator_setDistributionExp(struct randomGenerator_t * rg, double lambda)
 {
@@ -927,19 +889,21 @@ void randomGenerator_setDistributionExp(struct randomGenerator_t * rg, double la
    randomGenerator_exponentialInit(rg, lambda);
 }
 
-
+// Sets the distribution type to gamma
 void randomGenerator_setDistributionGamma(struct randomGenerator_t * rg, double alpha, double beta)
 {
    rg->distribution = rGDistGamma;
    randomGenerator_GammaInit(rg, alpha, beta);
-} 
+}
 
+// Sets the distribution type to lognormal
 void randomGenerator_setDistributionLognormal(struct randomGenerator_t * rg, double alpha, double beta)
 {
    rg->distribution = rGDistLognormal;
    randomGenerator_LognormalInit(rg, alpha, beta);
-} 
+}
 
+// Sets the distribution type to Weibull
 void randomGenerator_setDistributionWeibull(struct randomGenerator_t * rg, double alpha, double beta)
 {
    rg->distribution = rGDistWeibull;
@@ -948,7 +912,7 @@ void randomGenerator_setDistributionWeibull(struct randomGenerator_t * rg, doubl
 
 
 /*-------------------------------------------------------------------------*/
-/*   ITS functions                                                         */ 
+/*   ITS functions                                                         */
 /*-------------------------------------------------------------------------*/
 
 /**
@@ -1066,7 +1030,7 @@ void randomGenerator_recordThenReplay(struct randomGenerator_t * rg)
 }
 
 /*==========================================================================*/
-/*   Probes                                                                 */ 
+/*   Probes                                                                 */
 /*==========================================================================*/
 void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
 				   struct probe_t * p)
@@ -1075,18 +1039,12 @@ void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
 }
 
 
-unsigned long randomGenerator_getnbSamples(struct randomGenerator_t * rg)
-{ 
-  return probe_nbSamples(rg->values);
-
-}
-
 
 /*==========================================================================*/
 /*   Miscelleanous helper functions                                         */
 /*==========================================================================*/
 
-/** 
+/**
  * @brief Build values and proba arrays from file
  */
 #define ALLOC_STEP 10
@@ -1106,7 +1064,7 @@ void readUIntDiscreteProbaFromFile(char * fileName,
    if (f == NULL) {
       return;
    }
- 
+
    while (!feof(f)) {
       if ((*nbValues % ALLOC_STEP) == 0) {
 	*values = realloc(*values, (*nbValues  + ALLOC_STEP)*sizeof(unsigned int));
@@ -1117,13 +1075,7 @@ void readUIntDiscreteProbaFromFile(char * fileName,
 	(*nbValues)++;
       }
 
-   } 
+   }
    fclose(f);
-}
-
-void randomGenerator_setMinMax(struct randomGenerator_t *rg, double min, double max)
-{
-   rg->distParam.min = min;
-   rg->distParam.max = max;
 }
 

@@ -1,5 +1,6 @@
-#include <ndesObject.h>
-#include <log.h>
+#include "ndesObject.h"
+#include "log.h"
+
 
 static int ndesObject_nb = 0;
 
@@ -18,7 +19,7 @@ struct ndesObject_t * ndesObject_create(void * private,
 
    result->creationDate = motSim_getCurrentTime();
    result->data = private;
-   result->type = objectType;   
+   result->type = objectType;
 
    printf_debug(DEBUG_OBJECT, "ndesObject %p created, id %d type \"%s\"\n",
 		result,
@@ -125,7 +126,7 @@ struct ndesObject_t * ndesObject_defaultGetObject(void * ob)
    result = ((struct ndesObject_t **)ob)[0];
    printf_debug(DEBUG_OBJECT, "OUT (result = %p)\n", result);
 
-   return result ; 
+   return result ;
 }
 
 /**
@@ -147,7 +148,7 @@ void ndesObject_defaultSetObject(void * ob, struct ndesObject_t * ndesObject)
  *
  * Cette fonction permet de créer un objet dont le type est passé en
  * paramètre. Elle fera pour cela appel aux fonctions d'allocation,
- * d'initialisation définies par le type en question. 
+ * d'initialisation définies par le type en question.
  */
 void * ndesObject_createObject(struct ndesObjectType_t * ndesObjectType)
 {

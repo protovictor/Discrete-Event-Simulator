@@ -9,7 +9,7 @@
 #ifndef __DEF_EVENT
 #define __DEF_EVENT
 
-#include <motsim.h>
+#include "motsim.h"
 
 struct event_t {
    int    type;
@@ -36,7 +36,7 @@ extern unsigned long event_nbFree;
 typedef void (*eventAction_t)(void *);
 
 /**
- * @brief  Création d'un événement 
+ * @brief  Création d'un événement
  * Cet événement devra être exécuté à la date passée en
  * paramètre.
  * A cette date, la fonction 'run' sera invoquée avec le
@@ -55,7 +55,7 @@ struct event_t * event_create(void (*run)(void *data),
 			      double date);
 
 /**
- * @brief  Création et insertion d'un événement 
+ * @brief  Création et insertion d'un événement
  * Cet événement devra être exécuté à la date passée en
  * paramètre.
  * A cette date, la fonction 'run' sera invoquée avec le
