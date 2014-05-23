@@ -188,7 +188,7 @@ void TCP_session_SendPage(struct TCP_server_t* server)
   double date;
 
 
-  /* The main object can exceed the MTU, so we split it into multilpe PDUs which
+  /* The main object can exceed the MSS, so we split it into multilpe PDUs which
    * will be transmitted serially to the client
    */
 
@@ -212,9 +212,9 @@ struct TCP_server_t* TCP_server_PDUList_Create(struct TCP_server_t* server, int 
 {
 
   int n, i;
-  int lastsize = size % MTU;
+  int lastsize = size % MSS;
   /* We calculate the number of PDUs in which we will split the packet with the size */
-  n = size / MTU;
+  n = size / MSS;
   if( lastsize != 0)
   n+=1;
   server->PDUnr = n;
@@ -222,7 +222,7 @@ struct TCP_server_t* TCP_server_PDUList_Create(struct TCP_server_t* server, int 
   for(i=1; i<n; i++)
   {
     struct PDUList_t *node = (struct PDUList_t *) sim_malloc(sizeof(struct PDUList_t));
-    node->pdu = PDU_create(MTU, NULL);
+    node->pdu = PDU_create(MSS, NULL);
     node->nextPdu = NULL;
     if(server->firstPdu == NULL)
     {
@@ -285,7 +285,7 @@ void TCP_Send_EmbeddedObjects(struct TCP_server_t *server)
    }while(size<=0);
 
 
-   /* We fragment the object into several PDUs of maximum size equal to MTU */
+   /* We fragment the object into several PDUs of maximum size equal to MSS */
    server = TCP_server_PDUList_Create(server, size);
 
    /* The transmission date for the next embedded object */
