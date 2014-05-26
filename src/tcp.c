@@ -1,9 +1,9 @@
 #include <stdio.h>
-#include <motsim.h>
-#include <ndesObject.h>
-#include <event.h>
-#include <pdu.h>
-#include <tcp.h>
+#include "motsim.h"
+#include "ndesObject.h"
+#include "event.h"
+#include "pdu.h"
+#include "tcp.h"
 
 
 /* A List o PDU's */

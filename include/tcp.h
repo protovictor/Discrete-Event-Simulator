@@ -1,10 +1,10 @@
-#include <file_pdu.h>
-#include <date-generator.h>
-#include <random-generator.h>
+#include "file_pdu.h"
+#include "date-generator.h"
+#include "random-generator.h"
 
 #define MAX_SIZE    2000000  /* 2MB */
 #define MAX_NUMBER  53       /* the maximum number of embedded objects */
-#define MSS 1460             /* maximum segment size = 1460 bytes */
+#define MSS 1460             /* maximum transmission unit = 1500 bytes => the webpage is splitted */
 
 
 struct TCP_Session_t;

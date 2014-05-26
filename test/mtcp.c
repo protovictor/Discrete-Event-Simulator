@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include <motsim.h>
-#include <tcp.h>
-#include <pdu-sink.h>
-#include <srv-gen.h>
+#include "motsim.h"
+#include "tcp.h"
+#include "pdu-sink.h"
+#include "srv-gen.h"
 
 
  int main()
@@ -76,9 +76,10 @@
   motSim_printStatus();
 
   printf("Average Inter-arrival: %f \n", probe_mean(iaProbe));
-  printf("Mean time of journey: %f \n", probe_mean(sejProbe));
-  printf("Mean time of service: %f \n", probe_mean(rtrProbe));
+  printf("Average time of journey: %f \n", probe_mean(sejProbe));
+  printf("Average time of service: %f \n", probe_mean(rtrProbe));
 
 
 return 0;
 }
+
