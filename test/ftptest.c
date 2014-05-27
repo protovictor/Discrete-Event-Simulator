@@ -34,7 +34,7 @@ int main()
 
   /*==========================================*/
   /*                                          */
-  /*       Some sensors for the simulation    */
+  /*      Some sensors for the simulation     */
   /*                                          */
   /*==========================================*/
 

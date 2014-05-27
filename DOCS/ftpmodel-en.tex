@@ -1,0 +1,130 @@
+\section{A FTP model}
+
+The model implemented here is recommended in "cdma2000 Evaluation Methodology".
+
+The structure of a FTP session is:
+\begin{verbatim}
+
+  struct FTP_Session_t{
+    declareAsNdesObject;
+    struct dateGenerator_t    *readingTime;      //!< the time between two ftp sessions
+    struct randomGenerator_t  *sizeGen;          //!< the random generator for the size of files
+
+    struct PDUList_t  *firstPdu;         //!< the first pdu in the list that need to be transmitted
+    struct PDUList_t  *lastPdu;          //!< the last pdu in the list that need to be transmitted
+    int PDUnr;                           //!< the number of PDUs in the list
+    double duration;                     //!< the duration of a session
+
+    void *destination;                    //!< the destination of the files
+    processPDU_t destProcessPDU;          //!< a pointer to the function that will process the files
+
+    int SessionID;                        //!< each session has a different ID
+};
+
+\end{verbatim}
+
+The important parameters for us are:
+\begin{description}
+\item[readingTime] - the time between two consecutive sessions and it is a random variable
+based on an Exponential distribution with $\lambda=0.006$.
+\item[sizeGen] - the size of each file that will be transferred, it's a random variable based on a Lognormal distribution \ref{lognormal_dist} (with $\alpha=14.45$ and $\beta=0.35$).
+\end{description}
+
+
+To create a simulation, we simply call the function:
+\begin{verbatim}
+struct FTP_Session_t* FTP_Session_Create(struct dateGenerator_t *dateGen,
+                                          struct randomGenerator_t *sizeGen,
+                                          void *destination,
+                                          processPDU_t destProcessPDU)
+\end{verbatim}
+
+\textbf{dateGen} and \textbf{sizeGen} are the parameters I described above.
+\textbf{destination} is the destination of the files and \textbf{destProcessPDU} is the function that will process the files.
+
+The algorithm is even simpler than the one from http model:
+\begin{enumerate}
+\item When the session starts, we have all the parameters we need to transmit a file, so we split the file into multiple PDUs of maximum 1460bytes (MSS = MTU-40bytes).
+\item We transmit all the PDUs in order
+\item We prepare the parameters for the next session and we add a new event session to the simulator
+\end{enumerate}
+The algorithm repeats until a preseted time expires.
+
+\subsection{Implementing a simple ftp simulation}
+
+At first, we describe a general simulator:
+
+\begin{verbatim}
+ motSim_create();
+ sink = PDUSink_create();
+\end{verbatim}
+The sink is the destination of the transmitted file at the end of a transfer.
+
+Because between a client and a ftp server is usually some other device (in wireless networks, this is called base station, in local area networks, it is called router), we created a node of the type srvGen\_t:
+\begin{verbatim}
+base_station = srvGen_create(sink, (processPDU_t)PDUSink_processPDU );
+srvGen_setServiceTime (base_station, serviceTimeExp, mean);
+\end{verbatim}
+ The destination of packets that the router/base station forwards is the sink created before.
+ This node serves each packet in exponential time, with mean = 50ms. Before creating the base station, we set the mean variable equal to 50.
+
+We need to define a filePDU what will hold the created PDUs and from which we will take one PDU at a time to send to the base station:
+\begin{verbatim}
+filePDU = filePDU_create(base_station, (processPDU_t)srvGen_processPDU);
+\end{verbatim}
+
+Then we set the parameters for the transfer:
+\begin{verbatim}
+    fileSize = randomGenerator_createDouble();
+    randomGenerator_setDistributionLognormal(fileSize, 14.45, 0.35);
+  
+    readingTime = dateGenerator_createExp(0.006);
+\end{verbatim}
+
+Now that we have initialised all the structure, we can create the one that intereses us more: the ftp session's structure that holds all the parameters for the transfer.
+\begin{verbatim}
+Transfer = FTP_Session_Create(readingTime, fileSize, filePDU, (processPDU_t) filePDU_processPDU );
+\end{verbatim}
+
+We can also put some sensors on the simulator:
+\begin{verbatim}
+   // A probe for the inter-arrival files
+    isProbe = probe_createExhaustive();
+    dateGenerator_addInterArrivalProbe(readingTime, isProbe);
+   // A probe for the base station's service time
+    bsProbe = probe_createExhaustive();
+    srvGen_addServiceProbe(base_station, bsProbe);
+   // A probe for the journey 
+    sejProbe = probe_createExhaustive();
+    filePDU_addSejournProbe(filePDU, sejProbe);
+\end{verbatim}
+
+ We are ready to start the simulator. We start the sessions:
+\begin{verbatim}
+  FTP_Session_Start(Transfer);
+\end{verbatim}
+and the simulator:
+\begin{verbatim}
+    FTP_Session_Start(Transfer);
+
+    motSim_runUntil(duration);
+\end{verbatim}
+ To see the simulation status
+\begin{verbatim}
+ motSim_printStatus();
+\end{verbatim}
+And we can also see the results of the accumulated probes:
+\begin{verbatim}
+    printf("Number of FTP sessions : %d \n", FTP_GetSessionNr(Transfer));
+    printf("Average reading time: %f ms \n", probe_mean(isProbe));
+    printf("Base station serving time: %f \n", probe_mean(bsProbe));
+    printf("Average journey time: %f \n", probe_mean(sejProbe));
+\end{verbatim}
+
+
+
+
+
+
+
+

@@ -3,26 +3,20 @@
 %========================================================================
 \section{A simple http model}
 
- The implemented model represents a simplification of the method recommended in "Source traffic modeling of wireless applications".
+ The model implemented here is recommended in "Source traffic modeling of wireless applications" and it's based on "cdma2000 Evaluation Methodology".
 
 The ON-OFF model suggested in the document is composed from an HTTP-ON phase and an HTTP-OFF phase.
 \begin{description}
- \item[HTTP-ON] phase models the activity after accepting a web request.
- \item[HTTP-OFF] phase represebts the period when a user doesn't make any request. It's formed by the loading page time and the viewing time.
+ \item[HTTP-ON] phase models the activity after accepting a web request. (the reply phase)
+ \item[HTTP-OFF] phase represents the period when a user doesn't make any request. It's formed by the loading page time and the viewing time.
 \end{description}
 
 \subsection{HTTP model}
 
-We have two sets of parameters:
-\begin{itemize}
- \item the first set describes the session level
- \item the second set describes the composition of a web request
-\end{itemize}
-
 The recommended model contains the following random variables:
 
 \begin{description}
- \item[I]: the time between two WWW sessions
+ \item[I]: the time between two http sessions (I considered each request-reply pair as single session)
  \item[X]: the number of requests per session
  \item[V]: the web request viewing time(HTTP-OFF time)
  \item[M]: the size of main object of a webpage
@@ -34,7 +28,7 @@ The recommended model contains the following random variables:
 Thus being said, the random variable are distributed in the following way:
 
 \begin{description}
- \item[I] - it is hard to establish a distribution, so it is used I = 1 second between two sessions;
+ \item[I] - it is hard to establish a distribution, in real world, I is aproximative 1s;
  \item[X] - Lognormal distributed (\ref{lognormal_dist}) with a mean E = 25 and a standard deviation $\sigma$=100;
  \item[V] - Weibull distributed (\ref{weibull_dist}) with a mean of 39.5 seconds( $\alpha$ = 0.5, $\beta$ = 4.44);
  \item[M] - Lognormal distributed(\ref{lognormal_dist}) ($\alpha$ = 1.31, $\beta$ = 1.41) - with a mean of 10kB;
@@ -43,78 +37,219 @@ Thus being said, the random variable are distributed in the following way:
  \item[R] - Lognormal distributed(\ref{lognormal_dist}) ($\alpha$ = 5.84, $\beta$ = 0.29) - with a mean of 360B;
 \end{description}
 
-\subsection{Implementation of the simulator}
+\subsection{The implementation}
+
+ The model consists from two parts:
+  \begin{description}
+    \item[Request]: a client sends a request to the web server  
+    \item[Reply]: the server receives the request and responds with a page
+  \end{description}
+  The reply part was only suggested in the source code to make the simulation more realistic and to help any user to understand what the code does. 
+The request contains information about the webpage, so it's necessary for us to create a realistic request. Sending the http request wasn't really done, 
+because the already implemented network discrete event simulator permits only one-way traffic, so we represent just the very important part of the http 
+traffic, and that is downloading a webpage, based on a request.
+  The process of viewing a webpage involves two major actors: a client, a web server.
+  The client was represented in the code through a structure:
+\begin{verbatim}
+
+struct TCP_client_t {
+   declareAsNdesObject;
+
+   struct dateGenerator_t *time_c;             //!< starting time of a http request 
+   struct randomGenerator_t *mainObjSizeGen;   //!< main object size generator
+   struct randomGenerator_t *embObjNrGen;      //!< embedded object number generator
+   struct randomGenerator_t *embObjSzGen;      //!< embedded object size
+
+   void *destination;                          //!< destination of the received page
+   processPDU_t destProcessPDU;                //!< the function that will process the received page
+};
+\end{verbatim}
+ As you can see above, there are some random generators for the request stage:
+ \begin{description}
+ \item[time\_c] - for the starting time of each request (in the recommended model, 
+this date generator uses a random generator based on an Exponential distribution (with $\lambda$=0.02 );
+ \item[mainObjSizeGen] - is based on a Lognormal distribution(with $\alpha=1.31$ , $\beta=1.41$) gives a random size for each webpage's main object;
+ \item[embObjNrGen] - is based on a Gamma distribution(with $\alpha=0.24$ , $\beta=23.42$) gives a random number of embedded objects for each webpage;
+ \item[embObjSzGen] - is based on a Lognormal distribution(with $\alpha=-0.75$ , $\beta=2.36$);
+ \end{description}
+   Beside these, there are declared a pointer to the destination of the received files in the reply process and a function that will take care of these files.
+ 
+ At the beggining of a simulation, we create a client, using the function:
+\begin{verbatim}
+struct TCP_client_t* TCP_clientCreate(struct dateGenerator_t *dg,
+                                      struct randomGenerator_t *maiszg,
+                                      struct randomGenerator_t *embnr,
+                                      struct randomGenerator_t *embsz,
+                                      void *destination,
+                                      processPDU_t destProcessPDU)
+\end{verbatim}
+At the beginning of each session, it is created a getRequest
+\begin{verbatim}
+  struct getRequest_t* getRequest_Create(int mainsz, int embnr, struct randomGenerator_t *embsz)
+{
+    struct getRequest_t * result = (struct getRequest_t *)sim_malloc(sizeof(struct getRequest_t));
+
+  result->mainObjSize = mainsz;
+  result->embObjNr = embnr;
+  result->embObjSize = embsz;
+
+ return result;
+}
+\end{verbatim}
+where the parameters mainsz and embnr are generated with the random generators from the TCP\_client\_t structure.
+
+After the creation of a request, the information about the webpage is passed to the web server. This information reffers to: main object size, number of embedded
+objects, embedded objects size.
+At this moment, the webserver can respond to the client with the webpage he requested.
+The transmission of the page is made in two steps:
+\begin{description}
+ \item - the main object of the page is sent to the client
+ \item - the embedded objects are sent to the client 
+\end{description} 
+ 
+Each object (main or embedded) is splitted (before being sent) into multiple PDUs of maximum 1460 bytes (MSS = MTU - 40bytes).
+The PDUs are sent in order to the client (and reassembled at destination, but this part we don not need to simulate).
+The server's structure:
+
+\begin{verbatim}
+
+ struct TCP_server_t {
+   declareAsNdesObject;
+
+   struct dateGenerator_t *time_s;              //!< reply transmission starting time
+
+   struct getRequest_t  *HTTP_GET;              //!< the PDU received from the client
+
+   struct PDUList_t *firstPdu;                  //!< the first PDU in the list that will be transmitted
+   struct PDUList_t *lastPdu;                   //!< the last PDU in the list that will be transmitted
+
+   int PDUnr;                                   //!< the number of PDUs in the list
+   double duration;                             //!< time of transmition of an object
+
+   void                 *destination;           //!< the destination where the server sends the PDUs
+   processPDU_t         destProcessPDU;         //!< the process that will receive the PDUs
+
+};
+
+
+\end{verbatim}
+ 
+ The algorithm is simple:
+ \begin{enumerate}
+  \item The session starts with the creation of a request(based on parameters suggested by the traffic model)    
+  \item The request is passed to the server
+  \item The server begins to send the page
+         \begin{enumerate}
+          \item the main object is sent (after being fragmented into multiple PDUs)
+          \item the embedded objects are sent (after being fragmented into multiple PDUs)
+         \end{enumerate}
+  \item A new http session is prepared and it's added to the simulator. 
+ \end{enumerate}
+ 
+ The algorithm repeats until the simulation ends (after a preseted duration).
+
+
+\subsection{Implementing a simple http simulation}
 At first, we describe a general simulator:
+
 \begin{verbatim}
-
-   // We create a general simulator
-       motSim_create();          
-       sink = PDUSink_create();
-   // The recommended model uses for interarrival time a Weibull distribution
-  dateGenWb = dateGenerator_createWeibull(alpha, beta);
-  
-  server = srvGen_create(sink, (processPDU_t)PDUSink_processPDU);
-  srvGen_setServiceTime(server, serviceTimeProp, 1.0/debit); 
-
-  filePDU = filePDU_create(server, (processPDU_t)srvGen_processPDU); 
-
+ motSim_create();
+ sink = PDUSink_create();
 \end{verbatim}
+The sink is the destination of the transmitted webpage at the end of a session.
 
-\subsubsection{The request}
-
-The variable V described before represents the time when a user reads a page, the time between two consecutive requests.
- This being told, for the request part, I suggest the following code to set the simulator:
-
+Because between a client and a webserver is usually some other device (in wireless networks, this is called base station, 
+in local area networks, it is called router), we created a node of the type srvGen\_t:
 \begin{verbatim}
-
-   /* The size of GetRequest packets is Lognormal distributed 
-      with req_alpha = 5.84 and req_beta = 0.29
-   */    
-      getReqSzGen = randomGenerator_createDouble();
-      randomGenerator_setDistributionLognormal(getReqSzGen, req_alpha, req_beta);
-      
-      getRequest = PDUSource_create(dateGenWb, filePDU, (processPDU_t)filePDU_processPDU); 
-    /* We associate the PDUSource the random size generator getReqSzGen */
-      PDUSource_setPDUSizeGenerator(reqPDU, getReqSzGen);
-
+  base_station = srvGen_create(sink, (processPDU_t)PDUSink_processPDU );
+  srvGen_setServiceTime (base_station, serviceTimeExp, mean);
 \end{verbatim}
-
- To start the simulator:
-\begin{verbatim}
-      PDUSource_start(getReqSzGen);
-\end{verbatim}
-
-\subsubsection{The Reply} 
-
-The random variables for main object size, inline object average size and number use Lognormal and Gamma distributions.
- These are implemented in the source random-generator.c
-
-To set the simualtor for a http reply:
-
-\begin{verbatim}
-      reqSizeGen = randomGenerator_createUInt();
-      randomGenerator_setDistributionComposed(reqSizeGen, a, b, ain, bin, galpha, gbeta);
-      
+ The destination of packets that the router/base station forwards is the sink created before.
+ This node serves each packet in exponential time, with mean = 50ms. Before creating the base station, we set the mean variable equal to 50.
  
-      reqPDU = PDUSource_create(dateGenWb, filePDU, (processPDU_t)filePDU_processPDU);  
-  
-      /* We associate the size of the request packet to the reqPDU */
-      PDUSource_setPDUSizeGenerator(reqPDU, reqSizeGen);
-\end{verbatim}
+The process of transmitting a webpage is the following:
+\begin{description}
+ \item - the webserver sends each PDU to the base station/router
+ \item - the base station/router has a time to process these PDUs and after that it sends them at the client
+ \item - the client receives the PDUs and reassembles the packets into a webpage
+\end{description}
 
- To start the simulator:
+ We need to define a filePDU what will hold the created PDUs and from which we will take one PDU at a time to send to the base station:
 \begin{verbatim}
-PDUSource_start(reqPDU);
+filePDU = filePDU_create(base_station, (processPDU_t)srvGen_processPDU);
 \end{verbatim}
  
-  For the structure of the page, I used a random generator composed from three distributions(\ref{composed_rg}) for the random variables: main object size, inline object size and number of inline objects.
-  In the distribution parameter structure of the random generator, I added also a the option of a size main generator, inline main generator and a number inline object generator.
+ For creating a request, we need to create some generators:
+\begin{verbatim}
+ /* We create random generators for the request parameters*/
+  mainObjSize = randomGenerator_createDouble();
+  embObjNr = randomGenerator_createDouble();
+  embObjSize = randomGenerator_createDouble();
+  /* And we set them to default distributions and parameters */
+  Request_LoadDefault(mainObjSize, embObjNr, embObjSize);
+\end{verbatim}
+ We created random generators with default parameters and a date generator to get dates of each session starting time. In this test, we assumed
+that a client requests a new webpage at each 15 seconds (15000ms).
+\begin{verbatim}
+dg = dateGenerator_createPeriodic(15000);
+\end{verbatim}
+
+ After we finished to set all the parameters for a request, we create a client structure that will hold these parameters for further use:
+\begin{verbatim}
+/**
+ * @brief The function creates a structure that holds the parameters of a request
+ * @param mainszg a pointer to the random generator that gives a random size for the main object
+ * @param embnr a pointer to the random generator that gives a random size for the number of embedded objects
+ * @param embsz a pointer to the random generator that gives a random size for each embedded object
+ * @param destination a pointer to the destination of the received packets
+ * @param destProcessPDU the function that will process the received packets
+ */
+Client = TCP_clientCreate(dg, mainObjSize, embObjNr, embObjSize, sink, (processPDU_t)PDUSink_processPDU);
+\end{verbatim}
+
+The only parameter that the server needs is the time between two transmissions, which is a random
+variable Weibull distributed (\ref{weibull_dist}):
+\begin{verbatim}
+  dateGen = dateGenerator_createWeibull(0.5, 4.44);
+  
+/**
+ * @brief The function creates a webserver that send a webpage to the client who requested it
+ * @param dg a pointer to the date generator that gives random departure dates for each object in the webpage
+ * @param destination a pointer to the structure that will hold the packets that need to be transmitted
+ * @param destProcessPDU the function that will process the packets from the destination
+ */
+  WebServer = TCP_serverCreate(dateGen, filePDU, (processPDU_t)filePDU_processPDU);
+\end{verbatim}
+
+ We put the two actors into one structure:
+\begin{verbatim}
+Session = TCP_Session_Create(Client, WebServer);
+\end{verbatim}
+and we start the transmission of webpages
+\begin{verbatim}  
+TCP_Session_start(Session);
+\end{verbatim}
+The pair of request-reply repeats until a preseted time
+\begin{verbatim}
+  motSim_runUntil(duration);
+\end{verbatim}
+To print the status of the simulation at the end of the duration, we call
+\begin{verbatim} 
+ motSim_printStatus();
+\end{verbatim}
+
+  To take some probes while the simulation is running, we can put some sensors on the generated data or the service time of the base station:
 
 \begin{verbatim}
-         struct randomGenerator_t * szmain;
-         struct randomGenerator_t * szin;
-         struct randomGenerator_t * nin;
-\end{verbatim} 
+ // A sensor of inter-arrivals of embedded objects
+       iaProbe = probe_createExhaustive();
+       dateGenerator_addInterArrivalProbe(dateGen, iaProbe);
 
+ // A sensor for the journey/sejour
+       sejProbe = probe_createExhaustive();
+       filePDU_addSejournProbe(filePDU, sejProbe);
 
-
+ // A sensor for the base station service time
+       bsProbe = probe_createExhaustive();
+       srvGen_addServiceProbe(base_station, bsProbe);
+\end{verbatim}

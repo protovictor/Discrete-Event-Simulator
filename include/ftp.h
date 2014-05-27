@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "tcp.h"
+#include "http.h"  // for the MSS value
 #include "motsim.h"
 #include "pdu.h"
 #include "srv-gen.h"

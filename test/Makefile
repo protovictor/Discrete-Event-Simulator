@@ -9,7 +9,7 @@ export LDFLAGS=-O3 -L$(NDES_PATH)/lib -lndes -lm
 TESTS = generators-0 generators-1 \
 	generators-3 generators-4 generators-5 \
 	drr \
-        mtcp\
+        httptest\
         ftptest\
 #	file-pdu file-pdu-2 file-pdu-3 \
 #	debits \
@@ -29,8 +29,8 @@ tests :  $(TESTS)
 drr : drr.o ../$(SRC_DIR)/libndes.a
 	$(CC) drr.o -o drr $(LDFLAGS)
 
-mtcp: mtcp.c
-	$(CC) $(CFLAGS) mtcp.c -o mtcp $(LDFLAGS)
+httptest: httptest.c
+	$(CC) $(CFLAGS) httptest.c -o httptest $(LDFLAGS)
 
 ftptest: ftptest.c
 	$(CC) $(CFLAGS) ftptest.c -o ftptest $(LDFLAGS)

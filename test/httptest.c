@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "motsim.h"
-#include "tcp.h"
+#include "http.h"
 #include "pdu-sink.h"
 #include "srv-gen.h"
 
@@ -15,10 +15,10 @@
   struct randomGenerator_t *mainObjSize, *embObjNr, *embObjSize;
   struct dateGenerator_t   *dateGen, *dg;
 
-  struct probe_t           *sejProbe, *iaProbe, *rtrProbe;
+  struct probe_t           *sejProbe, *iaProbe, *bsProbe;
   struct PDUSink_t         *sink;
   struct filePDU_t         *filePDU;
-  struct srvGen_t          *router;  /* the router who forwards the packets to the webserver */
+  struct srvGen_t          *base_station;  /* the base station who forwards the packets to the webserver */
 
   double duration = 100000.0;        /* the maximum duration of the simulation */
   double mean = 50;                  /* mean = 50ms - exponential distribution*/
@@ -27,10 +27,10 @@
   sink = PDUSink_create();
 
 
-  router = srvGen_create(sink, (processPDU_t)PDUSink_processPDU);
-  srvGen_setServiceTime(router, serviceTimeExp, mean);
+  base_station = srvGen_create(sink, (processPDU_t)PDUSink_processPDU);
+  srvGen_setServiceTime(base_station, serviceTimeExp, mean);
 
-  filePDU = filePDU_create(router, (processPDU_t)srvGen_processPDU);
+  filePDU = filePDU_create(base_station, (processPDU_t)srvGen_processPDU);
 
   /* We create random generators for the request parameters*/
   mainObjSize = randomGenerator_createDouble();
@@ -63,9 +63,9 @@
        sejProbe = probe_createExhaustive();
        filePDU_addSejournProbe(filePDU, sejProbe);
 
- // A sensor for the router service time
-       rtrProbe = probe_createExhaustive();
-       srvGen_addServiceProbe(router, rtrProbe);
+ // A sensor for the base station service time
+       bsProbe = probe_createExhaustive();
+       srvGen_addServiceProbe(base_station, bsProbe);
 
  //------------------------------------------------------
 
@@ -77,7 +77,7 @@
 
   printf("Average Inter-arrival: %f \n", probe_mean(iaProbe));
   printf("Average time of journey: %f \n", probe_mean(sejProbe));
-  printf("Average time of service: %f \n", probe_mean(rtrProbe));
+  printf("Average time of service: %f \n", probe_mean(bsProbe));
 
 
 return 0;
