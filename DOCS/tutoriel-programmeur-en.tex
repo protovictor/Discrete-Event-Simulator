@@ -1,0 +1,202 @@
+%========================================================================
+%
+%========================================================================
+\section{Extension of the simulator}
+\label{section:extension}
+
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Implementation of a scheduler}
+\label{subsection:tut-ordo}
+
+   For example, we will implement a {\em Round
+Robin} scheduler. The source files and the {\tt Makefile} are in the directory {\tt tuto-prog-1}.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{The characteristics of the scheduler}
+
+   Forget about the {\tt include} and a look at how the
+scheduler is characterised:
+  
+\begin{verbatim}
+#define SCHED_RR_NB_INPUT_MAX 8
+
+struct rrSched_t {
+   // The destination (basically a link)
+   void         * destination;
+   processPDU_t   destProcessPDU;
+
+   // The sources (the input files)
+   int        nbSources;
+   void     * sources[SCHED_RR_NB_INPUT_MAX];
+   getPDU_t   srcGetPDU[SCHED_RR_NB_INPUT_MAX];
+
+   // The last source served by the tourniquet
+   int lastServed;
+};
+\end{verbatim}
+
+    We need to know the upstream entities, since we want to
+treat them separately!
+
+    Creating the function is quite simple:
+
+\index{rrSched\_create}
+\begin{verbatim}
+struct rrSched_t * rrSched_create(void * destination,
+				  processPDU_t destProcessPDU)
+{
+   struct rrSched_t * result = (struct rrSched_t * )sim_malloc(sizeof(struct rrSched_t));
+
+   // Destination management
+   result->destination = destination;
+   result->destProcessPDU = destProcessPDU;
+
+   // No source defined
+   result->nbSources = 0;
+
+   // It starts somewhere ...
+   result->lastServed = 0;
+
+   return result;
+}
+\end{verbatim}
+
+    It manages the destination, like any entity that can provide
+{\sc pdu}s should do, and we take care of its specificities.
+
+    For example, a source will be assigned as follows:
+
+\index{rrSched\_addSource}
+\begin{verbatim}
+void rrSched_addSource(struct rrSched_t * sched,
+		       void * source,
+		       getPDU_t getPDU)
+{
+   assert(sched->nbSources < SCHED_RR_NB_INPUT_MAX);
+
+   sched->sources[sched->nbSources] = source;
+   sched->srcGetPDU[sched->nbSources++] = getPDU;
+}
+\end{verbatim}
+
+   Be careful, this is not very robust! But this is not the objective
+here \ldots
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{The function {\tt rrSched\_getPDU}}
+ 
+   This function is invoked by the downstream entity for
+obtaining a {\sc pdu}. It is in this function that we are going to
+implement the scheduling algorithm.
+
+    Here is the code
+
+\index{rrSched\_getPDU}
+\begin{verbatim}
+struct PDU_t * rrSched_getPDU(void * s)
+{
+   struct rrSched_t * sched = (struct rrSched_t * )s;
+   struct PDU_t * result = NULL;
+
+   assert(sched->nbSources > 0);
+
+   int next = sched->lastServed;
+
+   // What is the next source to serve ?
+   do {
+      // We search for the next source who can give us something
+      next = (next + 1)%sched->nbSources;
+      result = sched->srcGetPDU[next](sched->sources[next]);
+   } while ((result == NULL) && (next != sched->lastServed));
+
+   if (result)
+     sched->lastServed = next;
+   return result;
+}
+\end{verbatim}
+
+   
+   In fact, there is not much to say! The scheduling algorithm is applied and it possibly provides a {\tt NULL} {\sc pdu} if there is nothing to schedule.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{The function {\tt rrSched\_processPDU}}
+
+   Go to the {\tt rrSched\_processPDU} function
+that is invoked by a source that has a {\sc pdu} and who whill be
+passed to the scheduler.
+
+    It should be treated if possible, but do not treat if
+it can not be treat. Here is the beginning of the function
+
+\index{rrSched\_processPDU}
+\begin{verbatim}
+int rrSched_processPDU(void *s,
+		       getPDU_t getPDU,
+		       void * source)
+{
+   int result;
+   struct rrSched_t * sched = (struct rrSched_t *)s;
+
+   printf_debug(DEBUG_SCHED, "in\n");
+\end{verbatim}
+
+    I used the debugging, for example. We simply make a {\em cast}
+to respect the prototype functions.
+
+    The first thing to do is to check availability of the
+downstream entity:
+
+\begin{verbatim}
+   // La destination est-elle prete ?
+   int destDispo = sched->destProcessPDU(sched->destination, NULL, NULL);
+\end{verbatim}
+  
+   Now we will treat the case of test ({\tt NULL} parameters  to test our availability):
+
+\begin{verbatim}
+   // If it is a test available, I depend on the downstream
+   if ((getPDU == NULL) || (source == NULL)) {
+      result = destDispo;
+\end{verbatim}
+
+  If the downstream entity is ready, we told it to pick a {\sc pdu} (that one or another, it is the algorithm that will tell, but we do not see how it could
+be another!). Otherwise, it drops, \ldots
+
+\begin{verbatim}
+   } else {
+      if (destDispo) {
+         // If the approval is available, he was told to pick a PDU and it
+         // will start the scheduler
+         result = sched->destProcessPDU(sched->destination, rrSched_getPDU, sched);
+      } else {
+         // It does not matter if the downstream (support a priori) is not ready
+         result = 0;
+      }
+   }
+\end{verbatim}
+
+   On oublie pas de renvoyer le résultat !
+
+\begin{verbatim}
+
+   printf_debug(DEBUG_SCHED, "out\n");
+   return result;
+}
+\end{verbatim}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Use}
+
+   Well, I let you read the source!
+

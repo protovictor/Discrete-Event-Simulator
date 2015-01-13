@@ -1,0 +1,431 @@
+%========================================================================
+%
+%========================================================================
+\section{Tutorial}
+\label{section:user-tuto}
+
+%------------------------------------------------------------------------
+\subsection{Introduction}
+
+   Congratulations! You are ready to enter the fabulous world of
+{\sc ndes}, \ldots
+ 
+    It's basically an artfully embellished library with numerous bugs and ready to help you (or not) to your own network simulator!
+
+    The implementation of a simulator is done by writing a
+C program using this library.
+
+
+%------------------------------------------------------------------------
+\subsection{Installing}
+
+\begin{verbatim}
+ $ git clone https://github.com/Manu-31/ndes.git
+ $ cd ndes
+ $ make
+ $ make install
+\end{verbatim}
+
+   Do not worry, it does not install anything yet! This does
+as copying a library (static) in a dedicated directory.
+
+    We can also compile some test programs:
+
+\begin{verbatim}
+ $ make tests-bin
+\end{verbatim}
+%$
+    And why not, to run it:
+
+\begin{verbatim}
+ $ make tests
+\end{verbatim}
+%$
+
+   Obviously, the {\tt OK} messages don't prove us anything! Error messages tell us that there are problems \ldots {} as we were expected.
+
+%------------------------------------------------------------------------
+\subsection{My first simulation : the file M/M/1 !}
+
+   The source file (and its Makefile, because we respect our client) is found in the directory {\tt example/tutorial-1}.
+
+   In {\sc ndes}, the system will be modeled by a source, followed by a queue, downstream of which it exists a monitoring server followed by a sink. I leave you to draw a picture and I will publish here the prettiest one!
+
+%........................................................................
+\subsubsection{Creating a simulator}
+
+   Before any action, we create the simulator in the following way:
+
+\begin{verbatim}
+#include <motsim.h>
+
+...
+
+   /* Create a simulator */
+   motSim_create();
+\end{verbatim}
+
+%........................................................................
+\subsubsection{Creating a sink}
+
+   A sink is an object that receives messages without complaining and
+which destroys them instantly. It is very simple to create a sink:
+
+\begin{verbatim}
+#include <pdu-sink.h>
+
+...
+
+   struct PDUSink_t       * sink; // Déclaration d'un puits
+
+   ...
+
+   /* Create a sink */
+   sink = PDUSink_create();
+\end{verbatim}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Creating a server}
+   
+   As we do not want to do anything intelligent with our server, we will use a generic server like this:
+
+
+\begin{verbatim}
+#include <srv-gen.h>
+
+...
+
+   struct srvGen_t        * serveur; // Déclaration d'un serveur générique
+
+...
+
+   /* Create a server */
+   serveur = srvGen_create(sink, (processPDU_t)PDUSink_processPDU);
+\end{verbatim}
+
+   The creation of the server is somewhat more complicated than that of
+sinks. The reason is that the server firstly needs to know who to send
+clients ({\sc pdu}s for {\sc ndes}). It must therefore say what function they apply (here {\tt PDUSink\_processPDU} a specific function sink) and how an
+entity applies this function (our single sink, here). To know the function, it must be sought in the description of the target entity. In our example, the function {\tt PDUSink\_processPDU} is described in the section dedicated to the sinks.
+
+    More details about these functions are found in the section
+\ref{section:architecture} which describes the overall architecture.
+
+    As we want a M/M/1 queue, we need to tell our server that its processing time is an exponential parameter {\tt mu}.
+
+  
+\begin{verbatim}
+   float   mu = 10.0; // parameter of the server
+
+   ...
+
+   /* Set server's parameters */
+   srvGen_setServiceTime(serveur, serviceTimeExp, mu);
+\end{verbatim}
+
+   Generic servers are described more specifically in the
+section \ref{section:srv_gen}.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Creating a file}
+ 
+   A file allows to store the {\sc pdu}s in transit. We can create a file 
+in the following way: 
+  
+
+\begin{verbatim}
+   struct filePDU_t       * filePDU; // Declaration of a file pdu
+
+    ...
+
+   /* Create a file pdu */
+   filePDU = filePDU_create(serveur, (processPDU_t)srvGen_processPDU);
+\end{verbatim}
+
+   Without further add, the files are not bounded. They
+are precisely described in section \ref{section:file}. The
+two parameters of the function to create the file have the same role as those of the function to create the server.
+ 
+%........................................................................
+%
+%........................................................................
+\subsubsection{Creating a source}
+
+   We will use an object of {\sc ndes} whose role is to produce {\sc pdu}s. But before that, we need to create another object that indicates the time when it produces them: this is a "time generator". Time generators are described in section \ref{section:date_generator}.
+
+    We want a poisonn source, in conclusion an exponential generator:
+
+\begin{verbatim}
+#include <date-generator.h>
+
+...
+
+   struct dateGenerator_t * dateGenExp; // Un générateur de dates
+   float   lambda = 5.0 ; // Intensité du processus d'arrivée
+
+   ...
+
+   /* Create a data generator */
+   dateGenExp = dateGenerator_createExp(lambda);
+\end{verbatim}
+
+   And now we can create our source:
+
+\begin{verbatim}
+#include <pdu-source.h>
+
+...
+
+   struct PDUSource_t     * sourcePDU;  // Une source
+
+   ...
+
+   sourcePDU = PDUSource_create(dateGenExp, 
+				filePDU,
+				(processPDU_t)filePDU_processPDU);
+\end{verbatim}
+  
+   The first parameter is the object which allows him to determine
+the date of sending. The following two are similar to those passed
+when creating the file and the server.
+   
+%........................................................................
+%
+%........................................................................
+\subsubsection{The implementation of probes}
+
+   
+   Yes, I know, the title is a little scary, but it will be simple. 
+When you want to run a simulator, it is generaly hoped to get results.
+   In {\sc ndes}, they will be collected by a specific tool, the probe(the sensor).
+
+   Different types of sensors are described in section \ref{section:sondes}.
+   Here we only use exhaustive probes. For each object described above, the list of available probes is provided.   
+
+   We declare and initialize them like this:   
+
+\begin{verbatim}
+#include <probe.h>
+
+...
+
+   struct probe_t         * sejProbe, * iaProbe, * srvProbe; // Les sondes
+
+...
+
+   /* A sensor for inter-arrival time */
+   iaProbe = probe_createExhaustive();
+   dateGenerator_addInterArrivalProbe(dateGenExp, iaProbe);
+
+   /* A sensor for journey time */
+   sejProbe = probe_createExhaustive();
+   filePDU_addSejournProbe(filePDU, sejProbe);
+
+   /* A sensor for service time */
+   srvProbe = probe_createExhaustive();
+   srvGen_addServiceProbe(serveur, srvProbe);
+\end{verbatim}
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Launch of the simulation}
+   
+   
+   That's it, we're finally ready to start the
+simulation. We must activate the desired entities at the appropriate
+time. Here there is only a single source to activate, and we wish
+to do it from the beginning of the simulation:
+
+
+\begin{verbatim}
+   /* We activate de source */
+   PDUSource_start(sourcePDU);
+\end{verbatim}
+
+   We are now launching the simulation. We'll make it last
+100 seconds:
+
+\begin{verbatim}
+   /* The simulation lasts 100 s = 100 000ms */
+   motSim_runUntil(100000.0);
+\end{verbatim}
+
+   We can then display some internal settings of the simulator:
+
+\begin{verbatim}
+   motSim_printStatus();
+\end{verbatim}
+
+   And that's it!
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Showing the results}
+  
+   Now that our simulation is complete, we certainly
+want to see the result. We use for this the functions
+provided by the probes, for example:  
+
+
+\begin{verbatim}
+   /* Print scalar results */
+   printf("%d packets in a file\n",
+	  filePDU_length(filePDU));
+   printf("Average time of journey = %f\n",
+	  probe_mean(sejProbe));
+   printf("Average inter-arival   = %f (1/lambda = %f)\n",
+	  probe_mean(iaProbe), 1.0/lambda);
+   printf("Average time of service = %f (1/mu     = %f)\n",
+	  probe_mean(srvProbe), 1.0/mu);
+\end{verbatim}
+
+   Great, isn't it? No! There's something more \ldots
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Drawing the curves}
+
+   
+   For better results, we use(from the simulator) a display {\em gnuplot}. We have here at least two interesting plot curves, so we will write a
+function for that:
+
+\begin{verbatim}
+
+/*
+ * The results will be displayed in a graphbar
+ * with nbBar bars with the name "name"
+ */
+void tracer(struct probe_t * pr, char * name, int nbBar)
+{
+   struct probe_t   * gb;
+   struct gnuplot_t * gp;
+
+   /* The source for the graphbar */
+   gb = probe_createGraphBar(probe_min(pr), probe_max(pr), nbBar);
+
+   /* We convert the sensor into a parameter for graphbar */
+   probe_exhaustiveToGraphBar(pr, gb);
+
+   /* We name it */
+   probe_setName(gb, name);
+
+   /* We initialise the gnuplot */
+   gp = gnuplot_create();
+
+   /* We set the range of the graph */
+   gnuplot_setXRange(gp, probe_min(gb), probe_max(gb)/2.0);
+
+   /* We display it */
+   gnuplot_displayProbe(gp, WITH_BOXES, gb);
+}
+\end{verbatim}
+
+   The use of {\em gnuplot} is described in the section
+\ref{section:gnuplot}.
+
+   Please do not forget to add a short break at the end of our main program, if not it stops and kills the child processes, and therefore the display {\rm gnuplot} dissapears.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{The use of our first simulator}
+
+   It only remains for us to compile our program and to launch it. The {\tt examples/tutorial-1} also contains a makefile, but firstly, go and take a
+look at the includes and the library. Use the {\tt Makefile} like this:
+
+\begin{verbatim}
+ $ cd examples/tutorial-1
+ $ make
+ $ ./mm1
+[MOTSI] Date = 99999.846555
+[MOTSI] Events : 998243 created (3 m + 998240 r)/998242 freed
+[MOTSI] Simulated events : 998243 in, 998242 out, 1 pr.
+[MOTSI] PDU : 998242 created (27 m + 998215 r)/998242 freed
+[MOTSI] Total malloc'ed memory : 25169976 bytes
+[MOTSI] Realtime duration : 1 sec
+0 paquets restant dans  la file
+Temps moyen de sejour dans la file = 0.061008
+Interarive moyenne     = 0.200352 (1/lambda = 0.200000)
+Temps de service moyen = 0.100176 (1/mu     = 0.100000)
+*** ^C pour finir ;-)
+ $
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{The second simulation : another M/M/1 file !}
+
+   The first example is nice, but it would be better
+if the processing time depends on the size of the customer (as
+packets whose transmission time depends on the size!)
+
+   This is what we will do in this second tutorial. The files are located in the directory {\tt example/tutorial-2}.
+
+   I'll just comment the differences of this tutorial with the first one.
+
+   A small cosmetic change is made in the definition of the parameters of the simulation, we will present them with a advanced vocabulary:
+
+\begin{verbatim}
+   float frequencePaquets = 5.0;      // Nombre moyen de pq/s
+   float tailleMoyenne    = 1000.0;   // Taille moyenne des pq
+   float debit            = 10000.0;  // En bit par seconde
+\end{verbatim}
+
+   These values ​​are unrealistic, but cleverly chosen for
+having the same results as the first tutorial.   
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Generation of packet size}
+
+   This is the main difference from the first tutorial. We will
+use a random number generator for different packets size:
+
+\begin{verbatim}
+   /* Création d'un générateur de taille (tailles non bornées) */
+   sizeGen = randomGenerator_createUInt();
+   randomGenerator_setDistributionExp(sizeGen, 1.0/tailleMoyenne);
+
+   /* Affectation à la source */
+   PDUSource_setPDUSizeGenerator(sourcePDU, sizeGen);
+\end{verbatim}
+
+  The random number generators are described in the section
+\ref{section:rand-gen}. Place a probe of this size, in order to verify that it it's right:
+
+
+\begin{verbatim}
+   /* A sensor */
+   szProbe = probe_createExhaustive();
+   randomGenerator_setValueProbe(sizeGen, szProbe);
+\end{verbatim}
+
+   With this, we can draw more than a nice curve!
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{The server}
+
+   What we just did is useless if the server is
+not considered. So we need to specify that it serves each client
+in a time that dependends on size:
+   
+
+\begin{verbatim}
+   /* Paramétrage du serveur */
+   srvGen_setServiceTime(serveur, serviceTimeProp, 1.0/debit);
+\end{verbatim}
+   
+   This means that the time of serving a client is proportional to
+its size, having the coefficient as reverse flow.
+
