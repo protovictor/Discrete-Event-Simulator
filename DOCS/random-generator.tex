@@ -259,13 +259,13 @@ avec une distribution exponentielle de paramètre $\lambda = 10.0$
 %.......................................................................
 \subsubsection{Distribution de Pareto}
 
-   On spécifie une loi de Pareto de paramètres $\alpha$ et $x_{min}$ grâce à la
-fonction suivante 
+   On spécifie une loi de Pareto de paramètres $\alpha$ et $x_{min}$
+grâce à la  fonction suivante 
 
 \index{randomGenerator\_setDistributionPareto}
 \begin{verbatim}
-void tor_setDistributionPareto(struct randomGenerator_t * rg,
-                               double alpha, double xmin);
+void randomGenerator_setDistributionPareto(struct randomGenerator_t * rg,
+                                           double alpha, double xmin);
 \end{verbatim}
 
    La figure \ref{figure:distpa} donne un exemple de résultat obtenu

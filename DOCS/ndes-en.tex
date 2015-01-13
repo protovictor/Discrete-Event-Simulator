@@ -1,5 +1,7 @@
 \documentclass{book}
-
+\usepackage{xr}
+\externaldocument{random-generator-en.tex}
+\usepackage{amsmath}
 \usepackage[utf8x]{inputenc}
 \usepackage[french]{babel}
 \usepackage{graphicx}
@@ -8,6 +10,8 @@
 \usepackage[pdftex]{thumbpdf}
 \usepackage[pdftex,colorlinks]{hyperref}
 \usepackage{index}
+\usepackage{hyperref}
+
 
 \title{Network Discrete Event Simulator}
 
@@ -19,6 +23,15 @@
 \maketitle
 
 %\begin{abstract}
+   
+    {\em Network Discrete Event Simulator} (or {\sc ndes}) is one
+library which permits the creation of network discrete event simulators. This  document is a user guide and a programmer guide for this utility.
+
+   {\sc Ndes} was basically designed to simulate a
+specific scenario (scheduling of packets on a DVB-S2 link). 
+But it also includes various portions of code with whom
+the author had other goals. Its use in a different context is however very difficult, especially because of the absence of a substantial library of models.
+
 %\end{abstract}
 
 \newpage
@@ -28,57 +41,72 @@
 %========================================================================
 %
 %========================================================================
-%\chapter{Manuel utilisateur}
+\chapter{User's manual}
 
-%\input{introduction-generale}
-%\input{tutoriel-utilisateur}
-%\input{exemples-utilisateur}
-
-%========================================================================
-%
-%========================================================================
-%\chapter{Manuel programmeur}
-
-%\input{architecture}
-%\input{tutoriel-programmeur}
-%\input{motsim}
-%\input{ndes-object}
-%\input{log}
+\input{introduction-generale-en}
+\input{tutoriel-utilisateur-en}
+%\input{exemples-utilisateur-en}
 
 %========================================================================
 %
 %========================================================================
-%\section{L'affichage par GnuPlot}
-%\label{section:gnuplot}
+\chapter{Programmer's manual}
 
+\input{architecture-en}
+\input{tutoriel-programmeur-en}
+%\input{motsim-en}
+%\input{ndes-object-en}
+%\input{log-en}
+
+\chapter{Traffic models}
+%\input{httpmodel-en}
+%\input{ftpmodel-en}
 %========================================================================
 %
 %========================================================================
-%\section{Notion de simulation et de campagne}
 
-%========================================================================
-%
-%========================================================================
-%\chapter{La librairie}
 
-%\input{sondes}
+\chapter{The library}
+
+%\input{sondes-en}
 \input{random-generator-en}
-%\input{date-generator}
-%\input{pdu}
-%\input{file-pdu}
-%\input{srv-gen}
-%\input{pdu-sink}
-%\input{link-simplex}
-%\input{dvbs2link}
-%\input{sched-acm}
-%\input{sched-acm-knapsack}
+%\input{date-generator-en}
+%\input{pdu-en}
+%\input{file-pdu-en}
+%\input{srv-gen-en}
+%\input{pdu-sink-en}
+%\input{link-simplex-en}
+%\input{dvbs2link-en}
+%\input{sched-acm-en}
+%\input{sched-acm-knapsack-en}
 
+
+\section{GnuPlot diagrams}
+\label{section:gnuplot}
+
+%========================================================================
+%
+%========================================================================
+
+\section{Notion of simulation and of campaign}
+
+A simulation is a single instance of an execution of an event sequence
+following the initialization of the model. A campaign is a
+result of simulations on the same model with a reset of
+variables between two simulations.
+
+    The sensors relating to the simulation are re-initialized at the end of the
+simulation. Probes may be related to the campaign; they will not be reseted at the end of the campaign and they can allow also inter-simulation values​​, for example confidence intervals.
+
+%========================================================================
+%
+%========================================================================
 %========================================================================
 %
 %========================================================================
 \chapter{Annexes}
 
-\section{Index des fonctions}
+\section{Function index}
 
 \printindex
 
