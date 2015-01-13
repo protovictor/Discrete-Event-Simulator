@@ -414,7 +414,8 @@ int filePDU_size_n_PDU(struct filePDU_t * file, int n)
  */
 int filePDU_size(struct filePDU_t * file)
 {
-   return filePDU_size_n_PDU(file, filePDU_length(file));
+  return file->size;
+  //   return filePDU_size_n_PDU(file, filePDU_length(file));
 }
 
 /* WARNING : il vaudrait mieux une fonction qui donne un
