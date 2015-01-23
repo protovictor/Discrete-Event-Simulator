@@ -24,7 +24,13 @@
 #define min(a, b) ((a)<(b)?(a):(b))
 #define max(a, b) ((a)>(b)?(a):(b))
 
-typedef double  motSimDate_t;
+//#define MOTSIM_LONG_DATE
+
+#ifdef MOTSIM_LONG_DATE
+   typedef long double  motSimDate_t;
+#else
+   typedef double  motSimDate_t;
+#endif
 
 struct motsim_t;
 struct event_t;
@@ -57,7 +63,7 @@ void motSim_addEvent(struct event_t * event);
 /*
  * Initialisation puis insertion d'un evenement
  */
-void motSim_insertNewEvent(void (*run)(void *data), void * data, double date);
+void motSim_insertNewEvent(void (*run)(void *data), void * data, motSimDate_t date);
 
 void motSim_runNevents(int nbEvents);
 
@@ -69,7 +75,7 @@ motSimDate_t motSim_getCurrentTime();
 /*
  * Lancement d'une simulation d'une durée max de date
  */
-void motSim_runUntil(double date);
+void motSim_runUntil(motSimDate_t date);
 
 /** brief Simulation jusqu'à épuisement des événements
  */
@@ -84,7 +90,7 @@ void motSim_printStatus();
  * Lancement de nbSimu simulations, chacune d'une durée inférieures ou
  * égale à date.
  */
-void motSim_runNSimu(double date, int nbSimu);
+void motSim_runNSimu(motSimDate_t  date, int nbSimu);
 
 void motSim_printCampaignStat();
 
@@ -130,7 +136,7 @@ void motSim_exit(int retValue);
 #define DEBUG_ALWAYS   0xFFFFFFFF
 #define DEBUG_NEVER    0x00000000
 
-static unsigned long debug_mask = 0x00000000
+static unsigned long debug_mask __attribute__ ((unused)) = 0x00000000
   //     | DEBUG_EVENT     // Les événements (lourd !)
   //     | DEBUG_MOTSIM    // Le moteur
   //     | DEBUG_GENE      // Les générateurs de nombre/date/...
@@ -151,7 +157,7 @@ static unsigned long debug_mask = 0x00000000
   //     | DEBUG_OBJECT
   //     | DEBUG_MALLOC    // L'utilisation de malloc
        | DEBUG_TBD       // Le code pas implanté
-  //         | DEBUG_ALWAYS
+  //       | DEBUG_ALWAYS
   ;
 
 #else

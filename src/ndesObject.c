@@ -1,3 +1,5 @@
+#include <string.h>    // memset
+ 
 #include <ndesObject.h>
 #include <log.h>
 
@@ -15,11 +17,12 @@ struct ndesObject_t * ndesObject_create(void * private,
    result = (struct ndesObject_t *)sim_malloc(sizeof(struct ndesObject_t));
 
    result->id = ndesObject_nb++;
+   result->name = NULL;
 
    result->creationDate = motSim_getCurrentTime();
    result->data = private;
    result->type = objectType;   
-
+   
    printf_debug(DEBUG_OBJECT, "ndesObject %p created, id %d type \"%s\"\n",
 		result,
 		result->id,
@@ -42,6 +45,8 @@ int ndesObject_getId(struct ndesObject_t * o)
 
 /**
  * @brief Obtention des données associées à l'objet
+ * @param ndesObject a non NULL ndesObject pointer
+ * @return The private data associated with this object
  */
 void * ndesObject_getPrivate(struct ndesObject_t * ndesObject)
 {

@@ -4,6 +4,7 @@
 #include <signal.h>    // sigaction
 #include <strings.h>   // bzero
 #include <time.h>
+#include <unistd.h>    // alarm
 
 #include <event-file.h>
 #include <pdu.h>
@@ -27,8 +28,8 @@ unsigned long __totalMallocSize = 0;
  */
 struct motsim_t {
    time_t               actualStartTime;
-   double               currentTime;
-   double               finishTime; // Heure simulée de fin prévue
+   motSimDate_t               currentTime;
+   motSimDate_t               finishTime; // Heure simulée de fin prévue
    struct eventFile_t * events;
    int                  nbInsertedEvents;
    int                  nbRanEvents;
@@ -212,7 +213,7 @@ void motSim_runUntilTheEnd()
  * L'état final (celui des sondes en particulier) est celui
  * correspondant à la fin de la dernière simulation.
  */
-void motSim_runNSimu(double date, int nbSimu)
+void motSim_runNSimu(motSimDate_t date, int nbSimu)
 {
    int n;
 
@@ -226,7 +227,7 @@ void motSim_runNSimu(double date, int nbSimu)
    }
 }
 
-void motSim_runUntil(double date)
+void motSim_runUntil(motSimDate_t date)
 {
    struct event_t * event;
 
@@ -336,7 +337,7 @@ void motSim_reset()
 }
 
 
-double motSim_getCurrentTime()
+motSimDate_t motSim_getCurrentTime()
 {
    return __motSim->currentTime;
 };
@@ -344,7 +345,7 @@ double motSim_getCurrentTime()
 /*
  * Initialisation puis insertion d'un evenement
  */
-void motSim_insertNewEvent(void (*run)(void *data), void * data, double date)
+void motSim_insertNewEvent(void (*run)(void *data), void * data, motSimDate_t date)
 {
   motSim_addEvent(event_create(run, data, date));
 }
@@ -356,8 +357,7 @@ void motSim_printStatus()
 	  event_nbCreate, event_nbMalloc, event_nbReuse, event_nbFree);
    printf("[MOTSI] Simulated events : %d in, %d out, %d pr.\n",
 	  __motSim->nbInsertedEvents, __motSim->nbRanEvents, eventFile_length(__motSim->events));
-   printf("[MOTSI] PDU (%d bytes): %ld created (%ld m + %ld r)/%ld released\n",
-	  sizeof(struct PDU_t),
+   printf("[MOTSI] PDU : %ld created (%ld m + %ld r)/%ld released\n",
 	  probe_nbSamples(PDU_createProbe),
 	  probe_nbSamples(PDU_mallocProbe),
 	  probe_nbSamples(PDU_reuseProbe),
@@ -395,6 +395,6 @@ void motSim_campaignRun(struct motSimCampaign_t * c)
 
 void motSim_campaignStat()
 {
-   printf("[MOTSI] Number of simulations : %l\n", probe_nbSamples(__motSim->dureeSimulation));
+   printf("[MOTSI] Number of simulations : %ld\n", probe_nbSamples(__motSim->dureeSimulation));
    printf("[MOTSI] Mean duration         : %f sec\n", probe_mean(__motSim->dureeSimulation));
 }

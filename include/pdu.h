@@ -1,40 +1,17 @@
-/*
+/**
  * Le type PDU, initialement censé représenter les PDU, sert
  * maintenant à manipuler un peu tout ce qui est dynamique dans le
  * système. Il faudra sûrement le renommer lorsque je trouverai un
  * nom pertinent et que je créerai des PDU !
+ *
+ * A faire : typer les PDU
  */
 #ifndef __DEF_PDU
 #define __DEF_PDU
 
 #include <motsim.h>
-#include <probe.h>
-#include <ndesObject.h>
 
-/*
- * Le type est visible car utilisé par différents modules vu que c'est
- * un peu le couteau suisse de l'outil de simulation. Idéalement, il
- * faut utiliser autant que possible les méthodes de manipulation
- * fournies plus bas.
- */
-struct PDU_t {
-   declareAsNdesObject;
-
-   int      id;    // Un identifiant général
-   motSimDate_t  creationDate;
-
-   void   * data;  // Des donnees privées
-   int      taille ;
-
-   // Les pointeurs suivants sont à la discrétion du propriétaire de la PDU
-   struct PDU_t * prev;
-   struct PDU_t * next;
-};
-
-/**
- * @brief Déclaration des fonctions spécifiques liées au ndesObject
- */
-declareObjectFunctions(PDU);
+struct PDU_t ;
 
 /*
  * Création d'une PDU de taille fournie. Elle peut contenir
@@ -72,12 +49,47 @@ typedef int (*processPDU_t)(void * receiver,
 			    getPDU_t getPDU,
 			    void * source);
 
-/*
- * Les sondes systeme
+
+/*************************************************************************
+   Chaining functions
  */
+
+/**
+ * @brief Get next PDU
+ * @param pdu non NULL
+ */
+struct PDU_t * PDU_getNext(struct PDU_t * pdu);
+
+/**
+ * @brief Get next PDU
+ * @param pdu non NULL
+ */
+struct PDU_t * PDU_getPrev(struct PDU_t * pdu);
+
+/**
+ * @brief Get next PDU
+ * @param pdu non NULL
+ * @param next can be null
+ */
+void PDU_setNext(struct PDU_t * pdu, struct PDU_t * next);
+
+/**
+ * @brief Get next PDU
+ * @param pdu non NULL
+ * @param prev can be null
+ */
+void PDU_setPrev(struct PDU_t * pdu, struct PDU_t * prev);
+
+
+/*
+ * Les sondes systeme WARNING : a déclarer ici ?
+ */
+struct probe_t;
+
 extern struct probe_t * PDU_createProbe;
 extern struct probe_t * PDU_reuseProbe;
 extern struct probe_t * PDU_mallocProbe;
 extern struct probe_t * PDU_releaseProbe;
+
 
 #endif

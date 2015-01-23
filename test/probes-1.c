@@ -18,7 +18,6 @@ int testerExhaustive(unsigned long nbEl)
    int result = 0;
    struct probe_t  *ep;
    unsigned long l;
-   double meanE, meanGB, data;
 
    // Création d'une sonde exhaustive
    ep = probe_createExhaustive();

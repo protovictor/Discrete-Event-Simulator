@@ -14,6 +14,8 @@
 #include <math.h>      // log
 #include <values.h>    // *_MAX
 
+#include <sys/time.h>  // gettimeofday
+
 #include <assert.h>
 
 #include <motsim.h>
@@ -106,7 +108,7 @@ struct randomGenerator_t {
  */
 inline double randomGenerator_erand48GetNext(struct randomGenerator_t * rg)
 {
-  //   double result = drand48();
+   //   double result = drand48();
    double result = erand48(rg->aleaSrc.xsubi);
 
    if (rg->values)
@@ -120,9 +122,11 @@ inline double randomGenerator_erand48GetNext(struct randomGenerator_t * rg)
  */
 void randomGenerator_erand48Init(struct randomGenerator_t * rg)
 {
+   struct timeval now;
    assert(rg->source == rGSourceErand48);
 
-   bzero(rg->aleaSrc.xsubi, 3);
+   gettimeofday(&now, NULL);
+   bcopy(&now + sizeof(now) - sizeof(rg->aleaSrc.xsubi), rg->aleaSrc.xsubi, sizeof(rg->aleaSrc.xsubi));
    rg->aleaGetNext = randomGenerator_erand48GetNext;
 
 }
@@ -189,7 +193,7 @@ double randomGenerator_exponentialGetNext(struct randomGenerator_t * rg)
    //  Les sources sont censÃ©es Ãªtre uniformes ...
    alea = rg->aleaGetNext(rg);
 
-   result =  - log(alea) /rg->distParam.d.lambda;
+   result =  - log( alea) /rg->distParam.d.lambda;
 
 /*
    printf_debug(DEBUG_GENE, " alea = %6.3f, lambda = %6.3f, result = %6.3f\n",
@@ -790,7 +794,7 @@ void randomGenerator_setQuantile2Param(struct randomGenerator_t * rg,
  */
 double randomGenerator_expDistQ(double x, double lambda)
 {
-   return - log(1.0 -x) / lambda;
+   return - log(1.0 - x) / lambda;
 }
 
 /**

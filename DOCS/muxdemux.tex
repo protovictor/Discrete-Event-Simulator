@@ -1,0 +1,68 @@
+%========================================================================
+%
+%========================================================================
+\section{Un multiplexeur/démultiplexeur}
+\label{section:muxdemux}
+
+   Un outil de multiplexage/démultiplexage élémentaire est implanté
+dans {\tt src/muxdemux.c} définissant une entité de multiplexage et
+une entité de démultiplexage. Le but est de fournir un cadre simple
+mais propre permettant à l'utilisateur de multiplexer dans une même
+séquence d'entités des flux différents et d'\^etre capable de les
+différencier à l'arrivée.
+
+   Attention, cet outil ne fournit aucune fonctionnalité de stockage,
+si bien que si le premier élément de la séquences séparant le
+multiplexeur du démultiplexeur n'est pas assez rapide, alors des {\sc
+  pdu} peuvent être perdues.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Principe général}
+
+   Cet outil est composé de deux partie distinctes :
+
+\begin{itemize}
+   \item Une entité de type {\tt struct muxDemuxSender\_t} fait office
+     de multiplexeur. Elle est associée à une destination unique et
+     possède un nombre d'entrée quelconque.
+   \item Une entité de type {\tt struct muxDemuxReceiver\_t } joue le
+     rôle de démultiplexeur. Elle possède une seule entrée mais
+     dessert un nombre quelconque de desinations.
+\end{itemize}
+
+   Une {\sc pdu} reçue par le multiplexeur sera encapsulée par ce
+dernier  dans une nouvelle {\sc pdu} qui contiendra également les
+informations permettant au démultiplexeur de faire son travail.
+
+   Par défaut, la nouvelle {\sc pdu} ainsi créée a la même taille que
+la {\sc pdu} d'origine.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Multiplexeur : déclaration et initialisation}
+
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Démultiplexeur : déclaration et initialisation}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Utilisation d'un filtre pour éviter le multiplexage}
+
+   Il peut être intéressant de conditionner des traitements sur
+l'identifiant de multiplexage sans démultiplexer les flux. Un filtre
+peut être simplement construit pour cela. Les filtres sont décrits
+dans la section \ref{section:filtres}.
+
+\index{muxDemuxSender\_createFilterFromSAP}
+\begin{verbatim}
+struct PDUFilter_t * muxDemuxSender_createFilterFromSAP(struct muxDemuxSenderSAP_t * sap);
+\end{verbatim}
+
+   Un exemple est disponible dans le fichier de test {\tt tests/rr-mux.c}.

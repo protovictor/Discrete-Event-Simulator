@@ -1,11 +1,18 @@
 SRC_FILES= $(wildcard *.c)
 OBJ_FILES= $(SRC_FILES:.c=.o)
 
+<<<<<<< HEAD
 EXAMPLES = debits rg-its rg-draw hdlc-demo example-1 example-2 example-3
+=======
+EXAMPLES = inoutdemo debits rg-its rg-draw example-1 example-2 example-3
+>>>>>>> master
 
 .PHONY: clean 
 
 all : $(EXAMPLES)
+
+inoutdemo : inoutdemo.o ../$(SRC_DIR)/libndes.a
+	$(CC) inoutdemo.o -o inoutdemo $(LDFLAGS)
 
 debits : debits.o ../$(SRC_DIR)/libndes.a
 	$(CC) debits.o -o debits $(LDFLAGS)
@@ -30,6 +37,9 @@ example-3 : example-3.o ../$(SRC_DIR)/libndes.a
 
 clean :
 	\rm -f $(OBJ_FILES) $(EXAMPLES) *~ 
+	(cd tuto-prog-1 ; make clean)
+	(cd tutorial-1 ; make clean)
+	(cd tutorial-2 ; make clean)
 
 .c.o :
 	$(CC) $(CFLAGS) -I../$(INCL_DIR) $< -c

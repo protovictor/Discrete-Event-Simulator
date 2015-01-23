@@ -16,7 +16,7 @@
 #define __DEF_DVBS2_LL
 
 #include <pdu.h>
-#include <dvb-s2-ll.h>
+#include <probe.h>
 
 #define NB_MODCOD_MAX 4
 
@@ -60,8 +60,25 @@ struct DVBS2ll_t * DVBS2ll_create(void * destination,
 #define   M16APSK  4
 #define   M32APSK  5
 
+#define  C14SIZE_str "C14SIZE"
+#define  C13SIZE_str "C13SIZE"
+#define  C25SIZE_str "C25SIZE"  
+#define  C12SIZE_str "C12SIZE"  
+#define  C35SIZE_str "C35SIZE"  
+#define  C23SIZE_str "C23SIZE"
+#define  C34SIZE_str "C34SIZE"  
+#define  C45SIZE_str "C45SIZE"  
+#define  C56SIZE_str "C56SIZE"  
+#define  C89SIZE_str "C89SIZE" 
+#define  C910SIZE_str "C910SIZE" 
 
-/*
+
+#define   MQPSK_str    "MQPSK"
+#define   M8PSK_str    "M8PSK"
+#define   M16APSK_str  "M16APSK"
+#define   M32APSK_str  "M32APSK"
+
+/**
  * @brief Ajout d'un MODCOD
  * Le codage est paramétré par le nombre de bits
  * par BBFRAME et la modulation par le nombre de bits par symbole.

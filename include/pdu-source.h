@@ -5,7 +5,14 @@
 #include <pdu.h>
 #include <motsim.h>
 
+#include <ndesObject.h>
+
 struct PDUSource_t; //!< Le type d'une source
+
+/**
+ * @brief Declare the object relative functions
+ */
+declareObjectFunctions(PDUSource);
 
 /**
  * @brief Définition de couples {date, taille}
@@ -13,7 +20,7 @@ struct PDUSource_t; //!< Le type d'une source
  * Pour définir explicitement une séquence de PDUs
  */
 struct dateSize {
-   double date;
+   motSimDate_t date;
    unsigned int size;
 };
 
@@ -45,6 +52,21 @@ struct PDUSource_t * PDUSource_create(struct dateGenerator_t * dateGen,
 struct PDUSource_t * PDUSource_createDeterministic(struct dateSize * sequence,
 						   void * destination,
 						   processPDU_t destProcessPDU);
+/**
+ * @brief Change the date generator
+ * @param src The PDUSource to modify
+ * @param gen The new date generator
+ * The previos date generator should be freed by the caller
+ */
+void PDUSource_setDateGenerator(struct PDUSource_t * src,
+                                struct dateGenerator_t * dateGen);
+
+/**
+ * @brief Get access to the date generator
+ * @param src The PDUSource to query
+ * @result The date generator
+ */
+struct dateGenerator_t * PDUSource_getDateGenerator(struct PDUSource_t * src);
 
 /**
  * @brief Spécification du générateur de taille de PDU associé
@@ -73,4 +95,4 @@ void PDUSource_start(struct PDUSource_t * source);
 /*
  * The function used by the destination to actually get the next PDU
  */
-struct PDU_t * PDUSource_getPDU(struct PDUSource_t * source);
+struct PDU_t * PDUSource_getPDU(void * src);

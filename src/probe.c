@@ -118,7 +118,10 @@ struct probe_t {
       struct slidingWindow_t * window;
       struct EMA_t           * ema;
       struct periodic_t      * periodic;
-} data;
+   } data;
+
+   // (Optional) fiter to apply before sampling
+   struct PDUFilter_t * filter;
 
    // Une sonde persistante n'est jamais réinitialisée
    int persistent;
@@ -320,7 +323,10 @@ struct probe_t * probe_createRaw(enum probeType_t probeType)
    result->name = strdup("Generic probe");
    result->nextProbe = NULL;
    result->period = 0.0;
-   
+
+   // Default is no filter
+   result->filter = NULL;
+
    // Les métas probes
    result->meanProbe = NULL;
    result->throughputProbe = NULL;
@@ -596,16 +602,19 @@ void probe_sampleExhaustive(struct probe_t * probe, double value)
   
    currentSet->dates[probe->nbSamples%PROBE_NB_SAMPLES_MAX] = motSim_getCurrentTime();
    currentSet->samples[probe->nbSamples%PROBE_NB_SAMPLES_MAX] = value;
-   printf_debug(DEBUG_PROBE, "OUT\n");
+   printf_debug(DEBUG_PROBE_VERB, "OUT\n");
 }
 
-/*
- * Reading the nth sample in an exhaustive probe
-*/
+/**
+ * @brief Reading the nth sample in an exhaustive probe
+ * @param probe The exhaustive probe to read from
+ * @param n the number of sample to read
+ * @result the value of sample n
+ */
 double probe_exhaustiveGetSampleN(struct probe_t * probe, int n)
 {
    assert(probe->probeType == exhaustiveProbeType);
-   assert(n<=probe->nbSamples);
+   assert(n<=probe->nbSamples); // WARNING  < or <= !?
 
    struct sampleSet_t * currentSet = probe->data.sampleSet;
    int numSet = probe->nbSamples / PROBE_NB_SAMPLES_MAX;
@@ -884,7 +893,10 @@ double probe_EMAThroughput(struct probe_t * probe)
    //   return probe->data.ema->bwAvg;
 }
 
-void probe_sample(struct probe_t * probe, double value)
+/**
+ * @brief Do the actual sample, without filtering or chaining
+ */
+void probe_doSample(struct probe_t * probe, double value)
 {
    if (probe==NULL)
       return;
@@ -955,6 +967,11 @@ void probe_sample(struct probe_t * probe, double value)
      printf_debug(DEBUG_PROBE_VERB, "Throughput %f from probe \"%s\" (type \"%s\") \n", probe_throughput(probe), probe_getName(probe), probeTypeName(probe->probeType));
       probe_sample(probe->throughputProbe, probe_throughput(probe));
    }
+}
+
+void probe_sample(struct probe_t * probe, double value)
+{
+   probe_doSample(probe, value);
 
    // On chaine si nécessaire 
    if (probe->nextProbe != NULL){
@@ -1345,6 +1362,27 @@ double probe_stdDev(struct probe_t * probe)
    return sqrt(probe_variance(probe));
 }
 
+/**
+ * @brief Experimental coefficient of variation
+ */
+double probe_coefficientOfVariation(struct probe_t * probe)
+{
+   int n;
+   double mean = probe_mean(probe);
+   double result = 0.0;
+
+   if (probe->probeType != exhaustiveProbeType) {
+      return NAN;
+   }
+
+   for (n = 0; n < probe_nbSamples(probe); n++) {
+     result += (probe_exhaustiveGetSampleN(probe, n)-mean)*(probe_exhaustiveGetSampleN(probe, n)-mean);
+   }
+
+   result = sqrt(result/probe_nbSamples(probe)) / mean;
+   return result;
+}
+
 
 /*
  * Demi largeur de l'intervalle de confiance à 5%
@@ -1575,4 +1613,51 @@ void probe_addSampleProbe(struct probe_t * p1, struct probe_t * p2)
 {
   addProbe(p1->sampleProbe, p2);
 }
+
+
+/*****************************************************************************
+       Probes and filters
+ */
+
+/**
+ * @brief Set a filter to a probe
+ *
+ * If the probe is used through probe_sampleValuePDUFilter, the sample
+ * will be done iif the PDU validates the filter
+ */
+void probe_setFilter(struct probe_t * probe, 
+		     struct PDUFilter_t * filter)
+{
+   probe->filter = filter;
+}
+
+/**
+ * @brief Echantillonage d'une valeur
+ * @param probe La sonde dans laquelle on veut enregistrer
+ * @param value La valeur à enregistrer
+ * @param pdu une PDU sur laquelle le filtre sera appliqué
+ * La probe peut être NULL, auquel cas rien n'est enregistré,
+ * naturellement.
+ * Attention, l'échantillonage se fera SI ET SEULEMENT SI la PDU passe
+ * le fitre.
+ */
+void probe_sampleValuePDUFilter(struct probe_t * probe, 
+			        double value, struct PDU_t* pdu)
+{
+   printf_debug(DEBUG_PROBE_VERB, "IN '%s' (filter %p pdu %p)\n", probe_getName(probe), probe->filter, pdu);
+
+   if ((probe->filter == NULL) || PDUFilter_filterPDU(probe->filter, pdu)) {
+      printf_debug(DEBUG_PROBE_VERB, "Ca passe\n");
+      probe_doSample(probe, value);
+   }else {
+      printf_debug(DEBUG_PROBE_VERB, "Ca FOIRE\n");
+   }
+   // Chaining ...
+   if (probe->nextProbe != NULL){
+      printf_debug(DEBUG_PROBE_VERB, "About to chain\n");
+      probe_sampleValuePDUFilter(probe->nextProbe, value, pdu);
+   }
+   printf_debug(DEBUG_PROBE_VERB, "OUT\n");
+}
+
 

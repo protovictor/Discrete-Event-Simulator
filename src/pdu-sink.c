@@ -60,12 +60,13 @@ int PDUSink_processPDU(void * s, getPDU_t getPDU, void * source)
 
    // Si c'est juste pour tester si je suis pret
    if ((getPDU == NULL) || (source == NULL)) { 
-      printf_debug(DEBUG_PDU, "c'etait un test\n");
+      printf_debug(DEBUG_ALWAYS, "getPDU and source should now be non NULL\n");
       return 1;
    }
 
    if (pduSink->insertProbe){
-      probe_sample(pduSink->insertProbe, PDU_id(pdu));
+     //      probe_sample(pduSink->insertProbe, PDU_id(pdu));
+      probe_sample(pduSink->insertProbe, PDU_size(pdu));
    }
 
    if (pdu) {

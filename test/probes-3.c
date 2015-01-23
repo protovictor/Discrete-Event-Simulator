@@ -18,7 +18,6 @@ int main()
 {
    struct probe_t * mp, *ep;
    int  e, n;
-   unsigned long l;
 
    double  data;
 
@@ -45,4 +44,6 @@ int main()
    printf("Moyenne : %f / %f\n", probe_mean(ep), probe_mean(mp));
    printf("Min : %f / %f\n", probe_min(ep), probe_min(mp));
    printf("Max : %f / %f\n", probe_max(ep), probe_max(mp));
+
+   return 0; // WARNING, on ne teste rien en fait !
 }

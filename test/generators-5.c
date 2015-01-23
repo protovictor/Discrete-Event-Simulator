@@ -1,6 +1,7 @@
 /*
  * Test des générateurs créés sur des fichiers
  */
+#include <math.h>
 #include <motsim.h>
 #include <random-generator.h>
 
@@ -19,14 +20,10 @@ int main() {
 
    motSim_create(); 
 
-   printf("AAA\n");
    rg = randomGenerator_createUIntDiscreteFromFile("uintdiscrete-1.txt");
-   printf("BBB\n");
    pr1 = probe_createExhaustive();
-   printf("CCC\n");
    for (n = 0 ; n < NBECH;n++){
-     v = randomGenerator_getNextUInt(rg);
-     //     printf("%d ", v);
+      v = randomGenerator_getNextUInt(rg);
       probe_sample(pr1, (double)v);
    }
 

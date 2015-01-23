@@ -1,0 +1,69 @@
+%========================================================================
+%
+%========================================================================
+\section{Les filtres de {\sc pdu}}
+\label{section:filtres}
+
+   Un filtre de  {\sc pdu} est un objet très simple permettant de
+conditionner des actions au résultat d'une fonction de test appliquée
+à une {\sc pdu}.
+
+   Ils sont définis dans {\tt pdu-filter.h} et implantés dans {\tt
+pdu-filter.c}. 
+
+   Un exemple d'utilisation des filtres est implanté dans le fichier
+{\tt tests.rr-mux.c} qui les utilise pour mesurer le débits de
+plusieurs flux multiplexés sans les démultiplexer.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Caractérisation et utilisation des filtres}
+
+   Un filtre est essentiellement caractérisé par une fonction de test
+et des données privées. Chaque fois que le filtre est appliqué à une
+{\sc   pdu}, la fonction de test est invoquée avec comme paramètres
+les données privées et la {\sc pdu}. Cette fonction doit alors
+retourner 1  ou 0.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Déclaration et initialisation}
+
+   Le type d'un filtre est {\tt struct PDUFilter\_t}, et un filtre est
+initialisé ainsi :
+
+\index{PDUFilter\_create}
+\begin{verbatim}
+struct PDUFilter_t * PDUFilter_create();
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Assignation des paramètres}
+
+\index{PDUFilter\_setPrivate}
+\begin{verbatim}
+void PDUFilter_setPrivate(struct PDUFilter_t * filter, void * private);
+\end{verbatim}
+
+\index{PDUFilter\_setTestFunction}
+\begin{verbatim}
+void PDUFilter_setTestFunction(struct PDUFilter_t * filter, 
+			       int (*test)(void *, struct PDU_t *));
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Utilisation d'un filtre}
+
+   Lorsqu'une entité a besoin de conditionner une action au résultat
+d'un filtre, elle n'a qu'a utiliser la fonction suivante
+
+\index{PDUFilter\_filterPDU}
+\begin{verbatim}
+int PDUFilter_filterPDU(struct PDUFilter_t * f, struct PDU_t * pdu);
+\end{verbatim}

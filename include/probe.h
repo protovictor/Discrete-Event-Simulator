@@ -5,6 +5,9 @@
 #ifndef __DEF_PROBE
 #define __DEF_PROBE
 
+#include <pdu.h>
+#include <pdu-filter.h>
+
 struct probe_t;
 
 enum probeType_t {
@@ -127,10 +130,36 @@ char * probe_getName(struct probe_t * p);
  * @brief Echantillonage d'une valeur
  * @param probe La sonde dans laquelle on veut enregistrer
  * @param value La valeur à enregistrer
- * La probe peut être NULL, auquel cas rien n'est enregistrer,
+ * La probe peut être NULL, auquel cas rien n'est enregistré,
  * naturellement 
  */
 void probe_sample(struct probe_t * probe, double value);
+
+/*****************************************************************************
+       Probes and filters
+ */
+
+/**
+ * @brief Set a filter to a probe
+ *
+ * If the probe is used through probe_sampleValuePDUFilter, the sample
+ * will be done iif the PDU validates the filter
+ */
+void probe_setFilter(struct probe_t * probe, 
+		     struct PDUFilter_t * filter);
+
+/**
+ * @brief Echantillonage d'une valeur
+ * @param probe La sonde dans laquelle on veut enregistrer
+ * @param value La valeur à enregistrer
+ * @param pdu une PDU sur laquelle le filtre sera appliqué
+ * La probe peut être NULL, auquel cas rien n'est enregistré,
+ * naturellement.
+ * Attention, l'échantillonage se fera SI ET SEULEMENT SI la PDU passe
+ * le fitre.
+ */
+void probe_sampleValuePDUFilter(struct probe_t * probe, 
+			   double value, struct PDU_t* pdu);
 
 /*
  * Echantillonage de la date d'occurence d'un evenement
@@ -143,11 +172,23 @@ void probe_sampleEvent(struct probe_t * probe);
 
 double probe_exhaustiveGetSample(struct probe_t * probe, unsigned long n);
 
-/*
- * Nombre d'echantillons
+/*****************************************************************************
+       Consultation des métriques offertes par une sonde
+ */
+
+/**
+ * @brief Nombre d'echantillons
  */
 unsigned long probe_nbSamples(struct probe_t * probe);
+
+/**
+ * @brief Maximal sampled value
+ */
 double probe_max(struct probe_t * probe);
+
+/**
+ * @brief Minimal sampled value
+ */
 double probe_min(struct probe_t * probe);
 
 /*
@@ -156,6 +197,11 @@ double probe_min(struct probe_t * probe);
 double probe_mean(struct probe_t * probe);
 double probe_variance(struct probe_t * probe);
 double probe_stdDev(struct probe_t * probe);
+
+/**
+ * @brief Experimental coefficient of variation
+ */
+double probe_coefficientOfVariation(struct probe_t * probe);
 
 /*
  * Demi largeur de l'intervalle de confiance à 5%

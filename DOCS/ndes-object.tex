@@ -1,1 +1,132 @@
+%========================================================================
+%
+%========================================================================
 \section{Le type ndesObject}
+
+   Le type {\tt struct ndesObject\_t} est défini dans {\tt ndesObject.h}.
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Déclaration et initialisation}
+
+   Un objet qui doit aussi être un ndesObject devra utiliser la macro
+   \lstinline{declareAsNdesObject}, par exemple de la façon suivante
+
+
+\index{declareAsNdesObject}
+\begin{verbatim}
+ struct monType_t {
+   declareAsNdesObject; //< C'est un ndesObject 
+   ...
+}
+\end{verbatim}
+
+   Un certain nombre de fonctions sont définies automatiquement grâce
+à la macro \lstinline{defineObjectFunctions}. Cette dernière s'utilise
+de la façon suivante
+
+\index{defineObjectFunctions}
+\begin{verbatim}
+/**
+ * @brief Définition des fonctions spécifiques liées au ndesObject
+ */
+defineObjectFunctions(monType);
+\end{verbatim}
+
+   Le type doit alors lui-même être déclaré en temps que ndesObject au
+travers d'une structure de type \lstinline{struct ndesObjectType\_t}
+définissant les principales fonctions de manipulation. La macro
+\lstinline{ndesObjectTypeDefaultValues} permet d'utiliser les
+fonctions de base, qui sont généralement suffisantes.
+
+   Finalement, la déclaration se fait donc de la façon suivante
+   
+\index{ndesObjectTypeDefaultValues}
+\begin{verbatim}
+/**
+ * @brief Mes objets sont aussi des ndesObject
+ */
+struct ndesObjectType_t monTypeType = {
+  ndesObjectTypeDefaultValues(monType)
+};
+\end{verbatim}
+
+   Enfin, lors de l'initialisation d'un objet, il est indispensable
+d'initialiser son ``côté objet'' grâce à la fonction
+\lstinline!ndesObjectInit! :
+
+\index{ndesObjectInit}
+\begin{verbatim}
+   struct monType_t * t;
+   ...
+   ndesObjectInit(t, monType);
+   ...
+\end{verbatim}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Les fonctions de manipulation d'un type d'objets}
+
+%------------------------------------------------------------------------
+%
+%------------------------------------------------------------------------
+\subsection{Les listes d'objets}
+
+   Les objets utilisant  les sont définies dans {\tt ndesObjectFile.h}.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Création}
+
+   Une liste est créée par un appel à la fonction suivante
+
+\index{ndesObjectFile\_create}
+\begin{verbatim}
+struct ndesObjectFile_t * ndesObjectFile_create(struct ndesObjectType_t * t);
+\end{verbatim}
+
+   L'unique paramètre est le type des objets décrit par une
+\lstinline{struct ndesObjectType\_t} initialiseé comme décrit
+précédemment.
+
+%........................................................................
+%
+%........................................................................
+\subsubsection{Parcours d'une file}
+
+   L'utilisation d'une liste nécessite régulièrement d'en parcourir
+les éléments, par exemple pour appliquer une fonction à chacun d'entre
+eux. La notion d'{\em itérateur} est là pour ça, \ldots
+
+   Un itérateur est un objet de type \lstinline{struct ndesObjectFileIterator\_t}.
+ Il est initialisé par la fonction
+suivante 
+
+\index{ndesObjectFile\_createIterator}
+\begin{verbatim}
+struct ndesObjectFileIterator_t * ndesObjectFile_createIterator(struct
+ndesObjectFile_t * of);
+\end{verbatim}
+
+   Le parcours est alors réalisé par des appels successifs à la
+fonction \lstinline{ndesObjectFile\_iteratorGetNext} :
+
+\index{ndesObjectFile\_iteratorGetNext}
+\begin{verbatim}
+struct ndesObjectFile_t * ndesObjectFile_iteratorGetNext(struct ndesObjectFileIterator_t * ofi);
+\end{verbatim}
+
+   Cette fonction renvoie, à chaque appel, un pointeur sur l'élément
+suivant de la liste. Lorsque la liste a été intégralement parcourue,
+elle renvoie un pointeur {\tt NULL}.
+
+   Finalement, un itérateur doit être détruit par un appel à la
+fonction \lstinline{ndesObjectFile\_deleteIterator}
+
+\index{ndesObjectFile\_deleteIterator}
+\begin{verbatim}
+void ndesObjectFile_deleteIterator(struct ndesObjectFileIterator_t * ofi);
+\end{verbatim}

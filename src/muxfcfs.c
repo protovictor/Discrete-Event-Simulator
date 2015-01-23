@@ -42,8 +42,8 @@ struct muxfcfs_t * muxfcfs_create(void * destination,
    return result;
 }
 
-/*
- * Demande d'une PDU par la destination
+/**
+ * @brief Demande d'une PDU par la destination
  */
 struct PDU_t * muxfcfs_getPDU(void * vm)
 {
@@ -70,33 +70,33 @@ struct PDU_t * muxfcfs_getPDU(void * vm)
    return pdu;
 }
 
-/*
- * Soumission d'une PDU par une source
+/**
+ * @brief Soumission d'une PDU par une source
  */
 int muxfcfs_processPDU(void * vm,
-                   getPDU_t getPDU,
-                   void * source)
+                       getPDU_t getPDU,
+                       void * source)
 {
    struct muxfcfs_t * mux = (struct muxfcfs_t *) vm;
-   struct PDU_t * pdu;
+   //   struct PDU_t * pdu;
    int result = 0;
 
    printf_debug(DEBUG_MUX, "IN\n");
 
    // Si c'est juste pour tester si je suis pret
    if ((getPDU == NULL) || (source == NULL)) {
+      printf_debug(DEBUG_ALWAYS, "getPDU and source should now be non NULL\n");
       return (source == NULL);
    }
 
    // Si la précédente n'a pas été consommée, elle est détruite
-   pdu = muxfcfs_getPDU(vm);
+   //   pdu = muxfcfs_getPDU(vm); // WARNING !?!?
 
    printf_debug(DEBUG_MUX, "on note la source\n");
 
    // On note l'origine
    mux->source = source;
    mux->source_getPDU = getPDU;
-
 
    // On prévient la destination
    if (mux->destProcessPDU && mux->destination) {

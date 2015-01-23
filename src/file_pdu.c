@@ -51,6 +51,7 @@ struct filePDU_t {
    struct probe_t * extractProbe;
    struct probe_t * dropProbe;
    struct probe_t * sejournProbe;
+   struct probe_t * lengthProbe;
 };
 
 /**
@@ -70,8 +71,9 @@ void filePDU_dump(struct filePDU_t * file)
   struct PDU_t * pq;
 
   printf("DUMP %2d elts (id:size/data) : ", file->nombre);
-  for (pq=file->premier; pq != NULL; pq=pq->next){
-    printf("[%d:%d/%d] ", PDU_id(pq->data), PDU_size(pq->data), (int)((struct PDU_t *)pq->data)->data);
+  for (pq=file->premier; pq != NULL; pq=PDU_getNext(pq)){
+    printf("[%d:%d/%p] ", PDU_id(PDU_private(pq)), PDU_size(PDU_private(pq)),
+	   PDU_private((struct PDU_t *)PDU_private(pq)));
   }
   printf("\n");
 }
@@ -92,30 +94,32 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file)
    //  filePDU_dump(file);
 
    if (file->premier) {
-      PDU = file->premier->data;
+      PDU = PDU_private(file->premier);
       premier = file->premier;
-      file->premier = premier->next;
+      file->premier = PDU_getNext(premier);
       // Si c'Ã©tait le seul
       if (file->dernier == premier) {
-         assert(premier->next == NULL);
+         assert(PDU_getNext(premier) == NULL);
 	 assert(file->nombre == 1);
          file->dernier = NULL;
       } else {
 	 assert(file->premier != NULL);
-         file->premier->prev = NULL;
+         PDU_setPrev(file->premier, NULL);
       }
       file->nombre --;
-      file->size -= PDU_size(premier->data);
+      file->size -= PDU_size(PDU_private(premier));
 
       /* Gestion des sondes */
       if (file->extractProbe) {
-         probe_sample(file->extractProbe, PDU_size(premier->data));
+         probe_sampleValuePDUFilter(file->extractProbe, PDU_size(PDU_private(premier)), PDU_private(premier));
+         //probe_sample(file->extractProbe, PDU_size(premier->data));
       }
       if (file->sejournProbe) {
-         if(motSim_getCurrentTime() < premier->creationDate){
+         if(motSim_getCurrentTime() <  PDU_getCreationDate(premier)){
 	    printf_debug(DEBUG_WARN, "Attention, quand on purge, il ne faut pas mettre dans les sondes\n");
          } else {
-            probe_sample(file->sejournProbe, motSim_getCurrentTime() - premier->creationDate);
+	    probe_sampleValuePDUFilter(file->sejournProbe, motSim_getCurrentTime() - PDU_getCreationDate(premier), PDU);
+            //probe_sample(file->sejournProbe, motSim_getCurrentTime() - premier->creationDate);
 	 }
       }
       PDU_free(premier);
@@ -126,6 +130,7 @@ struct PDU_t * filePDU_extract(struct filePDU_t * file)
    
    return PDU;
 }
+
 struct PDU_t * filePDU_getPDU(void * file)
 {
    struct PDU_t * pdu = filePDU_extract((struct filePDU_t *) file);
@@ -234,6 +239,7 @@ struct filePDU_t * filePDU_create(void * destination,
    result->insertProbe = NULL;
    result->extractProbe = NULL;
    result->sejournProbe = NULL;
+   result->lengthProbe = NULL;
 
    // Ajout Ã  la liste des choses Ã  rÃ©initialiser avant une prochaine simu
    motsim_addToResetList(result, (void (*)(void *))filePDU_reset);
@@ -266,6 +272,7 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
          if (file->dropProbe) {
             probe_sample(file->dropProbe, PDU_size(PDU));
          }
+
          pduDel = filePDU_extract(file);
          ndesLog_logLineF(PDU_getObject(pduDel), "DELETED BY %d", filePDU_getObjectId(file));
 
@@ -275,16 +282,17 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
       }
    }
 
-   // S'il s'agit d'une drop tail
+   // S'il s'agit d'une drop tail 
+   // WARNING a mieux expliquer, voire re écrire
    if (((file->maxSize == 0)||(file->size + PDU_size(PDU) <= file->maxSize))
        && ((file->maxLength == 0)||(file->nombre + 1 <= file->maxLength))) {
       pq = PDU_create(0, PDU);// Oui, les PDUs servent de chainons de liste !
 
-      pq->next = NULL;
-      pq->prev = file->dernier;
+      PDU_setNext(pq, NULL);
+      PDU_setPrev(pq, file->dernier);
 
       if (file->dernier)
-         file->dernier->next = pq;
+         PDU_setNext(file->dernier, pq);
 
       file->dernier = pq;
 
@@ -299,6 +307,9 @@ void filePDU_insert(struct filePDU_t * file, struct PDU_t * PDU)
       /* Gestion des sondes */
       if (file->insertProbe) {
          probe_sample(file->insertProbe, PDU_size(PDU));
+      }
+      if (file->lengthProbe) {
+         probe_sampleValuePDUFilter(file->lengthProbe, filePDU_length(file)-1, PDU);
       }
 
       /* WARNING : on le fait toujours ou pour le premier ? */
@@ -341,6 +352,7 @@ int filePDU_processPDU(void * f,
 
    // Si c'est juste pour tester si je suis pret
    if ((getPDU == NULL) || (source == NULL)) {
+      printf_debug(DEBUG_ALWAYS, "getPDU and source should now be non NULL\n");
       return 1; // WARNING Une file est toujours prete quitte à perdre !
    }
 
@@ -383,12 +395,12 @@ int filePDU_size_n_PDU(struct filePDU_t * file, int n)
    struct PDU_t * pq = file->premier;
 
    assert(pq);
-   result = PDU_size((struct PDU_t *)pq->data);
+   result = PDU_size((struct PDU_t *)PDU_private(pq));
 
    while (i < n) {
-      pq = pq->next;
+      pq = PDU_getNext(pq);
       assert(pq);
-      result += PDU_size((struct PDU_t *)pq->data);
+      result += PDU_size((struct PDU_t *)PDU_private(pq));
       i++;
    }
 
@@ -402,7 +414,8 @@ int filePDU_size_n_PDU(struct filePDU_t * file, int n)
  */
 int filePDU_size(struct filePDU_t * file)
 {
-   return filePDU_size_n_PDU(file, filePDU_length(file));
+  return file->size;
+  //   return filePDU_size_n_PDU(file, filePDU_length(file));
 }
 
 /* WARNING : il vaudrait mieux une fonction qui donne un
@@ -420,16 +433,16 @@ int filePDU_size_PDU_n(struct filePDU_t * file, int n)
    assert(pq);
 
    while (i < n) {
-      pq = pq->next;
+      pq = PDU_getNext(pq);
       assert(pq);
       i++;
    }
 
-   assert(pq->data);
+   assert(PDU_private(pq));
 
    //   printf_debug(DEBUG_FILE, "PDU %d : size %d\n", n, PDU_size(pq->PDU));
 
-   return PDU_size((struct PDU_t *)pq->data);
+   return PDU_size((struct PDU_t *)PDU_private(pq));
 }
 
 /*
@@ -443,16 +456,16 @@ int filePDU_id_PDU_n(struct filePDU_t * file, int n)
    assert(pq);
 
    while (i < n) {
-      pq = pq->next;
+      pq = PDU_getNext(pq);
       assert(pq);
       i++;
    }
 
-   assert(pq->data);
+   assert(PDU_private(pq));
 
    //   printf_debug(DEBUG_FILE, "PDU %d : id %d\n", n, PDU_id(pq->PDU));
 
-   return PDU_id((struct PDU_t *)pq->data);
+   return PDU_id((struct PDU_t *)PDU_private(pq));
 }
 
 /*
@@ -491,6 +504,15 @@ void filePDU_addSejournProbe(struct filePDU_t * file, struct probe_t * sejournPr
    file->sejournProbe = sejournProbe;
 }
 
+/**
+ * @brief Add a probe on queue length (nb of PDU) on insert events
+ */
+void filePDU_addFileLengthProbe(struct filePDU_t * file, struct probe_t * length)
+{
+   file->lengthProbe = probe_chain(length, file->lengthProbe);
+}
+
+
 /*
  * Mesure du dÃ©bit d'entrÃ©e sur les n-1 derniÃ¨res PDUs, oÃ¹ n est le
  * nombre de PDUs prÃ©sentes. Le dÃ©bit est alors obtenu en divisant la
@@ -504,11 +526,11 @@ double filePDU_getInputThroughput(struct filePDU_t * file)
 
    if (file->nombre > 1) {
       // Volume reÃ§u depuis la premiÃ¨re PDU
-      result = filePDU_size_n_PDU(file, filePDU_length(file)) - PDU_size(file->premier->data);
-      printf_debug(DEBUG_ALWAYS, "%f de %f a %f\n", result, file->premier->creationDate, file->dernier->creationDate);
+      result = filePDU_size_n_PDU(file, filePDU_length(file)) - PDU_size(PDU_private(file->premier));
+      printf_debug(DEBUG_ALWAYS, "%f de %f a %f\n", result, PDU_getCreationDate(file->premier), PDU_getCreationDate(file->dernier));
 
       // On divise par le temps entre la premiÃ¨re et la derniÃ¨re
-      result = result/(file->dernier->creationDate - file->premier->creationDate);
+      result = result/(PDU_getCreationDate(file->dernier) - PDU_getCreationDate(file->premier));
    }
 
    return result;

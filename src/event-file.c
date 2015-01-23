@@ -28,6 +28,8 @@ void eventFile_insert(struct eventFile_t * file, struct event_t * event)
 {
    struct event_t * precedent = file->dernier;
 
+   printf_debug(DEBUG_EVENT, "IN\n");
+
    // On cherche sa place
    while ((precedent) && (event_getDate(precedent) > event_getDate(event))){
       precedent = precedent->prev;

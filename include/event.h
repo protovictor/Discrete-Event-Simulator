@@ -13,8 +13,8 @@
 
 struct event_t {
    int    type;
-   double period;  // Pour les événements périodiques
-   double date;
+   motSimDate_t period;  // Pour les événements périodiques
+   motSimDate_t date;
    void * data;
    void (*run)(void * data);
 
@@ -52,7 +52,7 @@ typedef void (*eventAction_t)(void *);
  */
 struct event_t * event_create(void (*run)(void *data),
 			      void * data,
-			      double date);
+			      motSimDate_t date);
 
 /**
  * @brief  Création et insertion d'un événement 
@@ -67,7 +67,7 @@ struct event_t * event_create(void (*run)(void *data),
  */
 void event_add(void (*run)(void *data),
 	       void * data,
-	       double date);
+	       motSimDate_t date);
 
 /**
  * @brief  Création d'un événement périodique
@@ -87,8 +87,8 @@ void event_add(void (*run)(void *data),
  */
 struct event_t * event_periodicCreate(void (*run)(void *data),
 				      void * data,
-				      double date,
-				      double period);
+				      motSimDate_t date,
+				      motSimDate_t period);
 
 /**
  * @brief  Création et insertion d'un événement périodique
@@ -103,10 +103,10 @@ struct event_t * event_periodicCreate(void (*run)(void *data),
  */
 void event_periodicAdd(void (*run)(void *data),
 		       void * data,
-		       double date,
-		       double period);
+		       motSimDate_t date,
+		       motSimDate_t period);
 
-double event_getDate(struct event_t * event);
+motSimDate_t event_getDate(struct event_t * event);
 
 void event_run(struct event_t * event);
 

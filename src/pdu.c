@@ -2,6 +2,38 @@
 #include <assert.h>
 
 #include <pdu.h>
+#include <ndesObject.h>
+
+/* WARNING
+ * Le type est visible car utilisé par différents modules vu que c'est
+ * un peu le couteau suisse de l'outil de simulation. Idéalement, il
+ * faut utiliser autant que possible les méthodes de manipulation
+ * fournies plus bas.
+ */
+struct PDU_t {
+   declareAsNdesObject;
+
+   int      id;    // Un identifiant général
+   motSimDate_t  creationDate;
+
+   void   * data;  // Des donnees privées
+   int      taille ;
+
+   // Les pointeurs suivants sont à la discrétion du propriétaire de la PDU
+   // WARNING c'est une horreur à virer
+   struct PDU_t * prev;
+   struct PDU_t * next;
+};
+
+/**
+ * @brief Déclaration des fonctions spécifiques liées au ndesObject
+ */
+declareObjectFunctions(PDU);
+
+/**
+ * @brief Définition des fonctions spécifiques liées au ndesObject
+ */
+defineObjectFunctions(PDU);
 
 static int pduNB = 0;
 
@@ -13,11 +45,6 @@ struct probe_t * PDU_releaseProbe;
 
 // Pointeur sur une PDU libre (pour accélerer alloc/free)
 struct PDU_t * firstFreePDU = NULL;
-
-/**
- * @brief Définition des fonctions spécifiques liées au ndesObject
- */
-defineObjectFunctions(PDU);
 
 /**
  * @brief Les entrées de log sont des ndesObject
@@ -84,4 +111,42 @@ void PDU_free(struct PDU_t * pdu)
       pdu->next = firstFreePDU;
       firstFreePDU = pdu;
    }
+}
+
+/**
+ * @brief Get next PDU
+ * @param pdu non NULL
+ */
+struct PDU_t * PDU_getNext(struct PDU_t * pdu)
+{
+   return  pdu->next;
+}
+
+/**
+ * @brief Get next PDU
+ * @param pdu non NULL
+ */
+struct PDU_t * PDU_getPrev(struct PDU_t * pdu)
+{
+   return  pdu->prev;
+}
+
+/**
+ * @brief Get next PDU
+ * @param pdu non NULL
+ * @param next can be null
+ */
+void PDU_setNext(struct PDU_t * pdu, struct PDU_t * next)
+{
+   pdu->next = next;
+}
+
+/**
+ * @brief Get next PDU
+ * @param pdu non NULL
+ * @param prev can be null
+ */
+void PDU_setPrev(struct PDU_t * pdu, struct PDU_t * prev)
+{
+   pdu->prev = prev;
 }

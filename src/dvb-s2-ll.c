@@ -344,6 +344,7 @@ int DVBS2ll_processPDU(struct DVBS2ll_t * dvbs2ll,
 
    // Si c'est juste pour tester si je suis pret
    if ((getPDU == NULL) || (source == NULL)) {
+      printf_debug(DEBUG_ALWAYS, "getPDU/source should not be NULL\n");
       return DVBS2ll_available(dvbs2ll); // WARNING il vaudrait mieux un DVBS2ll_processPDU
    }
 
@@ -358,4 +359,5 @@ int DVBS2ll_processPDU(struct DVBS2ll_t * dvbs2ll,
   
       DVBS2ll_sendPDU(dvbs2ll, pdu);
    }
+   return 1;
 }
