@@ -55,7 +55,7 @@ int hdlc_connect(struct hdlc_t * h, int mode)
    h->window = PDU_create(0, NULL);  //!< Create a S..M Frame
    printf_debug(DEBUG_ALWAYS, "PDU created\n");
 
-   h->sendPDU(h->outLink, hdlc_getPDU, h);   
+   h->sendPDU(h->outLink, (getPDU_t)hdlc_getPDU, h);   
 
    printf_debug(DEBUG_ALWAYS, "OUT\n");
 
@@ -82,7 +82,7 @@ int hdlc_send(struct hdlc_t * h, struct PDU_t * data)
 
    pdu = PDU_create(0, data); //!< HDLC I-PDU creation
 
-   h->sendPDU(h->outLink, hdlc_getPDU, pdu);
+   h->sendPDU(h->outLink, (getPDU_t)hdlc_getPDU, pdu);
 
    return 0; //!< OK
 }
@@ -98,7 +98,7 @@ void hdlc_processPDU(struct hdlc_t * h,
 
    pdu = getPDU(source);
 
-   printf_debug(DEBUG_ALWAYS, "pdu received\n");
+   printf_debug(DEBUG_ALWAYS, "pdu %d received\n", PDU_id(pdu));
 }
 
 /**

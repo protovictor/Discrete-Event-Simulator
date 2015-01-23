@@ -1,11 +1,7 @@
 SRC_FILES= $(wildcard *.c)
 OBJ_FILES= $(SRC_FILES:.c=.o)
 
-<<<<<<< HEAD
-EXAMPLES = debits rg-its rg-draw hdlc-demo example-1 example-2 example-3
-=======
-EXAMPLES = inoutdemo debits rg-its rg-draw example-1 example-2 example-3
->>>>>>> master
+EXAMPLES = inoutdemo debits rg-its rg-draw hdlc-demo example-1 example-2 example-3
 
 .PHONY: clean 
 
