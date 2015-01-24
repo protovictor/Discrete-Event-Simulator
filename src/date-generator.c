@@ -30,8 +30,69 @@ struct dateGenerator_t {
 };
 
 /*-------------------------------------------------------------------------*/
+/*   Les constructeurs                                                     */
+/*-------------------------------------------------------------------------*/
+void dateGenerator_setRandomGenerator(struct dateGenerator_t * dateGen,
+				      struct randomGenerator_t * randGen);
+/**
+ * @brief Creation of a date generator
+ * @result a struct dateGenerator_t * 
+ *
+ * The created dateGenerator is unusable for now. It needs to be
+ * associated to a random generator
+ */
+struct dateGenerator_t * dateGenerator_create()
+{
+  struct dateGenerator_t * result = (struct dateGenerator_t * )
+                  sim_malloc(sizeof(struct dateGenerator_t));
+  result->interArrivalProbe = NULL;
+
+  result->randGen = NULL;
+
+  return result;
+}
+
+/*
+ * Création d'une loi avec interarrivé exponentielle
+ */
+struct dateGenerator_t * dateGenerator_createExp(double lambda)
+{
+  struct dateGenerator_t * result = dateGenerator_create();
+
+  dateGenerator_setRandomGenerator(result, randomGenerator_createDoubleExp(lambda));
+
+  return result;
+}
+
+/*
+ * Création d'une loi avec interarrivé constante
+ */
+struct dateGenerator_t * dateGenerator_createPeriodic(double period)
+{
+  struct dateGenerator_t * result = dateGenerator_create();
+  double un = 1.0;
+
+  dateGenerator_setRandomGenerator(result, randomGenerator_createDoubleDiscreteProba(1, &period, &un));
+
+  return result;
+}
+
+/*-------------------------------------------------------------------------*/
 /*   Les fonctions générales                                               */
 /*-------------------------------------------------------------------------*/
+/**
+ * @brief Choix du générateur aléatoire des durées entre dates
+ *
+ * @param dateGen le générateur à modifier
+ * @param randGen le générateur de date à affecter
+ */
+void dateGenerator_setRandomGenerator(struct dateGenerator_t * dateGen,
+				      struct randomGenerator_t * randGen)
+{
+   dateGen->randGen = randGen;
+}
+
+
 /** @brief Obtention de la prochaine date
  *
  *  @param dateGen le générateur à utiliser
@@ -50,7 +111,8 @@ double dateGenerator_nextDate(struct dateGenerator_t * dateGen, double currentTi
   //   return dateGen->nextDate(dateGen, currentTime);
 }
 
-/** @brief Insertion d'une sonde sur les inter-arrivees.
+/**
+ * @brief Insertion d'une sonde sur les inter-arrivees.
  * 
  * @param dateGen le générateur de date sur lequel greffer la sonde
  * @param probe la sonde à y appliquer
@@ -87,42 +149,12 @@ double loi_expo(struct dateGenerator_t * dateGen, double currentTime)
 */
 
 /*
- * Création d'une loi avec interarrivé exponentielle
- */
-struct dateGenerator_t * dateGenerator_createExp(double lambda)
-{
-  struct dateGenerator_t * result = (struct dateGenerator_t * )
-                  sim_malloc(sizeof(struct dateGenerator_t));
-  result->interArrivalProbe = NULL;
-
-  result->randGen = randomGenerator_createDoubleExp(lambda);
-
-  return result;
-}
-
-/*
  * Modification du paramètre lambda
  */
 void dateGenerator_setLambda(struct dateGenerator_t * dateGen, double lambda)
 {
    randomGenerator_setLambda(dateGen->randGen, lambda);
 }
-
-/*
- * Création d'une loi avec interarrivé constante
- */
-struct dateGenerator_t * dateGenerator_createPeriodic(double period)
-{
-  double un = 1.0;
-  struct dateGenerator_t * result = (struct dateGenerator_t * )
-                  sim_malloc(sizeof(struct dateGenerator_t));
-  result->interArrivalProbe = NULL;
-
-  result->randGen = randomGenerator_createDoubleDiscreteProba(1, &period, &un);
-
-  return result;
-}
-
 
 /*
  * Prepare for record values in order to replay on each reset

@@ -11,13 +11,45 @@
 #define __DEF_DATE_GENERATOR
 
 #include <probe.h>
+#include <random-generator.h>
 
 struct dateGenerator_t;
 
+/**
+ * @brief Creation of a date generator
+ * @result a struct dateGenerator_t * 
+ *
+ * The created dateGenerator is unusable for now. It needs to be
+ * associated to a random generator
+ */
 struct dateGenerator_t * dateGenerator_create();
 
 /**
+ * Creation d'une source qui genere des evenements a interrarivee
+ * exponentielle.
+ */
+struct dateGenerator_t * dateGenerator_createExp(double lambda);
+
+/**
+ * Creation d'une source qui genere des evenements a interrarivee
+ * constante. Bref, périodiques !
+ */
+struct dateGenerator_t * dateGenerator_createPeriodic(double period);
+
+/**
+ * @brief Choix du générateur aléatoire des durées entre dates
+ *
+ * @param dateGen le générateur à modifier
+ * @param randGen le générateur de date à affecter
+ */
+void dateGenerator_setRandomGenerator(struct dateGenerator_t * dateGen,
+				      struct randomGenerator_t * randGen);
+
+/**
  * @brief Ajout d'une sonde sur les inter-arrivees
+ *
+ * @param dateGen le générateur à modifier
+ * @param probe la sonde à affecter
  */
 void dateGenerator_addInterArrivalProbe(struct dateGenerator_t * dateGen,
 					struct probe_t * probe);
@@ -31,21 +63,9 @@ double dateGenerator_nextDate(struct dateGenerator_t * dateGen,
 			      double currentTime);
 
 /*
- * Creation d'une source qui genere des evenements a interrarivee
- * exponentielle.
- */
-struct dateGenerator_t * dateGenerator_createExp(double lambda);
-
-/*
  * Modification du paramètre lambda
  */
 void dateGenerator_setLambda(struct dateGenerator_t * dateGen, double lambda);
-
-/*
- * Creation d'une source qui genere des evenements a interrarivee
- * constante. Bref, périodiques !
- */
-struct dateGenerator_t * dateGenerator_createPeriodic(double period);
 
 /*
  * Prepare for record values in order to replay on each reset
