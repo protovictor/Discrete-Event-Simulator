@@ -1,5 +1,6 @@
 /**
- *
+ *   @file hdlc.h
+ *   @brief trying to implement a basic HDLC
  */
 #ifndef __DEF_HDLC
 #define __DEF_HDLC
@@ -28,15 +29,17 @@ void hdlc_processSDU(struct hdlc_t * h,
                      void * source);
 
 /**
- * @brief Initialization of an entity waiting for an incomming
- * connection 
+ * @brief Initialization of the function to be called on an incomming
+ * connection request
  */
-void hdlc_init(struct hdlc_t * h);
+void hdlc_setConnectionNotification(struct hdlc_t * h,
+				    int (*notifFunc)(struct hdlc_t * , void * ),
+                                    void * data);
 
 /**
  * @brief Initialization of a connection
  */
-int hdlc_connect(struct hdlc_t * h, int mode);
+int hdlc_connectRequest(struct hdlc_t * h);
 
 /**
  * @brief Emission d'un message
@@ -48,5 +51,6 @@ int hdlc_send(struct hdlc_t * h, struct PDU_t * data);
  */
 struct PDU_t * hdlc_getPDU(struct hdlc_t * h);
 
+#define HDLC_MAX_WINDOW_SIZE 127
 
 #endif
