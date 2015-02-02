@@ -1,7 +1,7 @@
 SRC_FILES= $(wildcard *.c)
 OBJ_FILES= $(SRC_FILES:.c=.o)
 
-EXAMPLES = inoutdemo debits rg-its rg-draw hdlc-demo example-1 example-2 example-3
+EXAMPLES = src-tcpss-ex inoutdemo debits rg-its rg-draw hdlc-demo example-1 example-2 example-3
 
 .PHONY: clean 
 
@@ -9,6 +9,9 @@ all : $(EXAMPLES)
 
 inoutdemo : inoutdemo.o ../$(SRC_DIR)/libndes.a
 	$(CC) inoutdemo.o -o inoutdemo $(LDFLAGS)
+
+src-tcpss-ex : src-tcpss-ex.o ../$(SRC_DIR)/libndes.a
+	$(CC) src-tcpss-ex.o -o src-tcpss-ex $(LDFLAGS)
 
 debits : debits.o ../$(SRC_DIR)/libndes.a
 	$(CC) debits.o -o debits $(LDFLAGS)
