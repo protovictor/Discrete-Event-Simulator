@@ -41,6 +41,8 @@ struct randomGenerator_t;
 #define rGDistExponential  2
 #define rGDistDiscrete     3
 #define rGDistITS          4
+#define rGDistTruncLogNorm 5
+#define rGDistTruncPareto  6
 
 #define rGDistDefault rGDistUniform
 /*
@@ -99,6 +101,17 @@ struct randomGenerator_t * randomGenerator_createULong(int distribution,
 // Des rÃ©els double prÃ©cision, avec une distribution exp de paramÃ¨tre lambda
 struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda);
 
+///  ****************   A FAIRE **************** 
+//
+// Des rÃ©els double prÃ©cision, avec une distribution Truncated Lognormal de paramÃ¨tre sigma et mu
+struct randomGenerator_t * randomGenerator_createDoubleTruncLogNorm(double sigma, double mu);
+
+
+///  ****************   A FAIRE **************** 
+//
+// Des rÃ©els double prÃ©cision, avec une distribution Truncated Pareto de paramÃ¨tre alpha, k et m
+struct randomGenerator_t * randomGenerator_createDoubleTruncLogNorm(double alpha, int k, int m);
+
 /* 
  * A double range [min .. max]
  */
@@ -137,8 +150,7 @@ void randomGenerator_delete(struct randomGenerator_t * rg);
  * Un nombre discret de probabilitÃ©s
  */
 void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
-					     int nb,
-                                             double * proba);
+					     int nb, double * proba);
 
 /**
  * @brief Création d'une distribution uniforme construite depuis un fichier
@@ -155,6 +167,17 @@ void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
 
 // Choix d'une loi exponentielle
 void randomGenerator_setDistributionExp(struct randomGenerator_t * rg, double lambda);
+
+///  ****************   PAS A FAIRE POUR L INSTANT ( pas essentiel )   **************** 
+//
+// Choix d'une loi TruncLogNorm
+void randomGenerator_setDistributionTruncLogNorm(struct randomGenerator_t * rg, double sigma, double mu);
+
+///  ****************   PAS A FAIRE POUR L INSTANT ( pas essentiel )   **************** 
+//
+// Choix d'une loi pareto
+void randomGenerator_setDistributionTruncPareto(struct randomGenerator_t * rg, double alpha, int k, int m);
+
 
 /**
  * @brief Set a pareto distribution
@@ -201,6 +224,17 @@ double randomGenerator_paretoDistQ(double x, double alpha, double xmin);
  * Change lambda
  */
 void randomGenerator_setLambda(struct randomGenerator_t * rg, double lambda);
+
+/*
+ * Change sigma and mu
+ */
+void randomGenerator_setLambda(struct randomGenerator_t * rg, double sigma, double mu);
+
+
+/*
+ * Change alpha, k and m 
+ */
+void randomGenerator_setLambda(struct randomGenerator_t * rg, double alpha, int k, int m );
 
 
 /*
