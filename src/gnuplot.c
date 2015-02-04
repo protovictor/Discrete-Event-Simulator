@@ -1,6 +1,6 @@
 /**
  * @file gnuplot.c
- * @brief Some basic tools to draw probes through gnuplot
+ * @brief Some basic tools to draww probes through gnuplot
  *
  */
 
