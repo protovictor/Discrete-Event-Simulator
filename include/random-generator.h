@@ -82,60 +82,98 @@ struct randomGenerator_t * randomGenerator_createDouble();
  */
 
 /**
- * @brief Création d'une ditribution d'après un fichier
+ * @brief Création d'une distribution d'après un fichier
  */
 struct randomGenerator_t * randomGenerator_createUIntDiscreteFromFile(char * fileName);
 
-/*
- * Le nombre de valeurs possibles est passÃ© en paramÃ¨tre ainsi que la
- * liste de ces valeurs puis la liste de leurs probabilitÃ©.
+
+/**
+ * @brief 
+ * @param nbValues  Le nombre de valeurs possibles
+ * @param values liste de ces valeurs
+ * @param xmin la liste de leurs probabilité
  */
 struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(int nbValues,
                                      unsigned int * values, double * proba);
  
-// Des entiers longs non signÃ©s
+/**
+ * @brief create ULong
+ * @param distribution numéro de la distribution
+ * @param min minimum entier long non signé
+ * @param max maximum entier long non signé
+ */
 struct randomGenerator_t * randomGenerator_createULong(int distribution,
 						       unsigned long min,
 						       unsigned long max);
 
-// Des rÃ©els double prÃ©cision, avec une distribution exp de paramÃ¨tre lambda
+/**
+ * @brief Génère une distribution exponentielle (des réels double précision)
+ * @param lambda paramètre lambda (double) de la loi exponentielle
+ */
 struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda);
 
 ///  ****************   A FAIRE **************** 
-//
-// Des rÃ©els double prÃ©cision, avec une distribution Truncated Lognormal de paramÃ¨tre sigma et mu
+/**
+ * @brief Génère une distribution Truncated Lognormal (des réels double précision)
+ * @param sigma paramètre sigma (double) de la loi Truncated Lognormal
+ * @param mu paramètre mu (double) de la loi Truncated Lognormal
+ */
+
 struct randomGenerator_t * randomGenerator_createDoubleTruncLogNorm(double sigma, double mu);
 
 
 ///  ****************   A FAIRE **************** 
-//
-// Des rÃ©els double prÃ©cision, avec une distribution Truncated Pareto de paramÃ¨tre alpha, k et m
+/**
+ * @brief Génère une distribution Truncated Pareto (des réels double précision)
+ * @param alpha paramètre sigma (double) de la loi Truncated Pareto
+ * @param k paramètre k (int) de la loi Truncated Pareto
+ * @param m paramètre m (int) de la loi Truncated Pareto
+ */
 struct randomGenerator_t * randomGenerator_createDoubleTruncLogNorm(double alpha, int k, int m);
 
-/* 
- * A double range [min .. max]
+/**
+ * @brief Generate a double range [min .. max]
+ * @param min double
+ * @param max double
  */
 struct randomGenerator_t * randomGenerator_createDoubleRange(double min,
 							     double max);
 
+/**
+ * @brief Generate a double discrete
+ * @param nbValues int
+ * @param values *double
+ */
 struct randomGenerator_t * randomGenerator_createDoubleDiscrete(
                                      int nbValues,
                                      double * values);
- 
+/**
+ * @brief Generate a double discrete proba
+ * @param nbValues int
+ * @param values *double
+ * @param proba *double
+ */
 struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(
                                      int nbValues,
                                      double * values,
                                      double * proba);
  
 /*==========================================================================*/
-
-// Use a (previously built) probe to re-run a sequence
+/**
+ * @brief  Use a (previously built) probe to re-run a sequence
+ * @param p *probe_t previously built probe
+ */
 struct randomGenerator_t * randomGenerator_createFromProbe(struct probe_t * p);
 
+/**
+ * @brief Reset a random generator
+ * @param rg random generator which has to be reseted
+ */
 void randomGenerator_reset(struct randomGenerator_t * rg);
 
-/*
- * Destructor
+/**
+ * @brief  Destructor, destruct a random generator
+ * @param rg random generator which has to be destructed
  */
 void randomGenerator_delete(struct randomGenerator_t * rg);
 
@@ -162,20 +200,28 @@ void randomGenerator_setDistributionDiscreteFromFile(struct randomGenerator_t * 
 						     char * fileName);
 
 
-// Choix d'une loi uniforme
+/**
+ * @brief Choix d'une loi uniforme
+ */
 void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
 
-// Choix d'une loi exponentielle
+/**
+ * @brief Choix d'une loi exponentielle
+ */
 void randomGenerator_setDistributionExp(struct randomGenerator_t * rg, double lambda);
 
 ///  ****************   PAS A FAIRE POUR L INSTANT ( pas essentiel )   **************** 
 //
-// Choix d'une loi TruncLogNorm
+/**
+ * @brief Choix d'une loi TruncLogNorm 
+ */ 
 void randomGenerator_setDistributionTruncLogNorm(struct randomGenerator_t * rg, double sigma, double mu);
 
 ///  ****************   PAS A FAIRE POUR L INSTANT ( pas essentiel )   **************** 
 //
-// Choix d'une loi pareto
+/**
+ * @brief Choix d'une loi Trunc Pareto
+ */ 
 void randomGenerator_setDistributionTruncPareto(struct randomGenerator_t * rg, double alpha, int k, int m);
 
 
@@ -220,38 +266,53 @@ double randomGenerator_expDistQ(double x, double lambda);
  */
 double randomGenerator_paretoDistQ(double x, double alpha, double xmin);
 
-/*
- * Change lambda
+/**
+ * @brief Change lambda
+ * @param rg random generator
+ * @param lambda lambda which has to be change
  */
 void randomGenerator_setLambda(struct randomGenerator_t * rg, double lambda);
 
-/*
- * Change sigma and mu
+/**
+ * @brief Change sigma and mu
+ * @param rg random generator
+ * @param sigma sigma which has to be change
+ * @param mu mu which has to be change
  */
 void randomGenerator_setLambda(struct randomGenerator_t * rg, double sigma, double mu);
 
-
-/*
- * Change alpha, k and m 
+/**
+ * @brief Change alpha, k and m
+ * @param rg random generator
+ * @param alpha alpha which has to be change
+ * @param k k which has to be change
+ * @param m m which has to be change
  */
 void randomGenerator_setLambda(struct randomGenerator_t * rg, double alpha, int k, int m );
 
-
-/*
- * Prepare for record values in order to replay on each reset
+/**
+ * @brief Prepare for record values in order to replay on each reset
+ * @param rg random generator
  */
 void randomGenerator_recordThenReplay(struct randomGenerator_t * rg);
 
-/*
- * Value generation
+/**
+ * @brief Value generation : unsigned int
+ * @param rg random generator
  */
 unsigned int randomGenerator_getNextUInt(struct randomGenerator_t * rg);
+
+/**
+ * @brief Value generation : double
+ * @param rg random generator
+ */
 double randomGenerator_getNextDouble(struct randomGenerator_t * rg);
 
-/*
- * Obtention de certains paramÃ¨tres. Il s'agit ici de valeurs
- * thÃ©oriques, pour obtenir leurs Ã©quivalents sur une sÃ©rie
- * d'expÃ©riences, on utilisera des sondes.
+/**
+ * @brief Obtention de certains paramètres. Il s'agit ici de valeurs
+ * théoriques, pour obtenir leurs équivalents sur une série
+ * d'expèriences, on utilisera des sondes.
+ * @param rg random generator
  */
 double randomGenerator_getExpectation(struct randomGenerator_t * rg);
 
@@ -260,8 +321,9 @@ double randomGenerator_getExpectation(struct randomGenerator_t * rg);
 /*==========================================================================*/
 /**
  * @brief Ajout d'une sonde sur les valeurs générées
+ * @param rg random generator
+ * @param p probe
  */
-
 void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
 				   struct probe_t * p);
 
