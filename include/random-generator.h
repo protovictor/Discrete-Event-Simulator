@@ -2,14 +2,14 @@
  * @file random-generator.h
  * @brief Les générateurs de nombres aléatoires.
  *
- * Un gÃ©nÃ©rateur est caractÃ©risÃ© par plusieurs propriÃ©tÃ©s
+ * Un générateur est caractérisé par plusieurs propriétés
  *
- * - Le type des valeurs gÃ©nÃ©rÃ©es.
- * - La distribution des probabilitÃ©s
- *    . Les paramÃ¨tres de cette distribution : min, max, moyenne, ...
- * - La source d'alÃ©a. Certaines permettent un rejeu (rand unix)
- *   d'autres sont "vraiment alÃ©atoires" (/dev/random)
- *    . Les paramÃ¨tres de cette source (seed, ...)
+ * - Le type des valeurs générées.
+ * - La distribution des probabilités
+ *    . Les paramètres de cette distribution : min, max, moyenne, ...
+ * - La source d'aléa. Certaines permettent un rejeu (rand unix)
+ *   d'autres sont "vraiment aléatoires" (/dev/random)
+ *    . Les paramètres de cette source (seed, ...)
  */
 
 #ifndef __DEF_RANDOM_GENERATOR
