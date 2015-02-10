@@ -129,7 +129,7 @@ struct randomGenerator_t * randomGenerator_createDoubleTruncLogNorm(double sigma
  * @param k paramètre k (int) de la loi Truncated Pareto
  * @param m paramètre m (int) de la loi Truncated Pareto
  */
-struct randomGenerator_t * randomGenerator_createDoubleTruncLogNorm(double alpha, int k, int m);
+//struct randomGenerator_t * randomGenerator_createDoubleTruncLogNorm(double alpha, int k, int m);
 
 /**
  * @brief Generate a double range [min .. max]
@@ -215,15 +215,16 @@ void randomGenerator_setDistributionExp(struct randomGenerator_t * rg, double la
 /**
  * @brief Choix d'une loi TruncLogNorm 
  */ 
-void randomGenerator_setDistributionTruncLogNorm(struct randomGenerator_t * rg, double sigma, double mu);
+//void randomGenerator_setDistributionTruncLogNorm(struct randomGenerator_t * rg, double sigma, double mu);
+//NOTE DE BENJAMIN : il avait dit "pas essentiel" mais je l'ai fait... (cf ci-dessous)
 
 ///  ****************   PAS A FAIRE POUR L INSTANT ( pas essentiel )   **************** 
 //
 /**
  * @brief Choix d'une loi Trunc Pareto
  */ 
-void randomGenerator_setDistributionTruncPareto(struct randomGenerator_t * rg, double alpha, int k, int m);
-
+//void randomGenerator_setDistributionTruncPareto(struct randomGenerator_t * rg, double alpha, int k, int m);
+//NOTE DE BENJAMIN : idem.
 
 /**
  * @brief Set a pareto distribution
@@ -274,23 +275,6 @@ double randomGenerator_paretoDistQ(double x, double alpha, double xmin);
 void randomGenerator_setLambda(struct randomGenerator_t * rg, double lambda);
 
 /**
- * @brief Change sigma and mu
- * @param rg random generator
- * @param sigma sigma which has to be change
- * @param mu mu which has to be change
- */
-void randomGenerator_setLambda(struct randomGenerator_t * rg, double sigma, double mu);
-
-/**
- * @brief Change alpha, k and m
- * @param rg random generator
- * @param alpha alpha which has to be change
- * @param k k which has to be change
- * @param m m which has to be change
- */
-void randomGenerator_setLambda(struct randomGenerator_t * rg, double alpha, int k, int m );
-
-/**
  * @brief Prepare for record values in order to replay on each reset
  * @param rg random generator
  */
@@ -326,5 +310,41 @@ double randomGenerator_getExpectation(struct randomGenerator_t * rg);
  */
 void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
 				   struct probe_t * p);
+
+
+//======================================
+//Nouveautés made in Benj ;)
+
+/*Inspirez-vous de createDoubleExp, setDistributionExp, etc... et faites la doc !  
+ */
+
+//Calqué sur randomGenerator_createDoubleExp
+struct randomGenerator_t * randomGenerator_createDoubleRangeTruncPareto(double alpha, double xmin, double plafond);
+//Calqué sur randomGenerator_setDistributionExp
+void randomGenerator_setDistributionTruncPareto(struct randomGenerator_t * rg,
+					     double alpha,
+                                             double xmin, double plafond);
+//Calqué sur randomGenerator_exponentialInit
+void randomGenerator_TruncParetoInit(struct randomGenerator_t * rg, double alpha, double xmin, double plafond);
+// Calqué sur randomGenerator_exponentialGetNext
+double randomGenerator_TruncParetoGetNext(struct randomGenerator_t * rg);
+//Calqué sur randomGenerator_setLambda.
+void randomGenerator_setAlphaXminPlafond(struct randomGenerator_t * rg, double alpha, double xmin, double plafond);
+
+//Les 5 fonctions suivantes sont calquées sur les 5 ci-dessus
+struct randomGenerator_t * randomGenerator_createDoubleRangeTruncLogNorm(double mu, double sigma, double plafond);
+void randomGenerator_setDistributionTruncLogNorm(struct randomGenerator_t * rg,
+					     double mu,
+                                             double sigma, double plafond);
+void randomGenerator_TruncLogNormInit(struct randomGenerator_t * rg, double mu, double sigma, double plafond);
+double randomGenerator_TruncLogGetNext(struct randomGenerator_t * rg);
+void randomGenerator_setMuSigmaPlafond(struct randomGenerator_t * rg, double mu, double sigma, double plafond);
+
+
+
+
+
+
+
 
 #endif

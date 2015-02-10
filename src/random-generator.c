@@ -21,7 +21,7 @@
 #include <motsim.h>
 #include <file_pdu.h>
 #include <random-generator.h>
-
+#define PI 3.14159265358979323846
 
 /*
  * Structure gÃ©nÃ©rale d'un gÃ©nÃ©rateur alÃ©atoire
@@ -71,6 +71,14 @@ struct randomGenerator_t {
             int nbProba;
             double * proba;
          } discrete;
+	 struct {
+		double alpha;
+		double xmin;
+	 } pareto; //AJOUT DE BENJAMIN !
+	 struct {
+		double mu;
+		double sigma;
+	 } logNorm; //AJOUT DE BENJAMIN, bis.
          struct {           //!< ITS distribution
             int nbParam;    //!< Quantile function number of parameters 
             double p1, p2;  //!< Parameters values
@@ -867,3 +875,126 @@ void readUIntDiscreteProbaFromFile(char * fileName,
    } 
    fclose(f);
 }
+
+
+//===================
+//Nouveautés made in Benj ! Elle est pas belle la vie ? ;)
+//Les fonctions create <= setDistribution <= Init sont imbriquées (A <= B : A appelle B)
+//En pratique on peut utiliser setDistribution si on a déjà un distributeur de double min..max suivant une autre loi (uniforme par exemple) ; sinon, utiliser create.
+//NOTE : la loi Pareto non-tronquée n'est définie que par deux paramètres, alpha (également appelé k) et xmin. J'ai donc choisi d'appeler le plafond 'plafond' et non 'xmax'.
+
+//Calqué sur randomGenerator_createDoubleExp
+struct randomGenerator_t * randomGenerator_createDoubleRangeTruncPareto(double alpha, double xmin, double plafond)
+{
+   struct randomGenerator_t * result = randomGenerator_createDoubleRange(xmin, plafond);
+   randomGenerator_setDistributionTruncPareto(result, alpha,xmin,plafond);
+   return result;
+}
+
+
+//Calqué sur randomGenerator_setDistributionExp
+void randomGenerator_setDistributionTruncPareto(struct randomGenerator_t * rg,
+					     double alpha,
+                                             double xmin, double plafond)
+{
+   rg->distribution = rGDistTruncPareto;
+   randomGenerator_TruncParetoInit(rg, alpha, xmin,plafond);
+}
+
+//Calqué sur randomGenerator_exponentialInit
+void randomGenerator_TruncParetoInit(struct randomGenerator_t * rg, double alpha, double xmin, double plafond)
+{
+   assert(rg->distribution == rGDistTruncPareto); 
+   rg->distParam.min = xmin; 
+   rg->distParam.max = plafond; 
+   //si "create" a été appelé, spécifier le min et le max a déjà dû être fait à l'étape "create". Mais on n'est jamais trop prudent.
+   rg->distParam.d.pareto.alpha = alpha;
+   rg->distParam.d.pareto.xmin = xmin;
+   rg->distGetNext = randomGenerator_TruncParetoGetNext;
+}
+
+// Calqué sur randomGenerator_exponentialGetNext
+double randomGenerator_TruncParetoGetNext(struct randomGenerator_t * rg)
+{
+   double alea;
+   double result ;
+
+   //  Les sources sont censées être uniformes. La boucle do..while garantit un résultat < max.
+   do{
+   alea = rg->aleaGetNext(rg);
+   result =  rg->distParam.d.pareto.xmin/(pow(alea, 1.0/rg->distParam.d.pareto.alpha));
+   }while (result > rg->distParam.max); 
+/*
+   printf_debug(DEBUG_GENE, " alea = %6.3f, alpha = %6.3f, xmin = %6.3f, result = %6.3f\n", alea, rg->distParam.d.pareto.alpha ,rg->distParam.d.pareto.xmin, , result);
+*/
+   return result;
+}
+
+
+//Calqué sur randomGenerator_setLambda.
+void randomGenerator_setAlphaXminPlafond(struct randomGenerator_t * rg, double alpha, double xmin, double plafond){
+   assert(rg->distribution == rGDistTruncPareto); 
+   rg->distParam.min = xmin;
+   rg->distParam.max = plafond;
+   rg->distParam.d.pareto.alpha = alpha;
+   rg->distParam.d.pareto.xmin = xmin;
+
+}
+
+//==============================================
+//Si vous avez compris pour setPareto, alors vous devriez comprendre pour la loi normale...
+//Tout est calqué sur ci-dessus !
+//NOTE : j'ai triché (ou pas !) : getNext génere d'abord un nombre Y selon une loi normale, puis retourne X=exp(Y). Ca correspond à la définition de Wikipédia "une variable aléatoire X est dite suivre une loi log-normale de paramètres mu et sigma^2 si la variable Y=ln(X) suit une loi normale".
+
+struct randomGenerator_t * randomGenerator_createDoubleRangeTruncLogNorm(double mu, double sigma, double plafond)
+{
+   struct randomGenerator_t * result = randomGenerator_createDoubleRange(0,plafond);
+   randomGenerator_setDistributionTruncLogNorm(result,mu,sigma,plafond);
+   return result;
+}
+
+void randomGenerator_setDistributionTruncLogNorm(struct randomGenerator_t * rg,
+					     double mu,
+                                             double sigma, double plafond)
+{
+   rg->distribution = rGDistTruncLogNorm;
+   randomGenerator_TruncLogNormInit(rg, mu, sigma,plafond);
+}
+
+void randomGenerator_TruncLogNormInit(struct randomGenerator_t * rg, double mu, double sigma, double plafond)
+{
+   assert(rg->distribution == rGDistTruncLogNorm); 
+   rg->distParam.min = 0 ;
+   rg->distParam.max = plafond;
+   //si "create" a été appelé, spécifier le min et le max a déjà dû être fait à l'étape "create". Mais on n'est jamais trop prudent.
+   rg->distParam.d.logNorm.mu = mu;
+   rg->distParam.d.logNorm.sigma = sigma;
+   rg->distGetNext = randomGenerator_TruncLogGetNext;
+}
+
+double randomGenerator_TruncLogGetNext(struct randomGenerator_t * rg)
+{
+   double R,theta;
+   double result ;
+
+   //  Les sources sont censées être uniformes. La boucle do..while garantit un résultat < max.
+   do{
+   R = sqrt(-log(rg->aleaGetNext(rg)));
+   theta = 2*PI*rg->aleaGetNext(rg); //R*cos(theta) suit une loi normale (0,1)
+   result = exp(rg->distParam.d.logNorm.mu + rg->distParam.d.logNorm.sigma * R*cos(theta));   
+
+   }while (result > rg->distParam.max); 
+/*
+   printf_debug(DEBUG_GENE, "OUPS ! Il semblerait qu'on n'ait pas mis de phrase de debug à randomGenerator_truncLogGetNext !");
+*/
+   return result;
+}
+
+void randomGenerator_setMuSigmaPlafond(struct randomGenerator_t * rg, double mu, double sigma, double plafond){
+   assert(rg->distribution == rGDistTruncLogNorm); 
+   rg->distParam.max = plafond;
+   //si "create" a été appelé, spécifier le min et le max a déjà dû être fait à l'étape "create". Mais on n'est jamais trop prudent.
+   rg->distParam.d.logNorm.mu = mu;
+   rg->distParam.d.logNorm.sigma = sigma;
+}
+
