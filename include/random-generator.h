@@ -19,8 +19,17 @@
 
 struct randomGenerator_t;
 
-/*
- * Available types for the random values
+/**
+ * @brief Available types for the random values
+ * @param rGTypeUInt Des nombres positifs entiers 
+ * @param rGTypeULong Des nombres positifs entiers longs
+ * @param rGTypeFloat Des nombres décimaux float
+ * @param rGTypeDouble Des nombres décimaux double précision
+ * @param rGTypeDoubleRange Des nombres double précision compris entre min et max
+ * @param rGTypeUIntEnum Des nombres positifs entiers pour les rgs discrets
+ * @param rGTypeDoubleEnum Des nombres décimaux double précision pour les rgs discrets
+ * @param rGTypeUIntRange Des nombres entiers positifs compris entre min et max
+ * @param rGTypeUIntConstant Des nombres entiers positifs constants
  */
 #define rGTypeUInt         1
 #define rGTypeULong        2
@@ -33,8 +42,15 @@ struct randomGenerator_t;
 #define rGTypeUIntConstant 9
 
 
-/*
- * Available distributions
+/**
+ * @brief Available distributions
+ * @param rGDistNoDist Pas de distribution définie
+ * @param rGDistUniform Distribution uniforme
+ * @param rGDistExponential Distribution exponentielle
+ * @param rGDistDiscrete Distribution discrète
+ * @param rGDistITS Distribution ITS
+ * @param rGDistTruncLogNorm Distribution log-normale tronquée
+ * @param rGDistTruncPareto Distribution Pareto tronquée
  */
 #define rGDistNoDist       0
 #define rGDistUniform      1
@@ -44,14 +60,23 @@ struct randomGenerator_t;
 #define rGDistTruncLogNorm 5
 #define rGDistTruncPareto  6
 
+/**
+ * @brief Définition de la distribution par défaut qui est la distribution uniforme
+*/
 #define rGDistDefault rGDistUniform
-/*
- * Entropy sources
+/**
+ * @brief Entropy sources
+ * @param rGSourceErand48 Source d'entrotpie de type Errand48
+ * @param rGSourceReplay Source d'entrotpie de type rGSourceReplay
+ * @param rgSourceUrandom Source d'entrotpie de type rgSourceUrandom
  */
 #define rGSourceErand48 1
 #define rGSourceReplay  2
 #define rgSourceUrandom 3
 
+/**
+ * @brief Source d'entropie par défaut Errand48
+*/
 #define rgSourceDefault rGSourceErand48
 
 /*==========================================================================*/
