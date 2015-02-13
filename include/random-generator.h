@@ -83,23 +83,41 @@ struct randomGenerator_t;
 /*  Creators                                                                */
 /*==========================================================================*/
 
-/*
- *  Creators without distribution
+/**
+ * @brief Creators without distribution
+ * @return On obtient un générateur aléatoire sans distribution
  */
 // Des entiers non signÃ©s quelconques
 struct randomGenerator_t * randomGenerator_createUInt();
 
-// Des entiers non signÃ©s entre min et max  (inclus)
+/**
+ * @brief Créateur d'un RG (sans distribution prédifinie)
+ * avec des entiers non signés entre min et max  (inclus)
+ * @param min le min de la distribution
+ * @param max le max de la distribution
+*/
 struct randomGenerator_t * randomGenerator_createUIntRange(unsigned int min,
 						      unsigned int max);
 
-// Des entiers non signÃ©s tous égaux !
+/**
+ * @brief Créateur d'un RG (sans distribution prédifinie)
+ * avec des entiers non signés tous égaux!
+ * @param v Distribution de dirac
+*/
 struct randomGenerator_t * randomGenerator_createUIntConstant(unsigned int v);
 
-// Des entiers non signÃ©s listÃ©s
+/**
+ * @brief Créateur d'un RG (sans distribution prédifinie)
+ * avec des entiers non signés listés
+ * @param nbValues nombre de valeur de la disribution
+ * @param values valeurs de la distribution!???
+*/
 struct randomGenerator_t * randomGenerator_createUIntDiscrete(int nbValues,
 							      unsigned int * values);
-// Des rÃ©els double prÃ©cision
+/**
+ * @brief Créateur d'un RG (sans distribution prédifinie)
+ * avec des réels double précision
+*/
 struct randomGenerator_t * randomGenerator_createDouble();
 
 /*
@@ -107,13 +125,14 @@ struct randomGenerator_t * randomGenerator_createDouble();
  */
 
 /**
- * @brief Création d'une distribution d'après un fichier
+ * @brief Création d'une distribution d'entier discrète d'après un fichier
+ * @param fileName nom du fichier contenant la distribution à lire
  */
 struct randomGenerator_t * randomGenerator_createUIntDiscreteFromFile(char * fileName);
 
 
 /**
- * @brief 
+ * @brief Création d'une distribution d'entier discrète
  * @param nbValues  Le nombre de valeurs possibles
  * @param values liste de ces valeurs
  * @param xmin la liste de leurs probabilité
@@ -122,7 +141,7 @@ struct randomGenerator_t * randomGenerator_createUIntDiscreteProba(int nbValues,
                                      unsigned int * values, double * proba);
  
 /**
- * @brief create ULong
+ * @brief create ULong (distribution avec des entiers longs)
  * @param distribution numéro de la distribution
  * @param min minimum entier long non signé
  * @param max maximum entier long non signé
@@ -158,25 +177,25 @@ struct randomGenerator_t * randomGenerator_createDoubleTruncLogNorm(double sigma
 
 /**
  * @brief Generate a double range [min .. max]
- * @param min double
- * @param max double
+ * @param min double minimum du segment
+ * @param max double maximum du segment
  */
 struct randomGenerator_t * randomGenerator_createDoubleRange(double min,
 							     double max);
 
 /**
  * @brief Generate a double discrete
- * @param nbValues int
- * @param values *double
+ * @param nbValues int nombre de valeurs de la distribution
+ * @param values *double les valeurs de la distribution!??
  */
 struct randomGenerator_t * randomGenerator_createDoubleDiscrete(
                                      int nbValues,
                                      double * values);
 /**
  * @brief Generate a double discrete proba
- * @param nbValues int
- * @param values *double
- * @param proba *double
+ * @param nbValues int nombres de valeurs de la distribtuion
+ * @param values *double les valeurs de la distribution
+ * @param proba *double les proba de chaque point de la distribution
  */
 struct randomGenerator_t * randomGenerator_createDoubleDiscreteProba(
                                      int nbValues,
@@ -209,8 +228,11 @@ void randomGenerator_delete(struct randomGenerator_t * rg);
  * Choix de la distribution
  */
 
-/*
- * Un nombre discret de probabilitÃ©s
+/**
+ * @brief Un nombre discret de probabilités
+ * @param rg RG dont on doit configurer la distribution
+ * @param nb nombre d'éléments de la distribution
+ * @param proba la loi de la distribution
  */
 void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
 					     int nb, double * proba);
@@ -220,6 +242,8 @@ void randomGenerator_setDistributionDiscrete(struct randomGenerator_t * rg,
  *
  * Le fichier doit être un fichier texte orienté ligne où chaque ligne
  * contient un entier (la valeur) suivi d'un réel (la probabilité associée).
+ * @param rg RG dont on doit configurer la distribution
+ * @param fileName nom du fichier contenant les infos sur la distribution
  */ 
 void randomGenerator_setDistributionDiscreteFromFile(struct randomGenerator_t * rg,
 						     char * fileName);
@@ -227,11 +251,14 @@ void randomGenerator_setDistributionDiscreteFromFile(struct randomGenerator_t * 
 
 /**
  * @brief Choix d'une loi uniforme
+ * @param rg RG dont on doit configurer la distribution
  */
 void randomGenerator_setDistributionUniform(struct randomGenerator_t * rg);
 
 /**
  * @brief Choix d'une loi exponentielle
+ * @param rg RG dont on doit configurer la distribution
+ * @param lambda paramètre de la distribution exponentielle
  */
 void randomGenerator_setDistributionExp(struct randomGenerator_t * rg, double lambda);
 
@@ -284,11 +311,16 @@ void randomGenerator_setQuantile2Param(struct randomGenerator_t * rg,
 				       double p1, double p2);
 /**
  * @brief Inverse of CDF for exponential distribution
+ * @param x paramètre de la CDF
+ * @param lambda paramètre de la distribution exponentielle
  */
 double randomGenerator_expDistQ(double x, double lambda);
 
 /**
  * @brief Inverse of CDF for pareto distribution
+ * @param x paramètre de la CDF
+ * @param alpha paramètre de de la distribution pareto
+ * @param xmin paramètre de la distribution pareto
  */
 double randomGenerator_paretoDistQ(double x, double alpha, double xmin);
 
@@ -344,32 +376,97 @@ void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
  */
 
 //Calqué sur randomGenerator_createDoubleExp
+/**
+ * @brief Création d'un RG de distribution Pareto tronquée
+ * @param alpha paramètre de la distribution pareto
+ * @param xmin paramètre de la distribution pareto
+ * @param plafond paramètre de la distribution de pareto
+*/
 struct randomGenerator_t * randomGenerator_createDoubleRangeTruncPareto(double alpha, double xmin, double plafond);
+
 //Calqué sur randomGenerator_setDistributionExp
+/**
+ * @brief Définir une distribution Pareto tronquée pour un RG
+ * @param rg RG dont on doit définir la distribution
+ * @param alpha paramètre de la distribution pareto
+ * @param xmin paramètre de la distribution pareto
+ * @param plafond paramètre de la distribution de pareto
+*/
 void randomGenerator_setDistributionTruncPareto(struct randomGenerator_t * rg,
 					     double alpha,
                                              double xmin, double plafond);
+
 //Calqué sur randomGenerator_exponentialInit
+/**
+ * @brief Initialisation de la distribution Pareto tronquée pour une rg
+ * @param rg RG dont on doit initialisé la distribution pareto tronquée
+ * @param alpha paramètre de la distribution pareto
+ * @param xmin paramètre de la distribution pareto
+ * @param plafond paramètre de la distribution de pareto
+*/
 void randomGenerator_TruncParetoInit(struct randomGenerator_t * rg, double alpha, double xmin, double plafond);
+
 // Calqué sur randomGenerator_exponentialGetNext
+/**
+ * @brief Value generation : double issue d'une distribution de pareto
+ * @param rg random generator
+ */
 double randomGenerator_TruncParetoGetNext(struct randomGenerator_t * rg);
+
 //Calqué sur randomGenerator_setLambda.
+/**
+ * @brief Change alpha , xmin and plafond for a pareto troncated distribution
+ * @param rg random generator
+ * @param alpha paramètre de la distribution pareto
+ * @param xmin paramètre de la distribution pareto
+ * @param plafond paramètre de la distribution de pareto
+*/
 void randomGenerator_setAlphaXminPlafond(struct randomGenerator_t * rg, double alpha, double xmin, double plafond);
 
 //Les 5 fonctions suivantes sont calquées sur les 5 ci-dessus
+/**
+ * @brief Création d'un RG de distribution log normale tronquée
+ * @param mu paramètre de la distribution log normale tronquée
+ * @param sigma paramètre de la distribution log normale tronquée
+ * @param plafond paramètre de la distribution de log normale tronquée
+*/
 struct randomGenerator_t * randomGenerator_createDoubleRangeTruncLogNorm(double mu, double sigma, double plafond);
+
+/**
+ * @brief Définir une distribution log normale tronquée pour un RG
+ * @param rg RG dont on doit définir la distribution
+ * @param mu paramètre de la distribution log normale tronquée
+ * @param sigma paramètre de la distribution log normale tronquée
+ * @param plafond paramètre de la distribution de log normale tronquée
+*/
 void randomGenerator_setDistributionTruncLogNorm(struct randomGenerator_t * rg,
 					     double mu,
                                              double sigma, double plafond);
+
+/**
+ * @brief Initialisation de la distribution log normale tronquée pour une rg
+ * @param rg RG dont on doit initialisé la distribution log normale tronquée
+ * @param mu paramètre de la distribution log normale
+ * @param sigma paramètre de la distribution log normale
+ * @param plafond paramètre de la distribution de log normale
+*/
 void randomGenerator_TruncLogNormInit(struct randomGenerator_t * rg, double mu, double sigma, double plafond);
+
+/**
+ * @brief Value generation : double issue d'une distribution log normale tronquée
+ * @param rg random generator
+ */
 double randomGenerator_TruncLogGetNext(struct randomGenerator_t * rg);
+
+/**
+ * @brief Change mu , sigma and plafond for a log normal distribution
+ * @param rg random generator
+ * @param mu paramètre de la distribution log normale
+ * @param sigma paramètre de la distribution log normale
+ * @param plafond paramètre de la distribution de log normale
+*/
 void randomGenerator_setMuSigmaPlafond(struct randomGenerator_t * rg, double mu, double sigma, double plafond);
 
 
-
-
-
-
-
-
+//======================================
 #endif
