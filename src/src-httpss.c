@@ -18,7 +18,7 @@
  * @brief Definition of a source
  */
 struct srcHTTPSS_t {
-	struct randomGenerator_t Sm; // Size of the main object in a page
+	randomGenerator_t Sm; // Size of the main object in a page
 	struct randomGenerator_t Se; // Size of an embedded object in a page
 	struct randomGenerator_t Nd; // Number of embedded objects in a page
 	struct randomGenerator_t Dpc; // Reading time
@@ -49,15 +49,15 @@ struct srcHTTPSS * srcHTTPSS_init(struct randomGenerator_t * Sm,
 	struct srcHTTPSS_t * result = 
 		(struct srcHTTPSS_t *) sim_malloc(sizeof(struct srcHTTPSS_t ));
 
-	result → Sm = Sm;
-	result → Se = Se;
-	result → Nd = Sd;
-	result → Dpc = Dpc;
-	result → Tp = Tp;							
-	result → MTU = MTU; 
-	result → nbTCP = nbTCP; 
-	result → nbPage = 0;
-	result → version = version;
+	result -> Sm = Sm;
+	result -> Se = Se;
+	result -> Nd = Sd;
+	result -> Dpc = Dpc;
+	result -> Tp = Tp;							
+	result -> MTU = MTU; 
+	result -> nbTCP = nbTCP; 
+	result -> nbPage = 0;
+	result -> version = version;
 
 	return result;
 }
