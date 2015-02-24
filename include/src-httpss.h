@@ -23,7 +23,7 @@ struct srcHTTPSS_t;
  * @param initialWindow is the initial value of cwnd
  * @param destination is a pointer to the destination entity
  * @param destProcessPDU is the PDU processing function of the destination
- * @param version True si 1.1, false si 1.0
+ * @param version 1 si 1.1, 0 si 1.0
  * @param nbTCP nombre de connections TCP utilisé pour charger les objets (==1 en 1.1)
  */
 struct srcHTTPSS * srcHTTPSS_init(struct randomGenerator_t * Sm,struct randomGenerator_t * Se,
@@ -31,7 +31,7 @@ struct srcHTTPSS * srcHTTPSS_init(struct randomGenerator_t * Sm,struct randomGen
 				struct randomGenerator_t * Dpc,
 				struct randomGenerator_t * Tp,
 				int MTU, int nbTCP, int nbPage,
-				boolean version);
+				int version);
 
 /*-------------------------------------------------------------------------------------------*/
 					/*Setters*/
