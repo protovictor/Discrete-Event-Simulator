@@ -42,7 +42,7 @@ struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm, struct random
  * @param Sm Type of Random, Generator Size of the main object in a page
  * @param src HTTP source
 */
-void srcHTTPSS_setSm(struct srcHTTPSS_t * src, struct randomGenerator_t * Sm);
+struct srcHTTPSS_t * srcHTTPSS_setSm(struct srcHTTPSS_t * src, struct randomGenerator_t * Sm);
 
 /**
  * @brief Set the Random Generator Se on the HTTP structure
