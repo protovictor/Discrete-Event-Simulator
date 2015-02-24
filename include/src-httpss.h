@@ -128,7 +128,7 @@ void srcHTTPSS_sendEmbeddedObjects(struct srcHTTPSS * src, void * destination,
  * @param destination is a pointer to the destination entity
  * @param destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_loadNewPage(src, void * destination, processPDU_t destProcessPDU,
+void srcHTTPSS_loadNewPage(struct srcHTTPSS * src, void * destination, processPDU_t destProcessPDU,
 			double RTTmd, int initialWindow);
 
 #endif
