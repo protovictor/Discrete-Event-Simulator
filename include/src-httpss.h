@@ -9,6 +9,7 @@
 #define __SRC_HTTP_H__
 
 #include <pdu.h>
+#include <random-generator.h>
 
 struct srcHTTPSS_t;
 
