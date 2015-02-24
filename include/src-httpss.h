@@ -8,6 +8,8 @@
 #ifndef __SRC_HTTP_H__
 #define __SRC_HTTP_H__
 
+#include <pdu.h>
+
 struct srcHTTPSS_t;
 
 /**
@@ -84,19 +86,34 @@ struct srcHTTPSS * srcHTTPSS_setMTU(struct srcHTTPSS_t * src, int MTU)
  * @param nbTCP nombre de connections TCP utilisé pour charger les objets (==1 en 1.1)
  * @param src HTTP source
 */
-struct srcHTTPSS * srcHTTPSS_setversion(struct srcHTTPSS_t * src, bool version, int nbTCP)
+struct srcHTTPSS * srcHTTPSS_setversion(struct srcHTTPSS_t * src, int version, int nbTCP)
 
 /*------------------------------------------------------------------------------------------*/
 			/*Fonctions pour lancer la session HTTP*/
 
 /**
  * @brief Dans cette fonction on va créer un source TCP (d'ou les paramètres pour la connection TCP).
- * On va envoyer la page principale à partir de cette fonction, et programmer 
+ * On va envoyer la page principale à partir de cette fonction, et programmer le chargement
+ * des objets embarqués qui est traité par la fonction srcHTTPSS_sendEmbeddedObjects
+ * @param src source HTTP, we have src-> MTU as maximum transmission unit of the link
+ * @param RTTmd is the Round Trip Time minus transmission time on the access link
+ * @param initialWindow is the initial value of cwnd
+ * @param destination is a pointer to the destination entity
+ * @param destProcessPDU is the PDU processing function of the destination
 */
 void srcHTTPSS_sessionStart(struct srcHTTPSS * src, void * destination, processPDU_t destProcessPDU,
 							double RTTmd, int initialWindow);
 
-
+/**
+ * @brief Dans cette fonction on va créer un source TCP (d'ou les paramètres pour la connection TCP).
+ * On va envoyer la page principale à partir de cette fonction, et programmer le chargement
+ * des objets embarqués
+ * @param src source HTTP, we have src-> MTU as maximum transmission unit of the link
+ * @param RTTmd is the Round Trip Time minus transmission time on the access link
+ * @param initialWindow is the initial value of cwnd
+ * @param destination is a pointer to the destination entity
+ * @param destProcessPDU is the PDU processing function of the destination
+*/
 void srcHTTPSS_sendEmbeddedObjects(struct srcHTTPSS * src, void * destination,
 									processPDU_t destProcessPDU, double RTTmd,
 									int initialWindow);
