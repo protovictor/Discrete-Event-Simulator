@@ -43,42 +43,42 @@ struct srcHTTPSS * srcHTTPSS_init(struct randomGenerator_t * Sm,struct randomGen
  * @param Sm Type of Random, Generator Size of the main object in a page
  * @param src HTTP source
 */
-struct srcHTTPSS * srcHTTPSS_setSm(struct srcHTTPSS_t * src, struct randomGenerator_t * Sm);
+void srcHTTPSS_setSm(struct srcHTTPSS_t * src, struct randomGenerator_t * Sm);
 
 /**
  * @brief Set the Random Generator Se on the HTTP structure
  * @param Se Type of Random, Size of an embedded object in a page
  * @param src HTTP source
 */
-struct srcHTTPSS * srcHTTPSS_setSe(struct srcHTTPSS_t * src, struct randomGenerator_t * Se);
+void srcHTTPSS_setSe(struct srcHTTPSS_t * src, struct randomGenerator_t * Se);
 
 /**
  * @brief Set the Random Generator Nd on the HTTP structure
  * @param Nd Random Generator, Number of embedded objects in a page
  * @param src HTTP source
 */
-struct srcHTTPSS * srcHTTPSS_setNd(struct srcHTTPSS_t * src, struct randomGenerator_t * Nd);
+void srcHTTPSS_setNd(struct srcHTTPSS_t * src, struct randomGenerator_t * Nd);
 
 /**
  * @brief Set the Random Generator Dpc on the HTTP structure
  * @param  Dpc Random Generator, Reading time
  * @param src HTTP source
 */
-struct srcHTTPSS * srcHTTPSS_setDpc(struct srcHTTPSS_t * src, struct randomGenerator_t * Dpc);
+void srcHTTPSS_setDpc(struct srcHTTPSS_t * src, struct randomGenerator_t * Dpc);
 
 /**
  * @brief Set the Random Generator Tp on the HTTP structure
  * @param  Tp Random Generator, Parsing time for the main page.
  * @param src HTTP source
 */
-struct srcHTTPSS * srcHTTPSS_setTp(struct srcHTTPSS_t * src, struct randomGenerator_t * Tp);
+void srcHTTPSS_setTp(struct srcHTTPSS_t * src, struct randomGenerator_t * Tp);
 
 /**
  * @brief Set the Random Generator MTU on the HTTP structure
  * @param  MTU is the maximum transmission unit of the link
  * @param src HTTP source
 */
-struct srcHTTPSS * srcHTTPSS_setMTU(struct srcHTTPSS_t * src, int MTU);
+void srcHTTPSS_setMTU(struct srcHTTPSS_t * src, int MTU);
 
 /**
  * @brief Set the Random Generator MTU on the HTTP structure
@@ -86,7 +86,7 @@ struct srcHTTPSS * srcHTTPSS_setMTU(struct srcHTTPSS_t * src, int MTU);
  * @param nbTCP nombre de connections TCP utilisé pour charger les objets (==1 en 1.1)
  * @param src HTTP source
 */
-struct srcHTTPSS * srcHTTPSS_setversion(struct srcHTTPSS_t * src, int version, int nbTCP);
+void srcHTTPSS_setversion(struct srcHTTPSS_t * src, int version, int nbTCP);
 
 /*------------------------------------------------------------------------------------------*/
 			/*Fonctions pour lancer la session HTTP*/
