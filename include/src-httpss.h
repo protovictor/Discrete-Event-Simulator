@@ -28,7 +28,7 @@ struct srcHTTPSS_t;
  * @param version 1 si 1.1, 0 si 1.0
  * @param nbTCP nombre de connections TCP utilisé pour charger les objets (==1 en 1.1)
  */
-struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm, struct randomGenerator_t * Se,
+void srcHTTPSS_init(struct randomGenerator_t * Sm, struct randomGenerator_t * Se,
 				struct randomGenerator_t * Nd,
 				struct randomGenerator_t * Dpc,
 				struct randomGenerator_t * Tp,
