@@ -28,7 +28,7 @@ struct srcHTTPSS_t;
  * @param version 1 si 1.1, 0 si 1.0
  * @param nbTCP nombre de connections TCP utilisé pour charger les objets (==1 en 1.1)
  */
-struct srcHTTPSS * srcHTTPSS_init(struct randomGenerator_t * Sm,struct randomGenerator_t * Se,
+struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm,struct randomGenerator_t * Se,
 				struct randomGenerator_t * Nd,
 				struct randomGenerator_t * Dpc,
 				struct randomGenerator_t * Tp,
@@ -101,7 +101,7 @@ void srcHTTPSS_setversion(struct srcHTTPSS_t * src, int version, int nbTCP);
  * @param destination is a pointer to the destination entity
  * @param destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_sessionStart(struct srcHTTPSS * src, void * destination, processPDU_t destProcessPDU,
+void srcHTTPSS_sessionStart(struct srcHTTPSS_t * src, void * destination, processPDU_t destProcessPDU,
 							double RTTmd, int initialWindow);
 
 /**
@@ -114,7 +114,7 @@ void srcHTTPSS_sessionStart(struct srcHTTPSS * src, void * destination, processP
  * @param destination is a pointer to the destination entity
  * @param destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_sendEmbeddedObjects(struct srcHTTPSS * src, void * destination,
+void srcHTTPSS_sendEmbeddedObjects(struct srcHTTPSS_t * src, void * destination,
 					processPDU_t destProcessPDU, double RTTmd,int initialWindow);
 
 /**
@@ -128,7 +128,7 @@ void srcHTTPSS_sendEmbeddedObjects(struct srcHTTPSS * src, void * destination,
  * @param destination is a pointer to the destination entity
  * @param destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_loadNewPage(struct srcHTTPSS * src, void * destination, processPDU_t destProcessPDU,
+void srcHTTPSS_loadNewPage(struct srcHTTPSS_t * src, void * destination, processPDU_t destProcessPDU,
 			double RTTmd, int initialWindow);
 
 #endif
