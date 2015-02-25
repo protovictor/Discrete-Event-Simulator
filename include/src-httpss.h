@@ -148,6 +148,6 @@ void srcHTTPSS_sendEmbeddedObjects(fonctionsHttpssArguments * arg);
  * arg->destination is a pointer to the destination entity
  * arg->destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_EOTEmbbededObjects(fonctionsHttpssArguments * arg);
+void srcHTTPSS_EOTEmbeddedObjects(fonctionsHttpssArguments * arg);
 
 #endif

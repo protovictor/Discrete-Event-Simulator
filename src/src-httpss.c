@@ -145,13 +145,14 @@ struct fonctionsHttpssArguments
 	double RTTmd;
 	int initialWindow;
 	struct srcTCPSS_t * srcTCP[100];
-	int nbTCPTermine = 0;
+	int nbTCPTermine;
 };
 
 
 void srcHTTPSS_sessionStart(fonctionsHttpssArguments * arg) 
 {
 	/*Initialiser les connections TCP*/
+	arg->nbTCPTermine = 0;
 	arg->srcTCP[0] = srcTCPss_create(arg->src->MTU, arg->RTTmd,
 						arg->initialWindow, arg->destination,
 						arg->destProcessPDU);
@@ -186,22 +187,23 @@ void srcHTTPSS_sendEmbeddedObjects(fonctionsHttpssArguments * arg)
 	int Nd = randomGenerator_TruncParetoGetNext(arg->src->Nd);
 	for (i = 0; i<Nd; i++) 
 	{
-		srcTCPss_sendFile(srcTCP[mod(i, arg->src->nbTCP)], randomGenerator_TruncLogGetNext(arg->src->Se)) ;
+		srcTCPss_sendFile(arg->srcTCP[mod(i, arg->src->nbTCP)], randomGenerator_TruncLogGetNext(arg->src->Se)) ;
 	}
 	/*On vérifie qu'on a envoyé les objets embarqués*/
 	for (i = 0; i<Nd; i++) {
 	/*On déclenche l'événement fin de transmission des Objets Embarquées principale*/
-		srcTCPss_addEOTEvent(srcTCP[i], event_create(srcHTTPSS_EOTEmbeddedObjects, arg, 0.0));
+		srcTCPss_addEOTEvent(arg->srcTCP[i], event_create(srcHTTPSS_EOTEmbeddedObjects, arg, 0.0));
 	}
 }
 
 /*Les objets Embarqués ont été envoyés*/
 void srcHTTPSS_EOTEmbeddedObjects(fonctionsHttpssArguments * arg) {
-	if (arg->nbTCPTermine == arg->src->nbTCP) {
+	if (arg->nbTCPTermine == arg->src->nbTCP - 1) {
 		//On a lu une page entière
 		arg->src->nbPage++;
 		arg->nbTCPTermine = 0;
 		//On détruit les sources TCP
+		int i;
 		for ( i=0; i < arg->src->nbTCP; i++)
 		{
 			arg->srcTCP[i] = srcTCPss_free(arg->srcTCP[i]);
