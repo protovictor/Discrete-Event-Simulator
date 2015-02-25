@@ -100,70 +100,68 @@ void srcHTTPSS_setversion(struct srcHTTPSS_t * src,int version, int nbTCP )
 }
 
 
-void srcHTTPSS_sessionStart(struct srcHTTPSS_t * src, void * destination,
-							processPDU_t destProcessPDU,
-							double RTTmd, int initialWindow) 
+/*Création d'une structure afin de passer à event_add un seul argument.*/
+typedef struct fonctionsHttpssArguments fonctionsHttpssArguments;
+struct fonctionsHttpssArguments
+{
+	struct srcHTTPSS_t * src;
+	void * destination;
+	processPDU_t destProcessPDU;
+	double RTTmd;
+	int initialWindow;
+};
+
+void srcHTTPSS_sessionStart(fonctionsHttpssArguments * arg) 
 {
 	/*Initialiser les connections TCP*/
-	struct srcTCPSS_t * srcTCP = srcTCPss_create(src->MTU, RTTmd,
-														initialWindow, destination,
-														destProcessPDU);
+	struct srcTCPSS_t * srcTCP = srcTCPss_create(arg->src->MTU, arg->RTTmd,
+														arg->initialWindow, arg->destination,
+														arg->destProcessPDU);
 	/*On envoie la page principale*/
-	srcTCPss_sendFile(srcTCP,randomGenerator_TruncParetoGetNext(src->Sm));
+	srcTCPss_sendFile(srcTCP,randomGenerator_TruncParetoGetNext(arg->src->Sm));
 	/*On peut programmer le chargement des objets embarqués*/
-	int tempsParsing = randomGenerator_exponentialGetNext(src->Tp);
+	int tempsParsing = randomGenerator_exponentialGetNext(arg->src->Tp);
 
-///**** A REFLECHIR ************/////////////
-//A L4AIDE D4UNE STRUCTURE
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	/*event_add(srcHTTPss_sendEmbeddedObjects, {src, destination,	destProcessPDU,
-											RTTmd,initialWindow},
-											motSim_getCurrentTime() + tempsParsing);*/
+	event_add(srcHTTPSS_sendEmbeddedObjects, arg, motSim_getCurrentTime() + tempsParsing);
 }
 
 /*Envoyer les objets embarqués*/
-void srcHTTPSS_sendEmbeddedObjects(struct srcHTTPSS_t * src, void * destination,
-									processPDU_t destProcessPDU, double RTTmd,
-									int initialWindow) 
+void srcHTTPSS_sendEmbeddedObjects(fonctionsHttpssArguments * arg) 
 {
 	int i;
 	/*On crée de nouvelles connections TCP*/
-	struct srcTCPSS_t * srcTCP[src->nbTCP];
-	for ( i=0; i < src->nbTCP; i++) 
+	struct srcTCPSS_t * srcTCP[arg->src->nbTCP];
+	for ( i=0; i < arg->src->nbTCP; i++) 
 	{
-		srcTCP[i] = srcTCPss_create(src->MTU,RTTmd,initialWindow,
-														destination, destProcessPDU);
+		srcTCP[i] = srcTCPss_create(arg->src->MTU,arg->RTTmd,arg->initialWindow,
+														arg->destination, arg->destProcessPDU);
 	}
 
 	/*Calculer le nombre d'objets embarqués*/
-	int Nd = randomGenerator_TruncParetoGetNext(src->Nd);
+	int Nd = randomGenerator_TruncParetoGetNext(arg->src->Nd);
 	for (i = 0; i<Nd; i++) 
 	{
-		srcTCPss_sendFile(srcTCP[mod(i, src->nbTCP)], randomGenerator_TruncLogGetNext(src->Se)) ;
+		srcTCPss_sendFile(srcTCP[mod(i, arg->src->nbTCP)], randomGenerator_TruncLogGetNext(arg->src->Se)) ;
 	}
 	/*On a lu une page entière*/
-	src->nbPage++;
+	arg->src->nbPage++;
 	/*On prépare le chargement de la nouvelle page*/
-	int tempsReading = randomGenerator_exponentialGetNext(src->Dpc);
-	/*event_add(srcHTTPss_loadNewPage, [src, destination,	destProcessPDU,	RTTmd,	initialWindow],    //// IDEM UTILISER UNE STRUCTURE
-									motSim_getCurrentTime() + tempsReading);*/
+	int tempsReading = randomGenerator_exponentialGetNext(arg->src->Dpc);
+	//stockage des arguments 
+	event_add(srcHTTPSS_loadNewPage, arg,motSim_getCurrentTime() + tempsReading);
 }
 
 
-void srcHTTPSS_loadNewPage(struct srcHTTPSS_t * src, void * destination, processPDU_t destProcessPDU, 
-									double RTTmd, int initialWindow) 
+void srcHTTPSS_loadNewPage(fonctionsHttpssArguments * arg) 
 {
 	/*Initialiser la connection TCP*/
-	struct srcTCPSS_t * srcTCP = srcTCPss_create(src->MTU, RTTmd,
-														initialWindow, destination,
-														destProcessPDU);
+	struct srcTCPSS_t * srcTCP = srcTCPss_create(arg->src->MTU, arg->RTTmd,
+														arg->initialWindow, arg->destination,
+														arg->destProcessPDU);
 	/*On envoie la nouvelle page principale*/
-	srcTCPss_sendFile(srcTCP, randomGenerator_TruncParetoGetNext(src -> Sm));
+	srcTCPss_sendFile(srcTCP, randomGenerator_TruncParetoGetNext(arg->src -> Sm));
 	/*On peut programmer le chargement des objets embarquésde la nouvelle page*/
-	int tempsParsing = randomGenerator_exponentialGetNext(src->Tp);
-	/*event_add(srcHTTPss_sendEmbeddedObjects, [src, destination, destProcessPDU,	RTTmd,     //// IDEM UTILISER UNE STRUCTURE
-											initialWindow],
-											motSim_getCurrentTime() + tempsParsing);
-											*/
+	int tempsParsing = randomGenerator_exponentialGetNext(arg->src->Tp);
+	event_add(srcHTTPSS_sendEmbeddedObjects, arg,	motSim_getCurrentTime() + tempsParsing);
 }
 
