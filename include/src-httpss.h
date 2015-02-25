@@ -93,45 +93,61 @@ void srcHTTPSS_setversion(struct srcHTTPSS_t * src, int version, int nbTCP);
 typedef struct fonctionsHttpssArguments fonctionsHttpssArguments;
 struct fonctionsHttpssArguments;
 
-
-void srcHTTPSS_EOTMainObject(fonctionsHttpssArguments * arg);
-void srcHTTPSS_EOTEmbbededObjects(fonctionsHttpssArguments * arg);
 /**
  * @brief Dans cette fonction on va créer un source TCP (d'ou les paramètres pour la connection TCP).
  * On va envoyer la page principale à partir de cette fonction, et programmer le chargement
- * des objets embarqués qui est traité par la fonction srcHTTPSS_sendEmbeddedObjects
- * @param src source HTTP, we have src-> MTU as maximum transmission unit of the link
- * @param RTTmd is the Round Trip Time minus transmission time on the access link
- * @param initialWindow is the initial value of cwnd
- * @param destination is a pointer to the destination entity
- * @param destProcessPDU is the PDU processing function of the destination
+ * des objets embarqués qui est traité par la fonction srcHTTPSS_EOTMainObject
+ * @param arg structure contenant la source HTTP, les infos pour une sources TCP et le nombre
+ * de connections TCP terminés lors d'un envoi sur plusieurs connections.
+ * arg->src source HTTP, we have src-> MTU as maximum transmission unit of the link
+ * arg->RTTmd is the Round Trip Time minus transmission time on the access link
+ * arg->initialWindow is the initial value of cwnd
+ * arg->destination is a pointer to the destination entity
+ * arg->destProcessPDU is the PDU processing function of the destination
 */
 void srcHTTPSS_sessionStart(fonctionsHttpssArguments * arg);
 
 /**
+ * @brief On a fini d'envoyé l'objet principal
+ * on va pouvoir alors programmer l'envoie des objets embarqués aprés le temps de parsing
+ * @param arg structure contenant la source HTTP, les infos pour une sources TCP et le nombre
+ * de connections TCP terminés lors d'un envoi sur plusieurs connections.
+ * arg->src source HTTP, we have src-> MTU as maximum transmission unit of the link
+ * arg->RTTmd is the Round Trip Time minus transmission time on the access link
+ * arg->initialWindow is the initial value of cwnd
+ * arg->destination is a pointer to the destination entity
+ * arg->destProcessPDU is the PDU processing function of the destination
+*/
+void srcHTTPSS_EOTMainObject(fonctionsHttpssArguments * arg);
+
+/**
  * @brief Dans cette fonction on va créer des sources TCP (d'ou les paramètres pour connections TCP).
  * On va envoyer les objets embarquées à partir de cette fonction, et programmer le chargement
- * d'une nouvelle page. Le chargement de la nouvelle page est traitée par srcHTTPSS_loadNewPage
- * @param src source HTTP, we have src-> MTU as maximum transmission unit of the link
- * @param RTTmd is the Round Trip Time minus transmission time on the access link
- * @param initialWindow is the initial value of cwnd
- * @param destination is a pointer to the destination entity
- * @param destProcessPDU is the PDU processing function of the destination
+ * d'une nouvelle page.
+ * La préparation du chargement de la nouvelle page est traitée par srcHTTPSS_EOTEmbeddedObejcts
+ * @param arg structure contenant la source HTTP, les infos pour une sources TCP et le nombre
+ * de connections TCP terminés lors d'un envoi sur plusieurs connections.
+ * arg->src source HTTP, we have src-> MTU as maximum transmission unit of the link
+ * arg->RTTmd is the Round Trip Time minus transmission time on the access link
+ * arg->initialWindow is the initial value of cwnd
+ * arg->destination is a pointer to the destination entity
+ * arg->destProcessPDU is the PDU processing function of the destination
 */
 void srcHTTPSS_sendEmbeddedObjects(fonctionsHttpssArguments * arg);
 
 /**
- * @brief Dans cette fonction on va créer une source TCP (d'ou les paramètres pour la connection TCP).
- * On va envoyer vas pouvoir charger la nouvelle page
- * à partir de cette fonction, et programmer le chargement des nouveaux objets embarqués.
- * Le chargement des objets embarquées est traitée par srcHTTPSS_sendEmbeddedObjects
- * @param src source HTTP, we have src-> MTU as maximum transmission unit of the link
- * @param RTTmd is the Round Trip Time minus transmission time on the access link
- * @param initialWindow is the initial value of cwnd
- * @param destination is a pointer to the destination entity
- * @param destProcessPDU is the PDU processing function of the destination
+ * @brief Chaque connections TCP qui a fini d'envoyé groupe d'objets embarqués va
+ * passer par cette fonction. Si tous les connections TCP on fini d'envoyer
+ * On va preparer le chargement d'une nouvelle page à l'aide d'un événement
+ * La fonction qui prendra la main aprés Dpc secondes sera srcHTTPSS_sessionStart
+ * @param arg structure contenant la source HTTP, les infos pour une sources TCP et le nombre
+ * de connections TCP terminés lors d'un envoi sur plusieurs connections.
+ * arg->src source HTTP, we have src-> MTU as maximum transmission unit of the link
+ * arg->RTTmd is the Round Trip Time minus transmission time on the access link
+ * arg->initialWindow is the initial value of cwnd
+ * arg->destination is a pointer to the destination entity
+ * arg->destProcessPDU is the PDU processing function of the destination
 */
-/*
-void srcHTTPSS_loadNewPage(fonctionsHttpssArguments * arg);
-*/
+void srcHTTPSS_EOTEmbbededObjects(fonctionsHttpssArguments * arg);
+
 #endif
