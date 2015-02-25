@@ -93,6 +93,9 @@ void srcHTTPSS_setversion(struct srcHTTPSS_t * src, int version, int nbTCP);
 typedef struct fonctionsHttpssArguments fonctionsHttpssArguments;
 struct fonctionsHttpssArguments;
 
+
+void srcHTTPSS_EOTMainObject(fonctionsHttpssArguments * arg);
+void srcHTTPSS_EOTEmbbededObjects(fonctionsHttpssArguments * arg);
 /**
  * @brief Dans cette fonction on va créer un source TCP (d'ou les paramètres pour la connection TCP).
  * On va envoyer la page principale à partir de cette fonction, et programmer le chargement
@@ -128,6 +131,7 @@ void srcHTTPSS_sendEmbeddedObjects(fonctionsHttpssArguments * arg);
  * @param destination is a pointer to the destination entity
  * @param destProcessPDU is the PDU processing function of the destination
 */
+/*
 void srcHTTPSS_loadNewPage(fonctionsHttpssArguments * arg);
-
+*/
 #endif

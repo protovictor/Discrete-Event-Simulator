@@ -9,6 +9,7 @@
  * C. R1002-0. Version1.0. December 10, 2004
  */
 #include <src-httpss.h>
+#include <src-tcpss.h>
 #include <event.h>
 #include <motsim.h>
 #include <file_pdu.h>
@@ -109,7 +110,17 @@ struct fonctionsHttpssArguments
 	processPDU_t destProcessPDU;
 	double RTTmd;
 	int initialWindow;
+	struct srcTCPSS_t * srcTCP[100];
 };
+
+/*Lanchement des objets embarqués*/
+void srcHTTPSS_EOTMainObjet (fonctionsHttpssArguments * arg) {
+
+	/*On peut programmer le chargement des objets embarqués*/
+	int tempsParsing =randomGenerator_exponentialGetNext(arg -> src -> Tp);
+	event_add(srcHTTPSS_sendEmbeddedObjects, arg, motSim_getCurrentTime() + tempsParsing);
+
+}
 
 void srcHTTPSS_sessionStart(fonctionsHttpssArguments * arg) 
 {
@@ -119,12 +130,19 @@ void srcHTTPSS_sessionStart(fonctionsHttpssArguments * arg)
 														arg->destProcessPDU);
 	/*On envoie la page principale*/
 	srcTCPss_sendFile(srcTCP,randomGenerator_TruncParetoGetNext(arg->src->Sm));
-	/*On peut programmer le chargement des objets embarqués*/
-	int tempsParsing = randomGenerator_exponentialGetNext(arg->src->Tp);
 
-	event_add(srcHTTPSS_sendEmbeddedObjects, arg, motSim_getCurrentTime() + tempsParsing);
+	/*On déclenche l'événement fin de transmission de la page principale*/
+	srcTCPss_addEOTEvent(srcTCP, event_create(srcHTTPSS_EOTMainObject,arg, 0.0));
 }
 
+/*Les objets Embarqués ont été envoyés*/
+void srcHTTPSS_EOTEmbbededObjects(fonctionsHttpssArguments * arg) {
+	/*On a lu une page entière*/
+	arg->src->nbPage++;
+	/*On prépare le chargement de la nouvelle page*/
+	int tempsReading =randomGenerator_exponentialGetNext(arg->src->Dpc);
+	event_add(srcHTTPSS_sessionStart, arg, motSim_getCurrentTime() + tempsReading);
+}
 /*Envoyer les objets embarqués*/
 void srcHTTPSS_sendEmbeddedObjects(fonctionsHttpssArguments * arg) 
 {
@@ -143,25 +161,26 @@ void srcHTTPSS_sendEmbeddedObjects(fonctionsHttpssArguments * arg)
 	{
 		srcTCPss_sendFile(srcTCP[mod(i, arg->src->nbTCP)], randomGenerator_TruncLogGetNext(arg->src->Se)) ;
 	}
-	/*On a lu une page entière*/
-	arg->src->nbPage++;
-	/*On prépare le chargement de la nouvelle page*/
-	int tempsReading = randomGenerator_exponentialGetNext(arg->src->Dpc);
-	//stockage des arguments 
-	event_add(srcHTTPSS_loadNewPage, arg,motSim_getCurrentTime() + tempsReading);
+	/*On vérifie qu'on a envoyé les objets embarqués*/
+	for (i = 0; i<Nd; i++) {
+	/*On déclenche l'événement fin de transmission des Objets Embarquées principale*/
+		srcTCPss_addEOTEvent(srcTCP[i],
+		event_create(srcHTTPSS_EOTEmbbededObjects, arg,0.0));
+	}
 }
 
 
+/*
 void srcHTTPSS_loadNewPage(fonctionsHttpssArguments * arg) 
 {
-	/*Initialiser la connection TCP*/
+	//Initialiser la connection TCP
 	struct srcTCPSS_t * srcTCP = srcTCPss_create(arg->src->MTU, arg->RTTmd,
 														arg->initialWindow, arg->destination,
 														arg->destProcessPDU);
-	/*On envoie la nouvelle page principale*/
+	//On envoie la nouvelle page principale
 	srcTCPss_sendFile(srcTCP, randomGenerator_TruncParetoGetNext(arg->src -> Sm));
-	/*On peut programmer le chargement des objets embarquésde la nouvelle page*/
+	//On peut programmer le chargement des objets embarquésde la nouvelle page
 	int tempsParsing = randomGenerator_exponentialGetNext(arg->src->Tp);
 	event_add(srcHTTPSS_sendEmbeddedObjects, arg,	motSim_getCurrentTime() + tempsParsing);
 }
-
+*/
