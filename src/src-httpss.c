@@ -203,19 +203,23 @@ void srcHTTPSS_sessionStart(void * arg)
 						src->initialWindow, src->destination,
 						src->destProcessPDU);
 	/*On envoie la page principale*/
-	srcTCPss_sendFile(src->srcTCP[0], randomGenerator_TruncParetoGetNext(src->Sm));
-
+	srcTCPss_sendFile(src->srcTCP[0], 300000);//randomGenerator_TruncParetoGetNext(src->Sm));
+	printf("hello\n");
 	/*On déclenche l'événement fin de transmission de la page principale*/
-	srcTCPss_addEOTEvent(src->srcTCP[0], event_create(srcHTTPSS_EOTMainObject, src, 0.0));
+	srcTCPss_addEOTEvent(src->srcTCP[0], event_create((void (*)(void *data))srcHTTPSS_EOTMainObject, (void*)src, motSim_getCurrentTime()));
+	//event_add((void (*)(void *data))srcHTTPSS_EOTMainObject, (void*)src, 20.0);
+	printf("lolo\n");
 }
 
 /*Lancement des objets embarqués*/
 void srcHTTPSS_EOTMainObject (void * arg) {
+  	printf("hihihii\n");
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
 	/*On détruit la source TCP*/
-	srcTCPss_free(src->srcTCP[0]);
+	//srcTCPss_free(src->srcTCP[0]);
 	/*On peut programmer le chargement des objets embarqués*/
 	int tempsParsing =randomGenerator_exponentialGetNext(src->Tp);
+	printf(" hfjkdkfjk"); 
 	event_add(srcHTTPSS_sendEmbeddedObjects, src, motSim_getCurrentTime() + tempsParsing);
 
 }
