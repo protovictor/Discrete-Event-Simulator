@@ -28,11 +28,16 @@ struct srcHTTPSS_t;
  * @param version 1 si 1.1, 0 si 1.0
  * @param nbTCP nombre de connections TCP utilisé pour charger les objets (==1 en 1.1)
  */
-struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm, struct randomGenerator_t * Se,
-				struct randomGenerator_t * Nd,
-				struct randomGenerator_t * Dpc,
-				struct randomGenerator_t * Tp,
-				int MTU, int nbTCP, int version);
+struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm,
+					struct randomGenerator_t * Se,
+					struct randomGenerator_t * Nd,
+					struct randomGenerator_t * Dpc,
+					struct randomGenerator_t * Tp,
+					int MTU, int nbTCP, int version,
+					void * destination,
+					processPDU_t destProcessPDU,
+					double RTTmd,
+					int initialWindow);
 
 /**
  * @brief Creation of HTTP source, with default values for distribution given by http://www.3gpp2.org/Public_html/specs/C.R1002-0_v1.0_041221.pdf
@@ -41,7 +46,7 @@ struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm, struct random
  * @param version : 0 pour hhtp 1.0 (burst-mode) et 1 pour http 1.1 (persistent
  * mode
  */
-struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version);
+struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version, double RTTmd, int initialWindow, void * destination, processPDU_t destProcessPDU);
 
 /*-------------------------------------------------------------------------------------------*/
 					/*Setters*/
@@ -99,8 +104,8 @@ void srcHTTPSS_setversion(struct srcHTTPSS_t * src, int version, int nbTCP);
 /*------------------------------------------------------------------------------------------*/
 			/*Fonctions pour lancer la session HTTP*/
 
-typedef struct fonctionsHttpssArguments fonctionsHttpssArguments;
-struct fonctionsHttpssArguments;
+/*typedef struct fonctionsHttpssArguments fonctionsHttpssArguments;
+struct fonctionsHttpssArguments;*/
 
 /**
  * @brief Dans cette fonction on va créer un source TCP (d'ou les paramètres pour la connection TCP).
@@ -114,7 +119,7 @@ struct fonctionsHttpssArguments;
  * arg->destination is a pointer to the destination entity
  * arg->destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_sessionStart(void * arguments);
+void srcHTTPSS_sessionStart(void * src) ;
 
 /**
  * @brief On a fini d'envoyé l'objet principal
@@ -127,7 +132,7 @@ void srcHTTPSS_sessionStart(void * arguments);
  * arg->destination is a pointer to the destination entity
  * arg->destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_EOTMainObject(void * arguments);
+void srcHTTPSS_EOTMainObject (void * arg);
 
 /**
  * @brief Dans cette fonction on va créer des sources TCP (d'ou les paramètres pour connections TCP).
@@ -142,7 +147,7 @@ void srcHTTPSS_EOTMainObject(void * arguments);
  * arg->destination is a pointer to the destination entity
  * arg->destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_sendEmbeddedObjects(void * arguments);
+void srcHTTPSS_sendEmbeddedObjects(void * src);
 
 /**
  * @brief Chaque connections TCP qui a fini d'envoyé groupe d'objets embarqués va
@@ -157,6 +162,6 @@ void srcHTTPSS_sendEmbeddedObjects(void * arguments);
  * arg->destination is a pointer to the destination entity
  * arg->destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_EOTEmbeddedObjects(void * arguments);
+void srcHTTPSS_EOTEmbeddedObjects(void * src);
 
 #endif
