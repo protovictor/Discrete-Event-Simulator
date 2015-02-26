@@ -13,6 +13,7 @@
 #include <event.h>
 #include <motsim.h>
 #include <file_pdu.h>
+#include <event-file.h>
 #include <random-generator.h>
 
 /**
@@ -203,31 +204,35 @@ void srcHTTPSS_sessionStart(void * arg)
 						src->initialWindow, src->destination,
 						src->destProcessPDU);
 	/*On envoie la page principale*/
-	srcTCPss_sendFile(src->srcTCP[0], 300000);//randomGenerator_TruncParetoGetNext(src->Sm));
-	printf("hello\n");
+	srcTCPss_sendFile(src->srcTCP[0],1000000); //randomGenerator_TruncParetoGetNext(src->Sm));
+	printf("TCPStarded,\n\n");
 	/*On déclenche l'événement fin de transmission de la page principale*/
-	srcTCPss_addEOTEvent(src->srcTCP[0], event_create((void (*)(void *data))srcHTTPSS_EOTMainObject, (void*)src, motSim_getCurrentTime()));
+	srcTCPss_addEOTEvent(src->srcTCP[0], event_create((void (*)(struct srcHTTPSS_t *data))srcHTTPSS_EOTMainObject, (struct srcHTTPSS_t*)src, motSim_getCurrentTime()));
 	//event_add((void (*)(void *data))srcHTTPSS_EOTMainObject, (void*)src, 20.0);
-	printf("lolo\n");
+	printf("Still in SessionStartAtTheEND\n\n");
 }
 
 /*Lancement des objets embarqués*/
-void srcHTTPSS_EOTMainObject (void * arg) {
-  	printf("hihihii\n");
+void srcHTTPSS_EOTMainObject (struct srcHTTPSS_t  * arg) {
+  	printf("TCDDONE\n\n\n");
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
+	printf("blalbla");
 	/*On détruit la source TCP*/
 	//srcTCPss_free(src->srcTCP[0]);
 	/*On peut programmer le chargement des objets embarqués*/
-	int tempsParsing =randomGenerator_exponentialGetNext(src->Tp);
-	printf(" hfjkdkfjk"); 
-	event_add(srcHTTPSS_sendEmbeddedObjects, src, motSim_getCurrentTime() + tempsParsing);
+	int tempsParsing = randomGenerator_exponentialGetNext(src->Tp);
+	printf(" blabla Parsing, %d\n\n", tempsParsing); 
+	//event_add(srcHTTPSS_sendEmbeddedObjects, src, motSim_getCurrentTime() + );
+	event_add((void (*)(void *data))srcHTTPSS_sendEmbeddedObjects, (void*)src, motSim_getCurrentTime());// + tempsParsing);
+	//srcHTTPSS_sendEmbeddedObjects(src);
 
 }
 
 
 /*Envoyer les objets embarqués*/
-void srcHTTPSS_sendEmbeddedObjects(void * arg)
+void srcHTTPSS_sendEmbeddedObjects(struct srcHTTPSS_t * arg)
 {
+  	printf("HAAAAAAAAAHHHHHHHHHHHHHAAAAAAAAAA");
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
 	int i;
 	/*On crée de nouvelles connections TCP*/
