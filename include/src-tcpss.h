@@ -44,6 +44,31 @@ struct srcTCPSS_t * srcTCPss_create(int MTU,
 void srcTCPss_sendFile(struct srcTCPSS_t * src,
 		       int nbBytes);
 
+/**
+ * @brief is the source empty ?
+ * @param src is a source
+ * @return non null if at least one byte remains to be sent
+ *
+ * A source is "empty" as soon as every byte has bee sent. Be carefull
+ * that an empty source will turn to non empty after a (new) call to
+ * srcTCPss_sendFile.
+ */
+int srcTCPss_isEmpty(struct srcTCPSS_t * src);
+
+/**
+ * @brief Delete and free a source
+ * @param src an empty source
+ * 
+ * The caller MUST ensure this source is empty.
+ */
+void srcTCPss_free(struct srcTCPSS_t * src);
+
+/**
+ * @brief Add an event to be run on EOT
+ * @param src is a poiter to the source
+ * @param ev is the event to schedule for EOT
+ */
+void srcTCPss_addEOTEvent(struct srcTCPSS_t * src, struct event_t * ev);
 
 
 #endif

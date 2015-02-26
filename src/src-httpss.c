@@ -84,7 +84,8 @@ struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm,
  * mode
  */
 struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version) {
-
+	struct srcHTTPSS_t * result = 
+		(struct srcHTTPSS_t *) sim_malloc(sizeof(struct srcHTTPSS_t ));
   	result -> Sm = randomGenerator_createDoubleRangeTruncLogNorm(8.35, 1.37, 2000000.0);
   	result -> Se = randomGenerator_createDoubleRangeTruncLogNorm(6.17, 2.36, 2000000.0);
 	result -> Nd = randomGenerator_createDoubleRangeTruncPareto(1.1, 2.0, 55.0);
@@ -175,8 +176,9 @@ struct fonctionsHttpssArguments
 };
 
 
-void srcHTTPSS_sessionStart(fonctionsHttpssArguments * arg) 
+void srcHTTPSS_sessionStart(void * arguments) 
 {
+	fonctionsHttpssArguments * arg = (fonctionsHttpssArguments *) arguments;
 	/*Initialiser les connections TCP*/
 	arg->nbTCPTermine = 0;
 	arg->srcTCP[0] = srcTCPss_create(arg->src->MTU, arg->RTTmd,
@@ -190,7 +192,8 @@ void srcHTTPSS_sessionStart(fonctionsHttpssArguments * arg)
 }
 
 /*Lancement des objets embarqués*/
-void srcHTTPSS_EOTMainObjet (fonctionsHttpssArguments * arg) {
+void srcHTTPSS_EOTMainObjet (void * arguments) {
+	fonctionsHttpssArguments * arg = (fonctionsHttpssArguments *) arguments;
 	/*On détruit la source TCP*/
 	srcTCPss_free(arg->srcTCP[0]);
 	/*On peut programmer le chargement des objets embarqués*/
@@ -200,8 +203,9 @@ void srcHTTPSS_EOTMainObjet (fonctionsHttpssArguments * arg) {
 }
 
 /*Envoyer les objets embarqués*/
-void srcHTTPSS_sendEmbeddedObjects(fonctionsHttpssArguments * arg) 
+void srcHTTPSS_sendEmbeddedObjects(void * arguments) 
 {
+	fonctionsHttpssArguments * arg = (fonctionsHttpssArguments *) arguments;
 	int i;
 	/*On crée de nouvelles connections TCP*/
 	for ( i=0; i < arg->src->nbTCP; i++) 
@@ -213,7 +217,7 @@ void srcHTTPSS_sendEmbeddedObjects(fonctionsHttpssArguments * arg)
 	int Nd = randomGenerator_TruncParetoGetNext(arg->src->Nd);
 	for (i = 0; i<Nd; i++) 
 	{
-		srcTCPss_sendFile(arg->srcTCP[mod(i, arg->src->nbTCP)], randomGenerator_TruncLogGetNext(arg->src->Se)) ;
+		srcTCPss_sendFile(arg->srcTCP[i%(arg->src->nbTCP)], randomGenerator_TruncLogGetNext(arg->src->Se)) ;
 	}
 	/*On vérifie qu'on a envoyé les objets embarqués*/
 	for (i = 0; i<Nd; i++) {
@@ -223,7 +227,8 @@ void srcHTTPSS_sendEmbeddedObjects(fonctionsHttpssArguments * arg)
 }
 
 /*Les objets Embarqués ont été envoyés*/
-void srcHTTPSS_EOTEmbeddedObjects(fonctionsHttpssArguments * arg) {
+void srcHTTPSS_EOTEmbeddedObjects(void * arguments) {
+	fonctionsHttpssArguments * arg = (fonctionsHttpssArguments *) arguments;
 	if (arg->nbTCPTermine == arg->src->nbTCP - 1) {
 		//On a lu une page entière
 		arg->src->nbPage++;
@@ -232,7 +237,7 @@ void srcHTTPSS_EOTEmbeddedObjects(fonctionsHttpssArguments * arg) {
 		int i;
 		for ( i=0; i < arg->src->nbTCP; i++)
 		{
-			arg->srcTCP[i] = srcTCPss_free(arg->srcTCP[i]);
+			srcTCPss_free(arg->srcTCP[i]);
 		}
 
 		/*On prépare le chargement de la nouvelle page*/

@@ -41,7 +41,7 @@ struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm, struct random
  * @param version : 0 pour hhtp 1.0 (burst-mode) et 1 pour http 1.1 (persistent
  * mode
  */
-struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version)
+struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version);
 
 /*-------------------------------------------------------------------------------------------*/
 					/*Setters*/
@@ -114,7 +114,7 @@ struct fonctionsHttpssArguments;
  * arg->destination is a pointer to the destination entity
  * arg->destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_sessionStart(fonctionsHttpssArguments * arg);
+void srcHTTPSS_sessionStart(void * arguments);
 
 /**
  * @brief On a fini d'envoyé l'objet principal
@@ -127,7 +127,7 @@ void srcHTTPSS_sessionStart(fonctionsHttpssArguments * arg);
  * arg->destination is a pointer to the destination entity
  * arg->destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_EOTMainObject(fonctionsHttpssArguments * arg);
+void srcHTTPSS_EOTMainObject(void * arguments);
 
 /**
  * @brief Dans cette fonction on va créer des sources TCP (d'ou les paramètres pour connections TCP).
@@ -142,7 +142,7 @@ void srcHTTPSS_EOTMainObject(fonctionsHttpssArguments * arg);
  * arg->destination is a pointer to the destination entity
  * arg->destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_sendEmbeddedObjects(fonctionsHttpssArguments * arg);
+void srcHTTPSS_sendEmbeddedObjects(void * arguments);
 
 /**
  * @brief Chaque connections TCP qui a fini d'envoyé groupe d'objets embarqués va
@@ -157,6 +157,6 @@ void srcHTTPSS_sendEmbeddedObjects(fonctionsHttpssArguments * arg);
  * arg->destination is a pointer to the destination entity
  * arg->destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_EOTEmbeddedObjects(fonctionsHttpssArguments * arg);
+void srcHTTPSS_EOTEmbeddedObjects(void * arguments);
 
 #endif
