@@ -42,11 +42,15 @@ struct srcHTTPSS_t {
 
 /**
  * @brief Creation/initialization of a HTTP source
+ * @param Sm randomGenerator pour la taille de la page principale
+ * @param Se randomGenerator pour la taille des objets embarqués
+ * @param Nd randomGenerator pour le nombre d'objets embarqués
+ * @param Dpc randomGenerator pour le temps de lecture
+ * @param Tp randomGenerator pour le temps de parsing
  * @param MTU is the maximum transmission unit of the link
- * @param RTTmd is the Round Trip Time minus transmission time on the access link
- * @param initialWindow is the initial value of cwnd
- * @param destination is a pointer to the destination entity
- * @param destProcessPDU is the PDU processing function of the destination
+ * @param nbTCP nombre de connexions TCP (1 pour HTTP 1.1)
+ * @param version : 0 pour hhtp 1.0 (burst-mode) et 1 pour http 1.1 (persistent
+ * mode
  */
 struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm,
 								struct randomGenerator_t * Se,
@@ -72,6 +76,28 @@ struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm,
 	return result;
 }
 
+/**
+ * @brief Creation of HTTP source, with default values for distribution given by http://www.3gpp2.org/Public_html/specs/C.R1002-0_v1.0_041221.pdf
+ * @param MTU maximum transimtion unit of the link
+ * @param nbTCP nombre de connexion TCP (1 pour HTTP 1.1)
+ * @param version : 0 pour hhtp 1.0 (burst-mode) et 1 pour http 1.1 (persistent
+ * mode
+ */
+struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version) {
+
+  	result -> Sm = randomGenerator_createDoubleRangeTruncLogNorm(8.35, 1.37, 2000000.0);
+  	result -> Se = randomGenerator_createDoubleRangeTruncLogNorm(6.17, 2.36, 2000000.0);
+	result -> Nd = randomGenerator_createDoubleRangeTruncPareto(1.1, 2.0, 55.0);
+	result -> Dpc = randomGenerator_createDoubleExp(0.033);
+	result -> Tp = randomGenerator_createDoubleExp(7.69);
+	result -> MTU = MTU;
+	result -> nbTCP = nbTCP;
+	result -> nbPage = 0;
+	result -> version = version;
+
+	return result;
+}
+	 
 /**
  * @brief Define another Sm of a HTTP source
  * @param src HTTP source

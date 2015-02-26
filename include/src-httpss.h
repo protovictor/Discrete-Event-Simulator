@@ -34,6 +34,15 @@ struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm, struct random
 				struct randomGenerator_t * Tp,
 				int MTU, int nbTCP, int version);
 
+/**
+ * @brief Creation of HTTP source, with default values for distribution given by http://www.3gpp2.org/Public_html/specs/C.R1002-0_v1.0_041221.pdf
+ * @param MTU maximum transimtion unit of the link
+ * @param nbTCP nombre de connexion TCP (1 pour HTTP 1.1)
+ * @param version : 0 pour hhtp 1.0 (burst-mode) et 1 pour http 1.1 (persistent
+ * mode
+ */
+struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version)
+
 /*-------------------------------------------------------------------------------------------*/
 					/*Setters*/
 /*-------------------------------------------------------------------------------------------*/
