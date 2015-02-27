@@ -46,7 +46,7 @@ struct srcHTTPSS_t {
 	int version; // vaut 1 si 1.1, vaut 0 si 1.0
 	void * destination; // Objet auquel sont destinées les PDUs
 	processPDU_t destProcessPDU; // Fonction notifiant la destination de la présence de PDUs
-	struct srcTCPSS_t * srcTCP[100]; //sources TCP utilisés par l'objet HTTP
+	struct srcTCPSS_t * srcTCP[1]; //sources TCP utilisés par l'objet HTTP
 	int nbTCPTermine; //le nombre de connecxions TCP ayant envoyer tout leurs paquets
 	double RTTmd; //is the Round Trip Time minus transmission time on the access link
 	int initialWindow; //is the initial value of cwnd
@@ -196,22 +196,35 @@ struct fonctionsHttpssArguments
 
 void srcHTTPSS_sessionStart(void * arg)
 {
+printf("YohO1\n\n");
+
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
+printf("YohO2\n\n");
 	/*Initialiser les connections TCP*/
 	src->nbTCPTermine = 0;
+printf("YohO3\n\n");
 	src->srcTCP[0] = srcTCPss_create(src->MTU, src->RTTmd,
 						src->initialWindow, src->destination,
 						src->destProcessPDU);
+printf("YohO4\n\n");
 	/*On envoie la page principale*/
-	srcTCPss_sendFile(src->srcTCP[0], randomGenerator_TruncParetoGetNext(src->Sm));
+	double sm = randomGenerator_getNextDouble(src->Sm);
+printf("YohO5\n\n");
+	printf("\n %f <- valeur de sm \n", sm);
+	srcTCPss_sendFile(src->srcTCP[0], 200000);
+printf("YohO6\n\n");
 
 	/*On déclenche l'événement fin de transmission de la page principale*/
 	srcTCPss_addEOTEvent(src->srcTCP[0], event_create(srcHTTPSS_EOTMainObject, src, 0.0));
+printf("YohO7\n\n");
 }
 
 /*Lancement des objets embarqués*/
 void srcHTTPSS_EOTMainObject (void * arg) {
+printf("YohO8\n\n");
+
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
+printf("YohO9\n\n");
 	/*On détruit la source TCP*/
 	srcTCPss_free(src->srcTCP[0]);
 	/*On peut programmer le chargement des objets embarqués*/
@@ -224,6 +237,8 @@ void srcHTTPSS_EOTMainObject (void * arg) {
 /*Envoyer les objets embarqués*/
 void srcHTTPSS_sendEmbeddedObjects(void * arg)
 {
+printf("YohO3");
+
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
 	int i;
 	/*On crée de nouvelles connections TCP*/
@@ -247,6 +262,8 @@ void srcHTTPSS_sendEmbeddedObjects(void * arg)
 
 /*Les objets Embarqués ont été envoyés*/
 void srcHTTPSS_EOTEmbeddedObjects(void * arg) {
+printf("YohO4");
+
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
 	if (src->nbTCPTermine == src->nbTCP - 1) {
 		//On a lu une page entière
