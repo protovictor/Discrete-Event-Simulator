@@ -369,101 +369,90 @@ void randomGenerator_addValueProbe(struct randomGenerator_t * rg,
 				   struct probe_t * p);
 
 
-//======================================
-//Nouveautés made in Benj ;)
-
-/*Inspirez-vous de createDoubleExp, setDistributionExp, etc... et faites la doc !  
- */
-
-//Calqué sur randomGenerator_createDoubleExp
 /**
- * @brief Création d'un RG de distribution Pareto tronquée
- * @param alpha paramètre de la distribution pareto
- * @param xmin paramètre de la distribution pareto
- * @param plafond paramètre de la distribution de pareto
+ * @brief Creation of a random generator with truncated Pareto distribution 
+ * @param alpha parameter of Pareto distribution
+ * @param xmin parameter of Pareto distribution
+ * @param plafond truncation
 */
 struct randomGenerator_t * randomGenerator_createDoubleRangeTruncPareto(double alpha, double xmin, double plafond);
 
-//Calqué sur randomGenerator_setDistributionExp
 /**
- * @brief Définir une distribution Pareto tronquée pour un RG
- * @param rg RG dont on doit définir la distribution
- * @param alpha paramètre de la distribution pareto
- * @param xmin paramètre de la distribution pareto
- * @param plafond paramètre de la distribution de pareto
+ * @brief Definition of a truncated Pareto distribution for a random generator
+ * @param rg RG whose distribution should be set
+ * @param alpha parameter of Pareto distribution
+ * @param xmin parameter of Pareto distribution
+ * @param plafond truncation
 */
 void randomGenerator_setDistributionTruncPareto(struct randomGenerator_t * rg,
 					     double alpha,
                                              double xmin, double plafond);
 
-//Calqué sur randomGenerator_exponentialInit
 /**
- * @brief Initialisation de la distribution Pareto tronquée pour une rg
- * @param rg RG dont on doit initialisé la distribution pareto tronquée
- * @param alpha paramètre de la distribution pareto
- * @param xmin paramètre de la distribution pareto
- * @param plafond paramètre de la distribution de pareto
+ * @brief Initialization of a truncated Pareto distribution for a random
+ * generator
+ * @param rg RG whose distribution should be initialized
+ * @param alpha parameter of Pareto distribution
+ * @param xmin parameter of Pareto distribution
+ * @param plafond truncation
 */
 void randomGenerator_TruncParetoInit(struct randomGenerator_t * rg, double alpha, double xmin, double plafond);
 
-// Calqué sur randomGenerator_exponentialGetNext
 /**
- * @brief Value generation : double issue d'une distribution de pareto
+ * @brief Generates a double from truncated Pareto distribution
  * @param rg random generator
  */
 double randomGenerator_TruncParetoGetNext(struct randomGenerator_t * rg);
 
-//Calqué sur randomGenerator_setLambda.
 /**
- * @brief Change alpha , xmin and plafond for a pareto troncated distribution
- * @param rg random generator
- * @param alpha paramètre de la distribution pareto
- * @param xmin paramètre de la distribution pareto
- * @param plafond paramètre de la distribution de pareto
+ * @brief Change alpha , xmin and plafond for a pareto truncated distribution
+ * @param rg RG whose distribution should be initialized
+ * @param alpha parameter of Pareto distribution
+ * @param xmin parameter of Pareto distribution
+ * @param plafond truncation
 */
 void randomGenerator_setAlphaXminPlafond(struct randomGenerator_t * rg, double alpha, double xmin, double plafond);
 
-//Les 5 fonctions suivantes sont calquées sur les 5 ci-dessus
-/**
- * @brief Création d'un RG de distribution log normale tronquée
- * @param mu paramètre de la distribution log normale tronquée
- * @param sigma paramètre de la distribution log normale tronquée
- * @param plafond paramètre de la distribution de log normale tronquée
+
+/** @brief Creation of a random generator with truncated Lognorm distribution 
+ * @param mu parameter of Lognorm distribution
+ * @param sigma parameter of Lognorm distribution
+ * @param plafond truncation
 */
 struct randomGenerator_t * randomGenerator_createDoubleRangeTruncLogNorm(double mu, double sigma, double plafond);
 
 /**
- * @brief Définir une distribution log normale tronquée pour un RG
- * @param rg RG dont on doit définir la distribution
- * @param mu paramètre de la distribution log normale tronquée
- * @param sigma paramètre de la distribution log normale tronquée
- * @param plafond paramètre de la distribution de log normale tronquée
+ * @brief Definition of a truncated Lognorm distribution for a random generator
+ * @param rg RG whose distribution should be set
+ * @param mu parameter of Lognorm distribution
+ * @param sigma parameter of Lognorm distribution
+ * @param plafond truncation
 */
 void randomGenerator_setDistributionTruncLogNorm(struct randomGenerator_t * rg,
 					     double mu,
                                              double sigma, double plafond);
 
 /**
- * @brief Initialisation de la distribution log normale tronquée pour une rg
- * @param rg RG dont on doit initialisé la distribution log normale tronquée
- * @param mu paramètre de la distribution log normale
- * @param sigma paramètre de la distribution log normale
- * @param plafond paramètre de la distribution de log normale
+ * @brief Initialization of a truncated Lognorm distribution for a random generator
+ * @param rg RG whose distribution should be set
+ * @param mu parameter of Lognorm distribution
+ * @param sigma parameter of Lognorm distribution
+ * @param plafond truncation
 */
 void randomGenerator_TruncLogNormInit(struct randomGenerator_t * rg, double mu, double sigma, double plafond);
 
 /**
- * @brief Value generation : double issue d'une distribution log normale tronquée
+ * @brief Generates a double from truncated Lognorm distribution
  * @param rg random generator
  */
 double randomGenerator_TruncLogGetNext(struct randomGenerator_t * rg);
 
 /**
- * @brief Change mu , sigma and plafond for a log normal distribution
+ * @brief Change mu , sigma and plafond for a Lognorm distribution
  * @param rg random generator
- * @param mu paramètre de la distribution log normale
- * @param sigma paramètre de la distribution log normale
- * @param plafond paramètre de la distribution de log normale
+ * @param mu parameter of Lognorm distribution
+ * @param sigma parameter of Lognorm distribution
+ * @param plafond truncation
 */
 void randomGenerator_setMuSigmaPlafond(struct randomGenerator_t * rg, double mu, double sigma, double plafond);
 
