@@ -132,7 +132,7 @@ void srcHTTPSS_sessionStart(void * src) ;
  * arg->destination is a pointer to the destination entity
  * arg->destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_EOTMainObject (struct srcHTTPSS_t * arg);
+void srcHTTPSS_EOTMainObject (void * arg);
 
 /**
  * @brief Dans cette fonction on va créer des sources TCP (d'ou les paramètres pour connections TCP).
@@ -147,7 +147,7 @@ void srcHTTPSS_EOTMainObject (struct srcHTTPSS_t * arg);
  * arg->destination is a pointer to the destination entity
  * arg->destProcessPDU is the PDU processing function of the destination
 */
-void srcHTTPSS_sendEmbeddedObjects(struct srcHTTPSS_t * src);
+void srcHTTPSS_sendEmbeddedObjects(void * arg);
 
 /**
  * @brief Chaque connections TCP qui a fini d'envoyé groupe d'objets embarqués va
