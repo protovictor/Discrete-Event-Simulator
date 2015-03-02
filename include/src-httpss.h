@@ -19,7 +19,7 @@ struct srcHTTPSS_t;
  * @param Nd Random Generator, Number of embedded objects in a page
  * @param Dpc Random Generator, Reading time
  * @param Tp Random Generator, Parsing time for the main page.
- * @param nbPage nombre de pages visités
+ * @param nbPage number of visited pages
  * @param MTU is the maximum transmission unit of the link
  * @param RTTmd is the Round Trip Time minus transmission time on the access link
  * @param initialWindow is the initial value of cwnd
@@ -42,8 +42,8 @@ struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm,
 /**
  * @brief Creation of HTTP source, with default values for distribution given by http://www.3gpp2.org/Public_html/specs/C.R1002-0_v1.0_041221.pdf
  * @param MTU maximum transimtion unit of the link
- * @param nbTCP nombre de connexion TCP (1 pour HTTP 1.1)
- * @param version : 0 pour hhtp 1.0 (burst-mode) et 1 pour http 1.1 (persistent
+ * @param nbTCP number of TCP connections (1 for HTTP 1.1)
+ * @param version : 0 for hhtp 1.0 (burst-mode) and 1 for http 1.1 (persistent
  * mode
  */
 struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version, double RTTmd, int initialWindow, void * destination, processPDU_t destProcessPDU);
@@ -95,8 +95,8 @@ void srcHTTPSS_setMTU(struct srcHTTPSS_t * src, int MTU);
 
 /**
  * @brief Set the Random Generator MTU on the HTTP structure
- * @param  version True si 1.1, false si 1.0
- * @param nbTCP nombre de connections TCP utilisé pour charger les objets (==1 en 1.1)
+ * @param  version 1.1 if true 1.0 if false
+ * @param nbTCP number of TCP connections used to load objects (==1 in 1.1)
  * @param src HTTP source
 */
 void srcHTTPSS_setversion(struct srcHTTPSS_t * src, int version, int nbTCP);
@@ -108,11 +108,13 @@ void srcHTTPSS_setversion(struct srcHTTPSS_t * src, int version, int nbTCP);
 struct fonctionsHttpssArguments;*/
 
 /**
- * @brief Dans cette fonction on va créer un source TCP (d'ou les paramètres pour la connection TCP).
- * On va envoyer la page principale à partir de cette fonction, et programmer le chargement
- * des objets embarqués qui est traité par la fonction srcHTTPSS_EOTMainObject
- * @param arg structure contenant la source HTTP, les infos pour une sources TCP et le nombre
- * de connections TCP terminés lors d'un envoi sur plusieurs connections.
+ * @brief This function creates a TCP source (hence the parameters for TCP
+ * connection). 
+ * It sends the main page and program downloading of embedded objects, treated
+ * by the srcHTTPSS_EOTMainObject function
+ * @param arg structure with the HTTP source, the informations for a TCP source
+ * and the number of ended TCP connections when using several connections for
+ * sending
  * arg->src source HTTP, we have src-> MTU as maximum transmission unit of the link
  * arg->RTTmd is the Round Trip Time minus transmission time on the access link
  * arg->initialWindow is the initial value of cwnd
@@ -122,10 +124,11 @@ struct fonctionsHttpssArguments;*/
 void srcHTTPSS_sessionStart(void * src) ;
 
 /**
- * @brief On a fini d'envoyé l'objet principal
- * on va pouvoir alors programmer l'envoie des objets embarqués aprés le temps de parsing
- * @param arg structure contenant la source HTTP, les infos pour une sources TCP et le nombre
- * de connections TCP terminés lors d'un envoi sur plusieurs connections.
+ * @brief This function sends embedded objects after a
+ * parsing time when the main object is already sent.
+ * @param arg structure with the HTTP source, the informations for a TCP source
+ * and the number of ended TCP connections when using several connections for
+ * sending
  * arg->src source HTTP, we have src-> MTU as maximum transmission unit of the link
  * arg->RTTmd is the Round Trip Time minus transmission time on the access link
  * arg->initialWindow is the initial value of cwnd
@@ -135,12 +138,11 @@ void srcHTTPSS_sessionStart(void * src) ;
 void srcHTTPSS_EOTMainObject (struct srcHTTPSS_t * arg);
 
 /**
- * @brief Dans cette fonction on va créer des sources TCP (d'ou les paramètres pour connections TCP).
- * On va envoyer les objets embarquées à partir de cette fonction, et programmer le chargement
- * d'une nouvelle page.
- * La préparation du chargement de la nouvelle page est traitée par srcHTTPSS_EOTEmbeddedObejcts
- * @param arg structure contenant la source HTTP, les infos pour une sources TCP et le nombre
- * de connections TCP terminés lors d'un envoi sur plusieurs connections.
+ * @brief This functions creates TCP sources, then sends embedded objects and
+ * computes the loading  of a new page (see srcHTTPSS_EOTEmbeddedObjects). 
+ * @param arg structure with the HTTP source, the informations for a TCP source
+ * and the number of ended TCP connections when using several connections for
+ * sending
  * arg->src source HTTP, we have src-> MTU as maximum transmission unit of the link
  * arg->RTTmd is the Round Trip Time minus transmission time on the access link
  * arg->initialWindow is the initial value of cwnd
@@ -150,12 +152,11 @@ void srcHTTPSS_EOTMainObject (struct srcHTTPSS_t * arg);
 void srcHTTPSS_sendEmbeddedObjects(struct srcHTTPSS_t * src);
 
 /**
- * @brief Chaque connections TCP qui a fini d'envoyé groupe d'objets embarqués va
- * passer par cette fonction. Si tous les connections TCP on fini d'envoyer
- * On va preparer le chargement d'une nouvelle page à l'aide d'un événement
- * La fonction qui prendra la main aprés Dpc secondes sera srcHTTPSS_sessionStart
- * @param arg structure contenant la source HTTP, les infos pour une sources TCP et le nombre
- * de connections TCP terminés lors d'un envoi sur plusieurs connections.
+ * @brief Whenever a TCP connection has successfully sent an embedded object group, it is held by this function. When all TCP connections are done, they are freed, and a new page will be generated by srcHTTPSS_sessionSrtart 
+ * @param arg structure with the HTTP source, the informations for a TCP source
+ * and the number of ended TCP connections when using several connections for
+ * sending
+
  * arg->src source HTTP, we have src-> MTU as maximum transmission unit of the link
  * arg->RTTmd is the Round Trip Time minus transmission time on the access link
  * arg->initialWindow is the initial value of cwnd

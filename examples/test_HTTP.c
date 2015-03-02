@@ -63,9 +63,9 @@ void tracer(struct probe_t * pr, char * name, int nbBar)
 #define ACCESS_LINK_THROUGHPUT 1000000
 #define ACCESS_LINK_TRANSM_TIME 0.00001
 
-#define RTT 0.20
+#define RTT 2
 #define MTU 1500
-#define nbTCP 1
+#define nbTCP 2
 
 
 int main()
@@ -104,10 +104,10 @@ int main()
 
    // Print some info
    printf("%ld packets received\n", probe_nbSamples(pr));
-   for (i = 1; i < probe_nbSamples(pr); i++) {
+   /*for (i = 1; i < probe_nbSamples(pr); i++) {
      printf("[%lf] %ld\n", probe_exhaustiveGetDateN(pr, i), (long)probe_exhaustiveGetSampleN(pr, i));
      printf("difference = %lf\n", probe_exhaustiveGetDateN(pr, i)-probe_exhaustiveGetDateN(pr, i-1));
-   }
+   }*/
 
  	// Création d'une sonde exhaustive sur les dates d'arrivées
    	pr_arrival = probe_createExhaustive();

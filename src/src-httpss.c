@@ -13,7 +13,6 @@
 #include <event.h>
 #include <motsim.h>
 #include <file_pdu.h>
-#include <event-file.h>
 #include <random-generator.h>
 
 /**
@@ -47,7 +46,7 @@ struct srcHTTPSS_t {
 	int version; // vaut 1 si 1.1, vaut 0 si 1.0
 	void * destination; // Objet auquel sont destinées les PDUs
 	processPDU_t destProcessPDU; // Fonction notifiant la destination de la présence de PDUs
-	struct srcTCPSS_t * srcTCP[100]; //sources TCP utilisés par l'objet HTTP
+	struct srcTCPSS_t * srcTCP[4]; //sources TCP utilisés par l'objet HTTP
 	int nbTCPTermine; //le nombre de connecxions TCP ayant envoyer tout leurs paquets
 	double RTTmd; //is the Round Trip Time minus transmission time on the access link
 	int initialWindow; //is the initial value of cwnd
@@ -197,81 +196,127 @@ struct fonctionsHttpssArguments
 
 void srcHTTPSS_sessionStart(void * arg)
 {
+printf("YohO1\n\n");
+
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
+//if ((src->nbPage) <= 2) {
+printf("YohO2\n\n");
 	/*Initialiser les connections TCP*/
 	src->nbTCPTermine = 0;
+printf("YohO3\n\n");
 	src->srcTCP[0] = srcTCPss_create(src->MTU, src->RTTmd,
 						src->initialWindow, src->destination,
 						src->destProcessPDU);
+printf("YohO4\n\n");
 	/*On envoie la page principale*/
+<<<<<<< HEAD
 	srcTCPss_sendFile(src->srcTCP[0],10000); //randomGenerator_TruncParetoGetNext(src->Sm));
 	printf("TCPStarded,\n\n");
+=======
+	double sm = randomGenerator_getNextDouble(src->Sm);
+printf("YohO5\n\n");
+	printf("\n %f <- valeur de sm \n", sm);
+	srcTCPss_sendFile(src->srcTCP[0], 200000);
+printf("YohO6\n\n");
+
+>>>>>>> 08a112aaa6bd5141c3d18431afa3ba9ada7ebe42
 	/*On déclenche l'événement fin de transmission de la page principale*/
-	srcTCPss_addEOTEvent(src->srcTCP[0], event_create((void (*)(struct srcHTTPSS_t *data))srcHTTPSS_EOTMainObject, (struct srcHTTPSS_t*)src, motSim_getCurrentTime()));
-	//event_add((void (*)(void *data))srcHTTPSS_EOTMainObject, (void*)src, 20.0);
-	printf("Still in SessionStartAtTheEND\n\n");
+printf("%d : nbPagesLu\n\n", src->nbPage);
+	srcTCPss_addEOTEvent(src->srcTCP[0], event_create(srcHTTPSS_EOTMainObject, src, 0.0));
+printf("YohO7\n\n");
+
 }
 
 /*Lancement des objets embarqués*/
-void srcHTTPSS_EOTMainObject (struct srcHTTPSS_t  * arg) {
-  	printf("TCDDONE\n\n\n");
+void srcHTTPSS_EOTMainObject (void * arg) {
+printf("YohO8\n\n");
+
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
-	printf("blalbla");
+printf("YohO9\n\n");
 	/*On détruit la source TCP*/
 	srcTCPss_free(src->srcTCP[0]);
+<<<<<<< HEAD
 	/*On peut programmer le chargement des objets embarqués*/
 	int tempsParsing = randomGenerator_exponentialGetNext(src->Tp);
 	printf(" blabla Parsing, %d\n\n", tempsParsing); 
 	//event_add(srcHTTPSS_sendEmbeddedObjects, src, motSim_getCurrentTime() + );
 	//event_add((void (*)(void *data))srcHTTPSS_sendEmbeddedObjects, (void*)src, motSim_getCurrentTime());// + tempsParsing);
 	//srcHTTPSS_sendEmbeddedObjects(src);
+=======
+printf("YohO9\n\n");
+	/*On peut programmer le chargement des objets embarqués*/
+	int tempsParsing =randomGenerator_getNextDouble(src->Tp);
+printf("Yoho10\n\n");
+	event_add(srcHTTPSS_sendEmbeddedObjects, src, motSim_getCurrentTime() + tempsParsing);
+printf("Yoho11\n\n");
+
+>>>>>>> 08a112aaa6bd5141c3d18431afa3ba9ada7ebe42
 
 }
 
 
 /*Envoyer les objets embarqués*/
-void srcHTTPSS_sendEmbeddedObjects(struct srcHTTPSS_t * arg)
+void srcHTTPSS_sendEmbeddedObjects(void * arg)
 {
-  	printf("HAAAAAAAAAHHHHHHHHHHHHHAAAAAAAAAA");
+printf("Yoho13\n");
+
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
+printf("Yoho14\n");
 	int i;
 	/*On crée de nouvelles connections TCP*/
 	for ( i=0; i < src->nbTCP; i++) 
 	{
+printf("Yoho15\n");
 		src->srcTCP[i] = srcTCPss_create(src->MTU, src->RTTmd, src->initialWindow, src->destination, src->destProcessPDU);
+printf("Yoho16\n");
+
 	}
+printf("Yoho17\n");
 
 	/*Calculer le nombre d'objets embarqués*/
 	int Nd = randomGenerator_TruncParetoGetNext(src->Nd);
 	for (i = 0; i<Nd; i++) 
 	{
-		srcTCPss_sendFile(src->srcTCP[i%(src->nbTCP)], randomGenerator_TruncLogGetNext(src->Se)) ;
+printf("Yoho18\n");
+		srcTCPss_sendFile(src->srcTCP[i%(src->nbTCP)], randomGenerator_getNextDouble(src->Se)) ;
 	}
 	/*On vérifie qu'on a envoyé les objets embarqués*/
-	for (i = 0; i<Nd; i++) {
+	for (i = 0; i<src->nbTCP; i++) {
+printf("Yoho19\n");
+printf("La valeur de Nd : %d et la valeur de i :%d \n",Nd,i);
 	/*On déclenche l'événement fin de transmission des Objets Embarquées principale*/
-		srcTCPss_addEOTEvent(src->srcTCP[i], event_create(srcHTTPSS_EOTEmbeddedObjects, src, 0.0));
+		srcTCPss_addEOTEvent(src->srcTCP[i], event_create(srcHTTPSS_EOTEmbeddedObjects, src, 0));
+printf("Yoho21\n");
 	}
 }
 
 /*Les objets Embarqués ont été envoyés*/
 void srcHTTPSS_EOTEmbeddedObjects(void * arg) {
+puts("Yoho22\n");
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
-	if (src->nbTCPTermine == src->nbTCP - 1) {
+printf("Yoho23\n");
+	if (src->nbTCPTermine == src->nbTCP -1 ) {
 		//On a lu une page entière
 		src->nbPage++;
+printf("Yoho24\n");
 		//On détruit les sources TCP
 		int i;
 		for ( i=0; i < src->nbTCP; i++)
 		{
+printf("Yoho25\n");
 			srcTCPss_free(src->srcTCP[i]);
 		}
-
+printf("Yoho26\n");
 		/*On prépare le chargement de la nouvelle page*/
-		int tempsReading =randomGenerator_exponentialGetNext(src->Dpc);
+		int tempsReading =randomGenerator_getNextDouble(src->Dpc);
+printf("Yoho27\n");
 		event_add(srcHTTPSS_sessionStart, src, motSim_getCurrentTime() + tempsReading);
+printf("Yoho28\n");
 
 	} else {
+printf("Yoho29\n");
 		src->nbTCPTermine++;
+printf("%d : nbTCPTermine\n",src->nbTCPTermine);
+printf("Yoho30\n");
 	}
 }

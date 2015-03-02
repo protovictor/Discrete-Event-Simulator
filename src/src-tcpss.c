@@ -214,10 +214,11 @@ void srcTCPss_free(struct srcTCPSS_t * src)
    assert(srcTCPss_isEmpty(src));
 
    // Delete the outputQueue
-   printf_debug(DEBUG_TBD, "filePDU_free unavailable !");
+   printf_debug(DEBUG_TBD, "filePDU_free unavailable !\n\n");
 
    // Free the structure
    free(src);
+   printf("Done to free the structure\n");
 }
 
 /**

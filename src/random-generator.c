@@ -480,7 +480,9 @@ struct randomGenerator_t * randomGenerator_createDouble()
 
 struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda)
 {
-   struct randomGenerator_t * result = randomGenerator_createDouble();
+  //struct randomGenerator_t * result = randomGenerator_createDouble(); Beurk,
+  //caca, on oublie cette ligne ! 
+  struct randomGenerator_t * result = randomGenerator_createDoubleRange(0.,0.01);
 
    randomGenerator_setDistributionExp(result, lambda);
 
@@ -979,7 +981,7 @@ double randomGenerator_TruncLogGetNext(struct randomGenerator_t * rg)
 
    //  Les sources sont censées être uniformes. La boucle do..while garantit un résultat < max.
    do{
-   R = sqrt(-log(rg->aleaGetNext(rg)));
+   R = sqrt(-2*log(rg->aleaGetNext(rg)));
    theta = 2*PI*rg->aleaGetNext(rg); //R*cos(theta) suit une loi normale (0,1)
    result = exp(rg->distParam.d.logNorm.mu + rg->distParam.d.logNorm.sigma * R*cos(theta));   
 
