@@ -156,6 +156,12 @@ struct randomGenerator_t * randomGenerator_createULong(int distribution,
  */
 struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda);
 
+/**
+ * @brief Tire une valeur pour la distribution exponentielle
+ * @param rg un random generator avec une distribution exponentielle
+ */
+double randomGenerator_exponentialGetNext(struct randomGenerator_t * rg);
+
 ///  ****************   A FAIRE **************** 
 /**
  * @brief Génère une distribution Truncated Lognormal (des réels double précision)
