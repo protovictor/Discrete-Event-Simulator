@@ -99,7 +99,7 @@ int main()
 
    // Send a file
    srcHTTPSS_sessionStart(src);
-
+   printf("SessionStarted");
    motSim_runUntilTheEnd();
 
    // Print some info
