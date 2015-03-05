@@ -482,7 +482,7 @@ struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda)
 {
   //struct randomGenerator_t * result = randomGenerator_createDouble(); Beurk,
   //on oublie cette ligne ! 
-  struct randomGenerator_t * result = randomGenerator_createDoubleRange(0.,0.01);
+  struct randomGenerator_t * result = randomGenerator_createDoubleRange(0.,1.);
 
    randomGenerator_setDistributionExp(result, lambda);
 
