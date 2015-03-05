@@ -1,7 +1,7 @@
 SRC_FILES= $(wildcard *.c)
 OBJ_FILES= $(SRC_FILES:.c=.o)
 
-EXAMPLES = src-tcpss-ex inoutdemo debits rg-its rg-draw hdlc-demo example-1 example-2 example-3 testTCP_ADSL test_HTTP exampleTCP
+EXAMPLES = src-tcpss-ex inoutdemo debits rg-its rg-draw hdlc-demo example-1 example-2 example-3 testTCP_ADSL test_HTTP
 
 .PHONY: clean 
 
@@ -39,7 +39,6 @@ testTCP_ADSL : testTCP_ADSL.o ../$(SRC_DIR)/libndes.a
 
 test_HTTP : test_HTTP.o ../$(SRC_DIR)/libndes.a
 	$(CC) test_HTTP.o -o test_HTTP $(LDFLAGS)
-
 
 
 clean :

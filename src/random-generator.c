@@ -23,6 +23,7 @@
 #include <random-generator.h>
 #define PI 3.14159265358979323846
 
+
 /*
  * Structure gÃ©nÃ©rale d'un gÃ©nÃ©rateur alÃ©atoire
  */
@@ -79,6 +80,7 @@ struct randomGenerator_t {
 		double mu;
 		double sigma;
 	 } logNorm; //AJOUT DE BENJAMIN, bis.
+
          struct {           //!< ITS distribution
             int nbParam;    //!< Quantile function number of parameters 
             double p1, p2;  //!< Parameters values
@@ -345,6 +347,9 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg)
    double result = 0.0;
 
    switch (rg->valueType) {
+      case rGTypeDoubleConstant :
+         result = rg->param.d.min;
+      break;
       case rGTypeDouble :
          result = rg->distGetNext(rg);
       break;
@@ -480,9 +485,7 @@ struct randomGenerator_t * randomGenerator_createDouble()
 
 struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda)
 {
-  //struct randomGenerator_t * result = randomGenerator_createDouble(); Beurk,
-  //caca, on oublie cette ligne ! 
-  struct randomGenerator_t * result = randomGenerator_createDoubleRange(0.,0.01);
+   struct randomGenerator_t * result = randomGenerator_createDouble();
 
    randomGenerator_setDistributionExp(result, lambda);
 
@@ -551,8 +554,17 @@ struct randomGenerator_t * randomGenerator_createUIntConstant(unsigned int v)
    return result;
 }
 
+struct randomGenerator_t * randomGenerator_createDoubleConstant(double v)
+{
+  struct randomGenerator_t * result = randomGenerator_createRaw();
 
+   // Data type
+   result->valueType = rGTypeDoubleConstant;
+   result->param.d.min = v;
+   result->param.d.max = v;
 
+   return result;
+}
 
 /*
  * CrÃ©ation d'un gÃ©nÃ©rateur alÃ©atoire de nombres entiers.
@@ -878,6 +890,30 @@ void readUIntDiscreteProbaFromFile(char * fileName,
    fclose(f);
 }
 
+/**
+ * @brief Tell if a random generator is constant
+ * @param rg a random generator to test
+ * @result non null if rg is constant
+ *
+ * A random generator is constant if it has been defined as a constant
+ * or if has been defined as a discrete distribution with a single
+ * value.
+ */
+int randomGenerator_isConstant(struct randomGenerator_t * rg)
+{
+  printf_debug(DEBUG_ALWAYS, "%p Value type %d, distribution %d\n", rg, rg->valueType, rg->distribution);
+
+   // Constant types
+   if ((rg->valueType == rGTypeDoubleConstant)
+     ||(rg->valueType == rGTypeUIntConstant)){
+      return 1;
+   // Discrete types with single value
+   } else if ((rg->distribution == rGDistDiscrete) && ( rg->distParam.d.discrete.nbProba == 1)){
+      return 1;
+   } else {
+      return 0;
+   }
+}
 
 //===================
 //Nouveautés made in Benj ! Elle est pas belle la vie ? ;)
@@ -981,7 +1017,7 @@ double randomGenerator_TruncLogGetNext(struct randomGenerator_t * rg)
 
    //  Les sources sont censées être uniformes. La boucle do..while garantit un résultat < max.
    do{
-   R = sqrt(-2*log(rg->aleaGetNext(rg)));
+   R = sqrt(-log(rg->aleaGetNext(rg)));
    theta = 2*PI*rg->aleaGetNext(rg); //R*cos(theta) suit une loi normale (0,1)
    result = exp(rg->distParam.d.logNorm.mu + rg->distParam.d.logNorm.sigma * R*cos(theta));   
 
@@ -999,4 +1035,3 @@ void randomGenerator_setMuSigmaPlafond(struct randomGenerator_t * rg, double mu,
    rg->distParam.d.logNorm.mu = mu;
    rg->distParam.d.logNorm.sigma = sigma;
 }
-

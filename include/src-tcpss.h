@@ -18,6 +18,7 @@
 #ifndef __SRC_TCP_H__
 #define __SRC_TCP_H__
 
+#include <event.h>
 #include <pdu.h>
 
 struct srcTCPSS_t;
@@ -44,6 +45,7 @@ struct srcTCPSS_t * srcTCPss_create(int MTU,
 void srcTCPss_sendFile(struct srcTCPSS_t * src,
 		       int nbBytes);
 
+
 /**
  * @brief is the source empty ?
  * @param src is a source
@@ -69,6 +71,5 @@ void srcTCPss_free(struct srcTCPSS_t * src);
  * @param ev is the event to schedule for EOT
  */
 void srcTCPss_addEOTEvent(struct srcTCPSS_t * src, struct event_t * ev);
-
 
 #endif
