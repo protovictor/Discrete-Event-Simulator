@@ -23,7 +23,6 @@
 #include <random-generator.h>
 #define PI 3.14159265358979323846
 
-
 /*
  * Structure gÃ©nÃ©rale d'un gÃ©nÃ©rateur alÃ©atoire
  */
@@ -80,7 +79,6 @@ struct randomGenerator_t {
 		double mu;
 		double sigma;
 	 } logNorm; //AJOUT DE BENJAMIN, bis.
-
          struct {           //!< ITS distribution
             int nbParam;    //!< Quantile function number of parameters 
             double p1, p2;  //!< Parameters values
@@ -347,9 +345,6 @@ double randomGenerator_getNextDouble(struct randomGenerator_t * rg)
    double result = 0.0;
 
    switch (rg->valueType) {
-      case rGTypeDoubleConstant :
-         result = rg->param.d.min;
-      break;
       case rGTypeDouble :
          result = rg->distGetNext(rg);
       break;
@@ -485,7 +480,9 @@ struct randomGenerator_t * randomGenerator_createDouble()
 
 struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda)
 {
-   struct randomGenerator_t * result = randomGenerator_createDouble();
+  //struct randomGenerator_t * result = randomGenerator_createDouble(); Beurk,
+  //on oublie cette ligne ! 
+  struct randomGenerator_t * result = randomGenerator_createDoubleRange(0.,0.01);
 
    randomGenerator_setDistributionExp(result, lambda);
 
@@ -554,17 +551,8 @@ struct randomGenerator_t * randomGenerator_createUIntConstant(unsigned int v)
    return result;
 }
 
-struct randomGenerator_t * randomGenerator_createDoubleConstant(double v)
-{
-  struct randomGenerator_t * result = randomGenerator_createRaw();
 
-   // Data type
-   result->valueType = rGTypeDoubleConstant;
-   result->param.d.min = v;
-   result->param.d.max = v;
 
-   return result;
-}
 
 /*
  * CrÃ©ation d'un gÃ©nÃ©rateur alÃ©atoire de nombres entiers.
@@ -915,6 +903,7 @@ int randomGenerator_isConstant(struct randomGenerator_t * rg)
    }
 }
 
+
 //===================
 //Nouveautés made in Benj ! Elle est pas belle la vie ? ;)
 //Les fonctions create <= setDistribution <= Init sont imbriquées (A <= B : A appelle B)
@@ -924,7 +913,7 @@ int randomGenerator_isConstant(struct randomGenerator_t * rg)
 //Calqué sur randomGenerator_createDoubleExp
 struct randomGenerator_t * randomGenerator_createDoubleRangeTruncPareto(double alpha, double xmin, double plafond)
 {
-   struct randomGenerator_t * result = randomGenerator_createDoubleRange(xmin, plafond);
+   struct randomGenerator_t * result = randomGenerator_createDoubleRange(0., 1.);
    randomGenerator_setDistributionTruncPareto(result, alpha,xmin,plafond);
    return result;
 }
@@ -986,7 +975,7 @@ void randomGenerator_setAlphaXminPlafond(struct randomGenerator_t * rg, double a
 
 struct randomGenerator_t * randomGenerator_createDoubleRangeTruncLogNorm(double mu, double sigma, double plafond)
 {
-   struct randomGenerator_t * result = randomGenerator_createDoubleRange(0,plafond);
+   struct randomGenerator_t * result = randomGenerator_createDoubleRange(0.,1.);
    randomGenerator_setDistributionTruncLogNorm(result,mu,sigma,plafond);
    return result;
 }
@@ -1017,7 +1006,7 @@ double randomGenerator_TruncLogGetNext(struct randomGenerator_t * rg)
 
    //  Les sources sont censées être uniformes. La boucle do..while garantit un résultat < max.
    do{
-   R = sqrt(-log(rg->aleaGetNext(rg)));
+   R = sqrt(-2*log(rg->aleaGetNext(rg)));
    theta = 2*PI*rg->aleaGetNext(rg); //R*cos(theta) suit une loi normale (0,1)
    result = exp(rg->distParam.d.logNorm.mu + rg->distParam.d.logNorm.sigma * R*cos(theta));   
 
@@ -1035,3 +1024,4 @@ void randomGenerator_setMuSigmaPlafond(struct randomGenerator_t * rg, double mu,
    rg->distParam.d.logNorm.mu = mu;
    rg->distParam.d.logNorm.sigma = sigma;
 }
+

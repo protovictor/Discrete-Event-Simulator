@@ -37,7 +37,8 @@ struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm,
 					void * destination,
 					processPDU_t destProcessPDU,
 					double RTTmd,
-					int initialWindow);
+					int initialWindow,
+					int nbPageMax);
 
 /**
  * @brief Creation of HTTP source, with default values for distribution given by http://www.3gpp2.org/Public_html/specs/C.R1002-0_v1.0_041221.pdf
@@ -46,7 +47,7 @@ struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm,
  * @param version : 0 pour hhtp 1.0 (burst-mode) et 1 pour http 1.1 (persistent
  * mode
  */
-struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version, double RTTmd, int initialWindow, void * destination, processPDU_t destProcessPDU);
+struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version, double RTTmd, int initialWindow, void * destination, processPDU_t destProcessPDU, int nbPageMax);
 
 /*-------------------------------------------------------------------------------------------*/
 					/*Setters*/

@@ -50,26 +50,8 @@ struct srcHTTPSS_t {
 	int nbTCPTermine; //le nombre de connecxions TCP ayant envoyer tout leurs paquets
 	double RTTmd; //is the Round Trip Time minus transmission time on the access link
 	int initialWindow; //is the initial value of cwnd
+	int nbPageMax; // Nombre de page max à lire
 };
-
-struct srcTCPSS_t {
-   int                windowSize ;
-   int                MSS;
-   double             RTT;
-
-   int                backlog;   //!< the number of unsent bytes
-   int                nbSentSegments;  //!< Number of segments actually sent
-   struct filePDU_t * outputQueue; //!< An internal queue where
-				   //!segments are queued waiting to
-				   //!be actually sent
-   void        * destination;    //!< L'objet auquel sont destinées les PDUs
-   processPDU_t  destProcessPDU; //!< La fonction permettant de
-				 //!signaler à la destination la
-				 //!présence de la PDU
-  struct eventFile_t * EOTEventList; //!< List of events to run at the
-				  //!end of transmission
-};
-
 
 /**
  * @brief Creation/initialization of a HTTP source
@@ -92,7 +74,8 @@ struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm,
 					void * destination,
 					processPDU_t destProcessPDU,
 					double RTTmd,
-					int initialWindow){	
+					int initialWindow,
+					int nbPageMax){	
 	struct srcHTTPSS_t * result = 
 		(struct srcHTTPSS_t *) sim_malloc(sizeof(struct srcHTTPSS_t ));
 
@@ -109,6 +92,8 @@ struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm,
 	result -> destProcessPDU = destProcessPDU;
 	result -> RTTmd = RTTmd;
 	result -> initialWindow = initialWindow;
+	result -> nbPageMax = nbPageMax;
+	
 
 	return result;
 }
@@ -120,11 +105,11 @@ struct srcHTTPSS_t * srcHTTPSS_init(struct randomGenerator_t * Sm,
  * @param version : 0 pour hhtp 1.0 (burst-mode) et 1 pour http 1.1 (persistent
  * mode
  */
-struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version, double RTTmd, int initialWindow, void * destination, processPDU_t destProcessPDU) {
+struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version, double RTTmd, int initialWindow, void * destination, processPDU_t destProcessPDU, int nbPageMax) {
 	
   	struct srcHTTPSS_t * result = 
 		(struct srcHTTPSS_t *) sim_malloc(sizeof(struct srcHTTPSS_t ));
-  	result -> Sm = randomGenerator_createDoubleRangeTruncLogNorm(8.35, 1.37, 10000.0);//2000000.0);
+  	result -> Sm = randomGenerator_createDoubleRangeTruncLogNorm(8.35, 1.37, 2000000.0);
   	result -> Se = randomGenerator_createDoubleRangeTruncLogNorm(6.17, 2.36, 2000000.0);
 	result -> Nd = randomGenerator_createDoubleRangeTruncPareto(1.1, 2.0, 55.0);
 	result -> Dpc = randomGenerator_createDoubleExp(0.033);
@@ -137,6 +122,7 @@ struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version, dou
 	result -> destProcessPDU = destProcessPDU;
 	result -> RTTmd = RTTmd;
 	result -> initialWindow = initialWindow;
+	result -> nbPageMax = nbPageMax;
 
 	return result;
 }
@@ -240,9 +226,10 @@ void srcHTTPSS_sessionStart(void * arg)
 	printf_debug(DEBUG_SRC,"Genere taille page principale\n");
 	//On envoie la page principale
 	//On recuperer la taille de la page principale
-	double sm = randomGenerator_getNextDouble(src->Sm);
+	double sm = 1460000;//randomGenerator_getNextDouble(src->Sm);
+	//printf("sm : %lf\n",sm);
 
-	printf_debug(DEBUG_SRC,"Envoi page principale, taille : %lf\n",sm);
+	printf_debug(DEBUG_SRC,"Envoi page principale, taille : %lf\n",(int) sm);
 	//Envoi de la page principale
 	srcTCPss_sendFile(src->srcTCP[0], sm);
 
@@ -263,8 +250,8 @@ void srcHTTPSS_EOTMainObject (void * arg) {
 
 	printf_debug(DEBUG_SRC,"Génère temps de parsing \n");
 	//On calcule le temps de parsing
-	int tempsParsing = randomGenerator_getNextDouble(src->Tp);
-	printf("Temps de parsing : %d\n",tempsParsing);
+	int tempsParsing = 10; randomGenerator_getNextDouble(src->Tp);
+	printf_debug(DEBUG_SRC,"Temps de parsing : %d\n",tempsParsing);
 
 	//On peut programmer le chargement des objets embarqués
 	printf_debug(DEBUG_SRC,"Programmation de l'event envoie des EbOb");
@@ -293,21 +280,22 @@ void srcHTTPSS_sendEmbeddedObjects(void * arg)
 			}
 			src->srcTCP[i] = srcTCPss_create(src->MTU, src->RTTmd, src->initialWindow, src->destination, src->destProcessPDU);
 			printf_debug(DEBUG_SRC,"Destination : %p\n",src->destination);
-			printf_debug(DEBUG_SRC,"Taille de la fenêtre de la source : %d\n",src->srcTCP[i%(src->nbTCP)]->windowSize);
 		}
 	printf_debug(DEBUG_SRC,"Connexions crée\n");
 	}
 	printf_debug(DEBUG_SRC,"Fin de création des connexions\n");
 
 	//Calcul du nombre d'objets embarqués
-	int Nd = randomGenerator_TruncParetoGetNext(src->Nd);
+	int Nd = 2;// randomGenerator_TruncParetoGetNext(src->Nd);
+	//printf("%d\n",Nd);
 	printf_debug(DEBUG_SRC,"Tirage du nombre d'objets : %d Nd embedded objects\n",Nd);
 
 	//On envoie les Nd objets embarqués
 	for (i = 0; i<Nd; i++) 
 	{
 		//On calcule la taille du ieme objet embarqué
-		double s = randomGenerator_getNextDouble(src->Se);
+		double s = 146000;//randomGenerator_getNextDouble(src->Se);
+		//printf("s : %lf\n",s);
 		int sizeEbOb = (int) s;
 		printf_debug(DEBUG_SRC,"Send file, taille de l'objet : %d\n", sizeEbOb);
 		//On envoie le ieme objet embarqué sur le i%(nbTCP) eme connection TCP
@@ -315,7 +303,7 @@ void srcHTTPSS_sendEmbeddedObjects(void * arg)
 		le 1er objet sur la 1ere connection TCP, la 2eme objet sur le 2eme connection TCP,
 		le 3eme objet sur la 3me connection TCP, le 4eme objet sur la 1ere connection TCP,
 		le 5eme objet sur la 2eme connection TCP*/
-		srcTCPss_sendFile(src->srcTCP[i%(src->nbTCP)], randomGenerator_getNextDouble(src->Se)) ;
+		srcTCPss_sendFile(src->srcTCP[i%(src->nbTCP)], s) ;
 	}
 
 	/*Calcul fin de boucle pour ne pas vérifier la terminaison de l'envoi sur une connexion où aucun envoi n'a été fait,
@@ -359,15 +347,15 @@ printf_debug(DEBUG_SRC,"Entrée dans la fonction de vérif de fin d'envoi\n");
 		
 		//On prépare le chargement de la nouvelle page
 		//On calcule le temps de lecture
-		int tempsReading = randomGenerator_getNextDouble(src->Dpc);
+		int tempsReading = 40;//randomGenerator_getNextDouble(src->Dpc);
 		printf_debug(DEBUG_SRC,"Tirage du temps de lecture : %d\n", tempsReading);
 
 		// Si on a pas finit la session on programme la nouvelle page
 		// Ici la session c'est la lecture de 2 pages
-		if (src->nbPage < 2) {
-		printf_debug(DEBUG_SRC,"Programmation de l'event lire une nouvelle page\n");
+		if (src->nbPage < src->nbPageMax) {
+			printf_debug(DEBUG_SRC,"Programmation de l'event lire une nouvelle page\n");
 			event_add(srcHTTPSS_sessionStart, src, motSim_getCurrentTime()+ tempsReading);
-		printf_debug(DEBUG_SRC,"Programmé\n\n");
+			printf_debug(DEBUG_SRC,"Programmé\n\n");
 		}
 
 	} else {
