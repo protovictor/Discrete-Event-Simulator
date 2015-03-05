@@ -481,7 +481,7 @@ struct randomGenerator_t * randomGenerator_createDouble()
 struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda)
 {
   //struct randomGenerator_t * result = randomGenerator_createDouble(); Beurk,
-  //caca, on oublie cette ligne ! 
+  //on oublie cette ligne ! 
   struct randomGenerator_t * result = randomGenerator_createDoubleRange(0.,0.01);
 
    randomGenerator_setDistributionExp(result, lambda);
@@ -888,7 +888,7 @@ void readUIntDiscreteProbaFromFile(char * fileName,
 //Calqué sur randomGenerator_createDoubleExp
 struct randomGenerator_t * randomGenerator_createDoubleRangeTruncPareto(double alpha, double xmin, double plafond)
 {
-   struct randomGenerator_t * result = randomGenerator_createDoubleRange(xmin, plafond);
+   struct randomGenerator_t * result = randomGenerator_createDoubleRange(0., 1.);
    randomGenerator_setDistributionTruncPareto(result, alpha,xmin,plafond);
    return result;
 }
@@ -950,7 +950,7 @@ void randomGenerator_setAlphaXminPlafond(struct randomGenerator_t * rg, double a
 
 struct randomGenerator_t * randomGenerator_createDoubleRangeTruncLogNorm(double mu, double sigma, double plafond)
 {
-   struct randomGenerator_t * result = randomGenerator_createDoubleRange(0,plafond);
+   struct randomGenerator_t * result = randomGenerator_createDoubleRange(0.,1.);
    randomGenerator_setDistributionTruncLogNorm(result,mu,sigma,plafond);
    return result;
 }
