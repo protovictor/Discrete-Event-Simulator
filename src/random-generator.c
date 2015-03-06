@@ -482,7 +482,7 @@ struct randomGenerator_t * randomGenerator_createDoubleExp(double lambda)
 {
   //struct randomGenerator_t * result = randomGenerator_createDouble(); Beurk,
   //on oublie cette ligne ! 
-  struct randomGenerator_t * result = randomGenerator_createDoubleRange(0.,0.01);
+  struct randomGenerator_t * result = randomGenerator_createDoubleRange(0.,1.);
 
    randomGenerator_setDistributionExp(result, lambda);
 
@@ -622,6 +622,30 @@ struct randomGenerator_t * randomGenerator_createUIntDiscreteFromFile(char * fil
    return result;
 }
 
+/**
+ * @brief Tell if a random generator is constant
+ * @param rg a random generator to test
+ * @result non null if rg is constant
+ *
+ * A random generator is constant if it has been defined as a constant
+ * or if has been defined as a discrete distribution with a single
+ * value.
+ */
+int randomGenerator_isConstant(struct randomGenerator_t * rg)
+{
+  printf_debug(DEBUG_ALWAYS, "%p Value type %d, distribution %d\n", rg, rg->valueType, rg->distribution);
+
+   // Constant types
+   if ((rg->valueType == rGTypeDoubleConstant)
+     ||(rg->valueType == rGTypeUIntConstant)){
+      return 1;
+   // Discrete types with single value
+   } else if ((rg->distribution == rGDistDiscrete) && ( rg->distParam.d.discrete.nbProba == 1)){
+      return 1;
+   } else {
+      return 0;
+   }
+}
 
 
 struct randomGenerator_t * randomGenerator_createDoubleDiscrete(int nbValues,
@@ -876,31 +900,6 @@ void readUIntDiscreteProbaFromFile(char * fileName,
 
    } 
    fclose(f);
-}
-
-/**
- * @brief Tell if a random generator is constant
- * @param rg a random generator to test
- * @result non null if rg is constant
- *
- * A random generator is constant if it has been defined as a constant
- * or if has been defined as a discrete distribution with a single
- * value.
- */
-int randomGenerator_isConstant(struct randomGenerator_t * rg)
-{
-  printf_debug(DEBUG_ALWAYS, "%p Value type %d, distribution %d\n", rg, rg->valueType, rg->distribution);
-
-   // Constant types
-   if ((rg->valueType == rGTypeDoubleConstant)
-     ||(rg->valueType == rGTypeUIntConstant)){
-      return 1;
-   // Discrete types with single value
-   } else if ((rg->distribution == rGDistDiscrete) && ( rg->distParam.d.discrete.nbProba == 1)){
-      return 1;
-   } else {
-      return 0;
-   }
 }
 
 
