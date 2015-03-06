@@ -291,6 +291,94 @@ int main() {
    
    randomGenerator_delete(rg);
 
+ //===========
+ //Enfin, la partie d'init par défaut ...
+ 
+
+  printf("\n---Et les valeurs d'init d'HTTP défaut ça donne quoi ?---\n");
+
+   mu = 8.35;
+   sigma = 1.37;
+   plafond = 2000000.;
+   printf("=======\nValeurs pat défaut Sm (Lognorm mu = %f, sigma = %f, plafond = %f)\n",mu,sigma,plafond);
+
+   rg = randomGenerator_createDoubleRangeTruncLogNorm(mu,sigma,plafond);
+   randomGenerator_addValueProbe(rg, pr);
+
+   average = 0.0;
+   for (n = 0; n < NB_SAMPLES; n++) {
+      average += randomGenerator_getNextDouble(rg);
+   }
+   average /= NB_SAMPLES;
+   printf("Moyenne = %f (théorique = %f)\n",average,exp(mu+sigma*sigma/2));
+   draw(pr, "Sm default.png", "Dist. logNorm.", 50, 1.0);
+   motSim_reset();
+
+   mu = 6.17;
+   sigma = 2.36;
+   plafond = 2000000.;
+   printf("=======\nValeurs pat défaut Se (Lognorm mu = %f, sigma = %f, plafond = %f)\n",mu,sigma,plafond);
+
+   rg = randomGenerator_createDoubleRangeTruncLogNorm(mu,sigma,plafond);
+   randomGenerator_addValueProbe(rg, pr);
+
+   
+   average = 0.0;
+   for (n = 0; n < NB_SAMPLES; n++) {
+      average += randomGenerator_getNextDouble(rg);
+   }
+   average /= NB_SAMPLES;
+   printf("Moyenne = %f (théorique = %f)\n",average,exp(mu+sigma*sigma/2));
+   draw(pr, "Se default.png", "Dist. Lognorm", 50, 1.0);
+   motSim_reset();
+
+   alpha = 1.17;
+   xmin = 2.0;
+   plafond = 20000000.;
+   printf("=======\nValeurs pat défaut Nd (Pareto alpha = %f, xmin = %f, plafond = %f)\n",alpha,xmin,plafond);
+   
+   rg = randomGenerator_createDoubleRangeTruncPareto(alpha,xmin,plafond);
+   randomGenerator_addValueProbe(rg, pr);
+
+   
+   average = 0.0;
+   for (n = 0; n < NB_SAMPLES; n++) {
+      average += randomGenerator_getNextDouble(rg);
+   }
+   average /= NB_SAMPLES;
+   printf("Moyenne = %f (théorique = %f)\n",average,alpha*xmin/(alpha-1.));
+   draw(pr, "Nd default.png", "Dist. Pareto", 50, 1.0);
+   motSim_reset();
+
+   lambda = 0.033;
+ printf("=======\nValeurs par défaut Dpc (Exponentielle lambda = %f)\n",lambda);
+   
+   rg = randomGenerator_createDoubleExp(lambda);
+   randomGenerator_addValueProbe(rg, pr);//Si vous oubliez cette ligne, malheur à vous !
+   average = 0.0;
+  for (n = 0; n < NB_SAMPLES; n++) {
+      average += randomGenerator_getNextDouble(rg);
+   }
+   average /= NB_SAMPLES;
+   printf("Moyenne = %f (théorique = %f)\n",average,1/lambda);
+   draw(pr, "Dpc default.png", "Dist. exp.", 50, 0.4);
+
+   motSim_reset();
+
+      lambda = 7.69;
+ printf("=======\nValeurs par défaut Dpc (Exponentielle lambda = %f)\n",lambda);
+   
+   rg = randomGenerator_createDoubleExp(lambda);
+   randomGenerator_addValueProbe(rg, pr);//Si vous oubliez cette ligne, malheur à vous !
+   average = 0.0;
+  for (n = 0; n < NB_SAMPLES; n++) {
+      average += randomGenerator_getNextDouble(rg);
+   }
+   average /= NB_SAMPLES;
+   printf("Moyenne = %f (théorique = %f)\n",average,1/lambda);
+   draw(pr, "Tp default.png", "Dist. exp.", 50, 0.4);
+
+   motSim_reset();
 
 
 
