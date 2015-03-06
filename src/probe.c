@@ -773,7 +773,7 @@ struct probe_t * probe_createGraphBar(double min, double max, unsigned long nbBa
    result->data.graphBar = (struct graphBar_t *)sim_malloc(sizeof(struct graphBar_t));
    assert(result->data.graphBar);
 
-   assert(max > min);
+   assert(max >= min);
    assert (nbBar != 0);
 
    result->data.graphBar->normalized = 0;
