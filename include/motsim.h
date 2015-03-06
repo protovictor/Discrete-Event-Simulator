@@ -132,6 +132,8 @@ void motSim_exit(int retValue);
 #define DEBUG_KS       0x20000000
 #define DEBUG_MALLOC   0x40000000
 #define DEBUG_KS_VERB  0x80000000
+#define DEBUG_HTTP     0x00010000
+
 
 #define DEBUG_ALWAYS   0xFFFFFFFF
 #define DEBUG_NEVER    0x00000000
@@ -142,6 +144,7 @@ static unsigned long debug_mask __attribute__ ((unused)) = 0x00000000
   //     | DEBUG_GENE      // Les générateurs de nombre/date/...
   //     | DEBUG_SRV       // Le serveur
   //     | DEBUG_SRC       // La source
+       | DEBUG_HTTP	   // Le modèle http
   //     | DEBUG_FILE      // La gestion des files
   //     | DEBUG_GNUPLOT
   //     | DEBUG_MUX

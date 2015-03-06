@@ -64,6 +64,8 @@ struct srcTCPSS_t * srcTCPss_create(int MTU,
    result->destProcessPDU = destProcessPDU;
    result->outputQueue = filePDU_create(NULL, NULL);
    result->EOTEventList = eventFile_create();
+
+   printf_debug(DEBUG_SRC, "%p created\n", result);
    return result;
 }
 
@@ -132,7 +134,7 @@ void srcTCPss_send2Segments(void * s)
 void srcTCPss_sendFile(struct srcTCPSS_t * src,
                        int nbBytes)
 {
-   printf_debug(DEBUG_SRC, "Will send %d bytes (ws %d)\n", nbBytes, src->windowSize);
+   printf_debug(DEBUG_SRC, "Will send %d bytes (ws %d) through %p\n", nbBytes, src->windowSize, src);
 
    if (srcTCPss_isEmpty(src)) {
       src->backlog = nbBytes;
@@ -158,18 +160,19 @@ struct PDU_t * srcTCPss_getPDU(void * s)
    struct PDU_t * result = NULL;
    struct event_t * ev;
 
-   printf_debug(DEBUG_SRC, "IN\n");
+   printf_debug(DEBUG_SRC, "IN %p\n", src);
 
   // If a PDU is available, we send it and (slow start) schedule 2 new
   // PDUs, if available
   if (filePDU_length(src->outputQueue) > 0) {
      printf_debug(DEBUG_SRC, "scheduling two more segments\n");
+     //printf("%d : motSimgetCurrentTime()\n",motSim_getCurrentTime());
      event_add(srcTCPss_send2Segments, src, motSim_getCurrentTime() + src->RTT);
      result = filePDU_extract(src->outputQueue);
      src->nbSentSegments++;
-     printf_debug(DEBUG_SRC, "returning a segment (nb %d)\n", src->nbSentSegments);
+     printf_debug(DEBUG_SRC, "returning a segment (nb %d) on %p\n", src->nbSentSegments, src);
      if (srcTCPss_isEmpty(src)) {
-        printf_debug(DEBUG_SRC, "(last for now)\n");
+        printf_debug(DEBUG_SRC, "(last for now on %p)\n", src);
         // This is the end of the transmission, we need to save window
         // size for the next transmission, if any
         src->windowSize += src->nbSentSegments;
@@ -214,7 +217,7 @@ void srcTCPss_free(struct srcTCPSS_t * src)
    assert(srcTCPss_isEmpty(src));
 
    // Delete the outputQueue
-   printf_debug(DEBUG_TBD, "filePDU_free unavailable !");
+   printf_debug(DEBUG_TBD, "filePDU_free unavailable !\n");
 
    // Free the structure
    free(src);

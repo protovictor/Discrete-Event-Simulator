@@ -34,7 +34,7 @@ void tracer(struct probe_t * pr, char * name, int nbBar)
    struct probe_t   * gb;
    struct gnuplot_t * gp;
 
-   /* On crée une sonde de type GraphBar */
+   /* On créé une sonde de type GraphBar */
    gb = probe_createGraphBar(probe_min(pr), probe_max(pr), nbBar);
 
    /* On convertit la sonde passée en paramètre en GraphBar */
@@ -60,17 +60,18 @@ void tracer(struct probe_t * pr, char * name, int nbBar)
  */
 #define FILE_SIZE 300000
 
-#define ACCESS_LINK_THROUGHPUT 1000000
+#define ACCESS_LINK_THROUGHPUT 100000000
 #define ACCESS_LINK_TRANSM_TIME 0.00001
 
-#define RTT 2
+#define RTT 1.5
 #define MTU 1500
-#define nbTCP 2
+#define nbTCP 3
+#define nbPageMax 3
 
 
 int main()
 {
-   struct srcTCPSS_t  * src;
+   struct srcHTTPSS_t  * src;
    struct llSimplex_t * link;
    struct PDUSink_t   * sink;
    struct probe_t     * pr;
@@ -95,8 +96,8 @@ int main()
 
    // The source (HTTP)
    WINDOW_SIZE =1; 
-   src = srcHTTPSS_init_default(MTU, nbTCP, 0, RTT, WINDOW_SIZE, link, llSimplex_processPDU);
-
+   //src = srcHTTPSS_init_default(MTU, nbTCP, 0, RTT, WINDOW_SIZE, link, llSimplex_processPDU);
+   src = srcHTTPSS_init_default(MTU, nbTCP, 0, RTT, WINDOW_SIZE, sink, PDUSink_processPDU, nbPageMax);
    // Send a file
    srcHTTPSS_sessionStart(src);
 
