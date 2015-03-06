@@ -132,6 +132,8 @@ void motSim_exit(int retValue);
 #define DEBUG_KS       0x20000000
 #define DEBUG_MALLOC   0x40000000
 #define DEBUG_KS_VERB  0x80000000
+#define DEBUG_HTTP     0x00010000
+
 
 #define DEBUG_ALWAYS   0xFFFFFFFF
 #define DEBUG_NEVER    0x00000000
