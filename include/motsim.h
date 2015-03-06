@@ -142,6 +142,7 @@ static unsigned long debug_mask __attribute__ ((unused)) = 0x00000000
   //     | DEBUG_GENE      // Les générateurs de nombre/date/...
   //     | DEBUG_SRV       // Le serveur
   //     | DEBUG_SRC       // La source
+       | DEBUG_HTTP	   // Le modèle http
   //     | DEBUG_FILE      // La gestion des files
   //     | DEBUG_GNUPLOT
   //     | DEBUG_MUX
