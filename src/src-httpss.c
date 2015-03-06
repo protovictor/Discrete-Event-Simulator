@@ -271,8 +271,8 @@ void srcHTTPSS_sendEmbeddedObjects(void * arg)
 		for ( i=0; i < src->nbTCP; i++) 
 		{
 			printf_debug(DEBUG_HTTP,"Création de la %d-ème connexion\n",i);
-			printf_debug(DEBUG_HTTP,"Free de la source TCP \n");
 			if (src->nbPage > 0) {
+				printf_debug(DEBUG_HTTP,"Free de la source TCP \n");
 				srcTCPss_free(src->srcTCP[i]);
 			}
 			src->srcTCP[i] = srcTCPss_create(src->MTU, src->RTTmd, src->initialWindow, src->destination, src->destProcessPDU);
@@ -309,12 +309,13 @@ void srcHTTPSS_sendEmbeddedObjects(void * arg)
 	if (src->nbTCP > Nd) {
 		fin = Nd;
 		// Correction, on termine les sources non vérifiées
+		// pour que le test dans la fonction suivante soit correcte
 		src->nbTCPTermine = src->nbTCPTermine + src->nbTCP - Nd;
 		printf("%d : nbTCPTermine, correction\n",src->nbTCPTermine);
 	} else {
 		fin = src->nbTCP;
 	}
-	printf_debug(DEBUG_HTTP,"%d : FIN\n",fin);
+	printf_debug(DEBUG_HTTP,"min entre nbTCP et obj embarqués : %d\n",fin);
 
 	//On vérifie qu'on a envoyé les objets embarqués
 	for (i = 0; i<fin; i++) {
