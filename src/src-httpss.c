@@ -191,11 +191,6 @@ void srcHTTPSS_setVersion(struct srcHTTPSS_t * src, int version, int nbTCP ) {sr
  * @param srcTCP sources TCP utilisés par l'objet HTTP
  * @param nbTCPTermine le nombre de connecxions TCP ayant envoyer tout leurs paquets
 */
-/*typedef struct fonctionsHttpssArguments fonctionsHttpssArguments;
-struct fonctionsHttpssArguments
-{
-	struct srcHTTPSS_t * src;
-};*/
 
 
 void srcHTTPSS_sessionStart(void * arg)
@@ -215,7 +210,7 @@ void srcHTTPSS_sessionStart(void * arg)
 	//On détruit les sources TCP
 	if (src->nbPage > 0) {
 		//On free les src TCP
-		srcTCPss_free(src->srcTCP[0]);
+		//srcTCPss_free(src->srcTCP[0]);
 	}
 
 	// Création de la connexion pour la page principale, élément 0 du tableau
@@ -226,11 +221,13 @@ void srcHTTPSS_sessionStart(void * arg)
 	printf_debug(DEBUG_SRC,"Genere taille page principale\n");
 	//On envoie la page principale
 	//On recuperer la taille de la page principale
-	double sm = 1460000;//randomGenerator_getNextDouble(src->Sm);
-	//printf("sm : %lf\n",sm);
+	double sm = randomGenerator_getNextDouble(src->Sm);
 
-	printf_debug(DEBUG_SRC,"Envoi page principale, taille : %lf\n",(int) sm);
+	printf("Envoi page principale, taille : %d\n",(int) sm);
 	//Envoi de la page principale
+int tempsReading = randomGenerator_getNextDouble(src->Dpc);
+		printf("Tirage du temps de lecture : %d\n", tempsReading);
+
 	srcTCPss_sendFile(src->srcTCP[0], sm);
 
 	printf_debug(DEBUG_SRC,"Programmation de l'évènement fin de transmition via TCP_addEOTevent\n");
@@ -250,7 +247,7 @@ void srcHTTPSS_EOTMainObject (void * arg) {
 
 	printf_debug(DEBUG_SRC,"Génère temps de parsing \n");
 	//On calcule le temps de parsing
-	int tempsParsing = 10; randomGenerator_getNextDouble(src->Tp);
+	int tempsParsing = randomGenerator_getNextDouble(src->Tp);
 	printf_debug(DEBUG_SRC,"Temps de parsing : %d\n",tempsParsing);
 
 	//On peut programmer le chargement des objets embarqués
@@ -286,7 +283,7 @@ void srcHTTPSS_sendEmbeddedObjects(void * arg)
 	printf_debug(DEBUG_SRC,"Fin de création des connexions\n");
 
 	//Calcul du nombre d'objets embarqués
-	int Nd = 2;// randomGenerator_TruncParetoGetNext(src->Nd);
+	int Nd = randomGenerator_TruncParetoGetNext(src->Nd);
 	//printf("%d\n",Nd);
 	printf_debug(DEBUG_SRC,"Tirage du nombre d'objets : %d Nd embedded objects\n",Nd);
 
@@ -294,7 +291,7 @@ void srcHTTPSS_sendEmbeddedObjects(void * arg)
 	for (i = 0; i<Nd; i++) 
 	{
 		//On calcule la taille du ieme objet embarqué
-		double s = 146000;//randomGenerator_getNextDouble(src->Se);
+		double s = randomGenerator_getNextDouble(src->Se);
 		//printf("s : %lf\n",s);
 		int sizeEbOb = (int) s;
 		printf_debug(DEBUG_SRC,"Send file, taille de l'objet : %d\n", sizeEbOb);
@@ -347,8 +344,8 @@ printf_debug(DEBUG_SRC,"Entrée dans la fonction de vérif de fin d'envoi\n");
 		
 		//On prépare le chargement de la nouvelle page
 		//On calcule le temps de lecture
-		int tempsReading = 40;//randomGenerator_getNextDouble(src->Dpc);
-		printf_debug(DEBUG_SRC,"Tirage du temps de lecture : %d\n", tempsReading);
+		int tempsReading = randomGenerator_getNextDouble(src->Dpc);
+		printf("Tirage du temps de lecture : %d\n", tempsReading);
 
 		// Si on a pas finit la session on programme la nouvelle page
 		// Ici la session c'est la lecture de 2 pages
@@ -356,6 +353,8 @@ printf_debug(DEBUG_SRC,"Entrée dans la fonction de vérif de fin d'envoi\n");
 			printf_debug(DEBUG_SRC,"Programmation de l'event lire une nouvelle page\n");
 			event_add(srcHTTPSS_sessionStart, src, motSim_getCurrentTime()+ tempsReading);
 			printf_debug(DEBUG_SRC,"Programmé\n\n");
+		} else {
+			printf("%d : nombre de page lu FINIII", src->nbPage);
 		}
 
 	} else {
