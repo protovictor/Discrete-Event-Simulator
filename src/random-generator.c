@@ -972,25 +972,25 @@ void randomGenerator_setAlphaXminPlafond(struct randomGenerator_t * rg, double a
 //Tout est calqué sur ci-dessus !
 //NOTE : j'ai triché (ou pas !) : getNext génere d'abord un nombre Y selon une loi normale, puis retourne X=exp(Y). Ca correspond à la définition de Wikipédia "une variable aléatoire X est dite suivre une loi log-normale de paramètres mu et sigma^2 si la variable Y=ln(X) suit une loi normale".
 
-struct randomGenerator_t * randomGenerator_createDoubleRangeTruncLogNorm(double mu, double sigma, double plafond)
+struct randomGenerator_t * randomGenerator_createDoubleRangeTruncLogNorm(double mu, double sigma, double sol, double plafond)
 {
    struct randomGenerator_t * result = randomGenerator_createDoubleRange(0.,1.);
-   randomGenerator_setDistributionTruncLogNorm(result,mu,sigma,plafond);
+   randomGenerator_setDistributionTruncLogNorm(result,mu,sigma,sol,plafond);
    return result;
 }
 
 void randomGenerator_setDistributionTruncLogNorm(struct randomGenerator_t * rg,
 					     double mu,
-                                             double sigma, double plafond)
+                                             double sigma, double sol, double plafond)
 {
    rg->distribution = rGDistTruncLogNorm;
-   randomGenerator_TruncLogNormInit(rg, mu, sigma,plafond);
+   randomGenerator_TruncLogNormInit(rg, mu, sigma,sol,plafond);
 }
 
-void randomGenerator_TruncLogNormInit(struct randomGenerator_t * rg, double mu, double sigma, double plafond)
+void randomGenerator_TruncLogNormInit(struct randomGenerator_t * rg, double mu, double sigma, double sol, double plafond)
 {
    assert(rg->distribution == rGDistTruncLogNorm); 
-   rg->distParam.min = 0 ;
+   rg->distParam.min = sol ;
    rg->distParam.max = plafond;
    //si "create" a été appelé, spécifier le min et le max a déjà dû être fait à l'étape "create". Mais on n'est jamais trop prudent.
    rg->distParam.d.logNorm.mu = mu;
@@ -1009,15 +1009,16 @@ double randomGenerator_TruncLogGetNext(struct randomGenerator_t * rg)
    theta = 2*PI*rg->aleaGetNext(rg); //R*cos(theta) suit une loi normale (0,1)
    result = exp(rg->distParam.d.logNorm.mu + rg->distParam.d.logNorm.sigma * R*cos(theta));   
 
-   }while (result > rg->distParam.max); 
+   }while (result > rg->distParam.max || result < rg->distParam.min); 
 /*
    printf_debug(DEBUG_GENE, "OUPS ! Il semblerait qu'on n'ait pas mis de phrase de debug à randomGenerator_truncLogGetNext !");
 */
    return result;
 }
 
-void randomGenerator_setMuSigmaPlafond(struct randomGenerator_t * rg, double mu, double sigma, double plafond){
+void randomGenerator_setMuSigmaPlafond(struct randomGenerator_t * rg, double mu, double sigma, double sol, double plafond){
    assert(rg->distribution == rGDistTruncLogNorm); 
+   rg->distParam.min = sol;
    rg->distParam.max = plafond;
    //si "create" a été appelé, spécifier le min et le max a déjà dû être fait à l'étape "create". Mais on n'est jamais trop prudent.
    rg->distParam.d.logNorm.mu = mu;

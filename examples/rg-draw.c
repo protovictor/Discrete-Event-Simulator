@@ -62,6 +62,7 @@ int main() {
    double plafond;
    double mu;
    double sigma;
+   double sol;
    double average;
    int n;
  //    srand(time(NULL));
@@ -142,10 +143,11 @@ int main() {
 
    mu=0.;
    sigma = 1;
+   sol = 0.025;
    plafond = 100.;
-   printf("=======\nPartie avec Trunc lognorm (mu = %f, sigma = %f, plafond = %f)\n",mu,sigma,plafond);
+   printf("=======\nPartie avec Trunc lognorm (mu = %f, sigma = %f, sol = %f, plafond = %f)\n",mu,sigma,sol,plafond);
 
-   rg = randomGenerator_createDoubleRangeTruncLogNorm(mu,sigma,plafond);
+   rg = randomGenerator_createDoubleRangeTruncLogNorm(mu,sigma,sol,plafond);
       pr = probe_createExhaustive();
    randomGenerator_addValueProbe(rg, pr);
 
@@ -162,9 +164,9 @@ int main() {
    sigma = 1.37;
    mu = 8.23;
    plafond = 50000000.;
-   printf("=======\nPartie avec Trunc lognorm (mu = %f, sigma = %f, plafond = %f)\n",mu,sigma,plafond);
+   printf("=======\nPartie avec Trunc lognorm (mu = %f, sigma = %f, sol = %f, plafond = %f)\n",mu,sigma,sol,plafond);
 
-   randomGenerator_setDistributionTruncLogNorm(rg,mu,sigma,plafond);
+   randomGenerator_setDistributionTruncLogNorm(rg,mu,sigma,sol,plafond);
    average = 0.0;
    for (n = 0; n < NB_SAMPLES; n++) {
       average += randomGenerator_getNextDouble(rg);
@@ -177,9 +179,9 @@ int main() {
 
    sigma = 0.5; mu = 0.;
    plafond = 50.;
-   printf("=======\nPartie avec Trunc lognorm (mu = %f, sigma = %f, plafond = %f)\n",mu,sigma,plafond);
+   printf("=======\nPartie avec Trunc lognorm (mu = %f, sigma = %f, sol = %f, plafond = %f)\n",mu,sigma,sol,plafond);
 
-   randomGenerator_setDistributionTruncLogNorm(rg,mu,sigma,plafond);
+   randomGenerator_setDistributionTruncLogNorm(rg,mu,sigma,sol,plafond);
    average = 0.0;
    for (n = 0; n < NB_SAMPLES; n++) {
       average += randomGenerator_getNextDouble(rg);
@@ -192,9 +194,9 @@ int main() {
    mu=0.5;
    sigma = 0.5;
    plafond = 50.;
-   printf("=======\nPartie avec Trunc lognorm (mu = %f, sigma = %f, plafond = %f)\n",mu,sigma,plafond);
+   printf("=======\nPartie avec Trunc lognorm (mu = %f, sigma = %f, sol = %f, plafond = %f)\n",mu,sigma,sol,plafond);
 
-   randomGenerator_setDistributionTruncLogNorm(rg,mu,sigma,plafond);
+   randomGenerator_setDistributionTruncLogNorm(rg,mu,sigma,sol,plafond);
    average = 0.0;
    for (n = 0; n < NB_SAMPLES; n++) {
       average += randomGenerator_getNextDouble(rg);
@@ -208,7 +210,7 @@ int main() {
 
    mu = 0.;
    sigma = 0.125;
-   printf("=======\nPartie avec Trunc lognorm (mu = %f, sigma = %f, plafond = %f)\n",mu,sigma,plafond);
+   printf("=======\nPartie avec Trunc lognorm (mu = %f, sigma = %f, sol = %f, plafond = %f)\n",mu,sigma,sol,plafond);
 
    average = 0.0;
    for (n = 0; n < NB_SAMPLES; n++) {
@@ -299,10 +301,11 @@ int main() {
 
    mu = 8.35;
    sigma = 1.37;
+   sol = 100;
    plafond = 2000000.;
-   printf("=======\nValeurs pat défaut Sm (Lognorm mu = %f, sigma = %f, plafond = %f)\n",mu,sigma,plafond);
+   printf("=======\nValeurs pat défaut Sm (Lognorm mu = %f, sigma = %f, sol = %f, plafond = %f)\n",mu,sigma,sol,plafond);
 
-   rg = randomGenerator_createDoubleRangeTruncLogNorm(mu,sigma,plafond);
+   rg = randomGenerator_createDoubleRangeTruncLogNorm(mu,sigma,sol,plafond);
    randomGenerator_addValueProbe(rg, pr);
 
    average = 0.0;
@@ -316,10 +319,11 @@ int main() {
 
    mu = 6.17;
    sigma = 2.36;
+   sol = 50;
    plafond = 2000000.;
-   printf("=======\nValeurs pat défaut Se (Lognorm mu = %f, sigma = %f, plafond = %f)\n",mu,sigma,plafond);
+   printf("=======\nValeurs pat défaut Se (Lognorm mu = %f, sigma = %f, sol = %f, plafond = %f)\n",mu,sigma,sol,plafond);
 
-   rg = randomGenerator_createDoubleRangeTruncLogNorm(mu,sigma,plafond);
+   rg = randomGenerator_createDoubleRangeTruncLogNorm(mu,sigma,sol,plafond);
    randomGenerator_addValueProbe(rg, pr);
 
    
@@ -366,7 +370,7 @@ int main() {
    motSim_reset();
 
       lambda = 7.69;
- printf("=======\nValeurs par défaut Dpc (Exponentielle lambda = %f)\n",lambda);
+ printf("=======\nValeurs par défaut Tp (Exponentielle lambda = %f)\n",lambda);
    
    rg = randomGenerator_createDoubleExp(lambda);
    randomGenerator_addValueProbe(rg, pr);//Si vous oubliez cette ligne, malheur à vous !
