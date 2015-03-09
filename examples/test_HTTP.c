@@ -65,8 +65,8 @@ void tracer(struct probe_t * pr, char * name, int nbBar)
 
 #define RTT 1.5
 #define MTU 1500
-#define nbTCP 3
-#define nbPageMax 3
+#define nbTCP 1
+#define nbPageMax 6 
 
 
 int main()
@@ -97,7 +97,7 @@ int main()
    // The source (HTTP)
    WINDOW_SIZE =1; 
    //src = srcHTTPSS_init_default(MTU, nbTCP, 0, RTT, WINDOW_SIZE, link, llSimplex_processPDU);
-   src = srcHTTPSS_init_default(MTU, nbTCP, 0, RTT, WINDOW_SIZE, sink, PDUSink_processPDU, nbPageMax);
+   src = srcHTTPSS_init_default(MTU, nbTCP, 1, RTT, WINDOW_SIZE, sink, PDUSink_processPDU, nbPageMax);
    // Send a file
    srcHTTPSS_sessionStart(src);
 

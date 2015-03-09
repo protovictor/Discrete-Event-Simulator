@@ -72,4 +72,10 @@ void srcTCPss_free(struct srcTCPSS_t * src);
  */
 void srcTCPss_addEOTEvent(struct srcTCPSS_t * src, struct event_t * ev);
 
+/**
+ * @brief notify TCP to run his EOT event  (the transmition has to be endded, if not, this function does nothing)
+ * @param src a pointer to the source
+ */
+void srcTCPss_wakeUp(void * s);
+
 #endif

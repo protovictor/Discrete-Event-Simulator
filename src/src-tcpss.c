@@ -181,7 +181,9 @@ struct PDU_t * srcTCPss_getPDU(void * s)
         // Run any event in the list, if any.
         // WARNING : this this the EOT, not the end of reception !
         // You may need to wait for an extra RTT ...
+        printf_debug(DEBUG_SRC, "there's an event in EOT list : %d\n",(ev = eventFile_nextEvent(src->EOTEventList)) != NULL);
         while ((ev = eventFile_extract(src->EOTEventList)) != NULL) {
+     	   printf_debug(DEBUG_SRC, "run the event\n");
            event_run(ev);
 	}
      }
@@ -232,3 +234,24 @@ void srcTCPss_addEOTEvent(struct srcTCPSS_t * src, struct event_t * ev)
 {
    eventFile_insert(src->EOTEventList, ev);
 }
+
+/**
+ * @brief notify TCP to run his EOT event  (the transmition has to be endded, if not, this function does nothing)
+ * @param src a pointer to the source
+ */
+void srcTCPss_wakeUp(void * s) {
+
+   struct srcTCPSS_t * src = (struct srcTCPSS_t *) s;
+   struct event_t * ev;
+
+   // if transmition endded
+   if (srcTCPss_isEmpty(src)) {
+	// Run the EOT events
+        while ((ev = eventFile_extract(src->EOTEventList)) != NULL) {
+     	   printf_debug(DEBUG_SRC, "run the event\n");
+           event_run(ev);
+	}
+   }
+}
+
+

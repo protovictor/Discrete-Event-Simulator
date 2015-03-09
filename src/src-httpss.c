@@ -109,8 +109,8 @@ struct srcHTTPSS_t * srcHTTPSS_init_default(int MTU, int nbTCP, int version, dou
 	
   	struct srcHTTPSS_t * result = 
 		(struct srcHTTPSS_t *) sim_malloc(sizeof(struct srcHTTPSS_t ));
-  	result -> Sm = randomGenerator_createDoubleRangeTruncLogNorm(8.35, 1.37, 2000000.0);
-  	result -> Se = randomGenerator_createDoubleRangeTruncLogNorm(6.17, 2.36, 2000000.0);
+  	result -> Sm = randomGenerator_createDoubleRangeTruncLogNorm(8.35, 1.37, 100.0, 2000000.0);
+  	result -> Se = randomGenerator_createDoubleRangeTruncLogNorm(6.17, 2.36, 50.0, 2000000.0);
 	result -> Nd = randomGenerator_createDoubleRangeTruncPareto(1.1, 2.0, 55.0);
 	result -> Dpc = randomGenerator_createDoubleExp(0.033);
 	result -> Tp = randomGenerator_createDoubleExp(7.69);
@@ -179,27 +179,13 @@ void srcHTTPSS_setMTU(struct srcHTTPSS_t * src, int MTU) {src->MTU = MTU;}
 void srcHTTPSS_setVersion(struct srcHTTPSS_t * src, int version, int nbTCP ) {src->version = version;src->nbTCP = nbTCP;}
 
 
-/**
- * @brief Création d'une structure afin de passer à event_add un seul argument.
- * arg structure contenant la source HTTP, les infos pour une sources TCP et le nombre
- * de connections TCP terminés lors d'un envoi sur plusieurs connections.
- * @param src source HTTP, we have src-> MTU as maximum transmission unit of the link
- * @param RTTmd is the Round Trip Time minus transmission time on the access link
- * @param initialWindow is the initial value of cwnd
- * @param destination is a pointer to the destination entity
- * @param destProcessPDU is the PDU processing function of the destination
- * @param srcTCP sources TCP utilisés par l'objet HTTP
- * @param nbTCPTermine le nombre de connecxions TCP ayant envoyer tout leurs paquets
-*/
-
-
 void srcHTTPSS_sessionStart(void * arg)
 {
-	printf_debug(DEBUG_HTTP,"Entree dans session start\n");
+	printf("Entree dans session start\n");
 	//On caste arg en une sourcce HTTP
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
 
-	printf_debug(DEBUG_HTTP,"Initialisation de la connexion TCP\n");
+	printf("Initialisation de la connexion TCP\n");
 
 	//Initialiser les connections TCP
 	/*On remet le nombre de connexions TCP terminés à 0
@@ -210,7 +196,7 @@ void srcHTTPSS_sessionStart(void * arg)
 	//On détruit les sources TCP
 	if (src->nbPage > 0) {
 		//On free les src TCP
-		//srcTCPss_free(src->srcTCP[0]);
+		srcTCPss_free(src->srcTCP[0]);
 	}
 
 	// Création de la connexion pour la page principale, élément 0 du tableau
@@ -218,74 +204,76 @@ void srcHTTPSS_sessionStart(void * arg)
 						src->initialWindow, src->destination,
 						src->destProcessPDU);
 
-	printf_debug(DEBUG_HTTP,"Genere taille page principale\n");
 	//On envoie la page principale
 	//On recuperer la taille de la page principale
 	double sm = randomGenerator_getNextDouble(src->Sm);
+	//printf("sm : %lf\n",sm);
 
-	printf("Envoi page principale, taille : %d\n",(int) sm);
-	//Envoi de la page principale
-int tempsReading = randomGenerator_getNextDouble(src->Dpc);
-		printf_debug(DEBUG_HTTP,"Tirage du temps de lecture : %d\n", tempsReading);
-
-	srcTCPss_sendFile(src->srcTCP[0], sm);
-
-	printf_debug(DEBUG_HTTP,"Programmation de l'évènement fin de transmition via TCP_addEOTevent\n");
+	printf("Programmation de l'évènement fin de transmition via TCP_addEOTevent\n");
 	//On déclenche l'événement fin de transmission de la page principale
 	srcTCPss_addEOTEvent(src->srcTCP[0], event_create(srcHTTPSS_EOTMainObject, src, 0));
-	printf_debug(DEBUG_HTTP,"Evènement programmé\n");
 
-	printf_debug(DEBUG_HTTP,"%d : nbPagesLu\n\n", src->nbPage);
+	printf("Envoi page principale, taille : %d\n\n",(int) sm);
+	//Envoi de la page principale
+	srcTCPss_sendFile(src->srcTCP[0], sm);
+
 }
 
 
 /*Lancement des objets embarqués*/
 void srcHTTPSS_EOTMainObject (void * arg) {
-	printf_debug(DEBUG_HTTP,"Entrée dans la fct EOTMainObj\n");
+	printf("Entrée dans la fct EOTMainObj\n");
 	//On caste arg en une sourcce HTTP
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
 
-	printf_debug(DEBUG_HTTP,"Génère temps de parsing \n");
+	printf("Génère temps de parsing \n");
 	//On calcule le temps de parsing
-	int tempsParsing = randomGenerator_getNextDouble(src->Tp);
-	printf_debug(DEBUG_HTTP,"Temps de parsing : %d\n",tempsParsing);
+	double tempsParsing = randomGenerator_getNextDouble(src->Tp);
+	printf("Temps de parsing : %lf\n",randomGenerator_getNextDouble(src->Tp));
 
 	//On peut programmer le chargement des objets embarqués
-	printf_debug(DEBUG_HTTP,"Programmation de l'event envoie des EbOb");
+	printf("Programmation de l'event envoie des EbOb");
 	event_add(srcHTTPSS_sendEmbeddedObjects, src, motSim_getCurrentTime() + tempsParsing);
-	printf_debug(DEBUG_HTTP,"Event programmé\n\n");
+	printf("Event programmé\n\n");
 }
 
 
 /*Envoyer les objets embarqués*/
 void srcHTTPSS_sendEmbeddedObjects(void * arg)
 {
-	printf_debug(DEBUG_HTTP,"Entrée dans l'envoie des EbOb\n");
+	printf("Entrée dans l'envoie des EbOb\n");
 	//On caste arg en une sourcce HTTP
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
 
-	printf_debug(DEBUG_HTTP,"Création des connexions TCP (de la)\n");
+	printf("Création des connexions TCP (de la), destination :%p\n",src->destination);
 	int i;
 	//On crée de nouvelles connections TCP que si c'est en mode burst version ==0
 	if (src->version == 0) {
 		for ( i=0; i < src->nbTCP; i++) 
 		{
-			printf_debug(DEBUG_HTTP,"Création de la %d-ème connexion\n",i);
 			if (src->nbPage > 0) {
-				printf_debug(DEBUG_HTTP,"Free de la source TCP \n");
 				srcTCPss_free(src->srcTCP[i]);
 			}
 			src->srcTCP[i] = srcTCPss_create(src->MTU, src->RTTmd, src->initialWindow, src->destination, src->destProcessPDU);
-			printf_debug(DEBUG_HTTP,"Destination : %p\n",src->destination);
 		}
-	printf_debug(DEBUG_HTTP,"Connexions crée\n");
 	}
-	printf_debug(DEBUG_HTTP,"Fin de création des connexions\n");
 
 	//Calcul du nombre d'objets embarqués
 	int Nd = randomGenerator_TruncParetoGetNext(src->Nd);
 	//printf("%d\n",Nd);
-	printf_debug(DEBUG_HTTP,"Tirage du nombre d'objets : %d Nd embedded objects\n",Nd);
+	printf("Tirage du nombre d'objets : %d Nd embedded objects\n",Nd);
+
+	/*Calcul fin de boucle pour ne pas vérifier la terminaison de l'envoi sur une connexion où aucun envoi n'a été fait,
+	ERREUR  corrigée : le nombre de connexion a terminé ne change pas, on risque de ne vérifier qu'une*/
+	int fin;
+	if (src->nbTCP > Nd) {
+		fin = Nd;
+		// Correction, on termine les sources non vérifiées
+		src->nbTCPTermine = src->nbTCPTermine + src->nbTCP - Nd;
+	} else {
+		fin = src->nbTCP;
+	}
+
 
 	//On envoie les Nd objets embarqués
 	for (i = 0; i<Nd; i++) 
@@ -294,72 +282,57 @@ void srcHTTPSS_sendEmbeddedObjects(void * arg)
 		double s = randomGenerator_getNextDouble(src->Se);
 		//printf("s : %lf\n",s);
 		int sizeEbOb = (int) s;
-		printf_debug(DEBUG_HTTP,"Send file, taille de l'objet : %d\n", sizeEbOb);
+		printf("Envoi du %d-eme objet embarqué, taille de l'objet : %d\n",i, sizeEbOb);
 		//On envoie le ieme objet embarqué sur le i%(nbTCP) eme connection TCP
 		/* Par exemple si 3 connections TCP et 5 objets embarqués
 		le 1er objet sur la 1ere connection TCP, la 2eme objet sur le 2eme connection TCP,
 		le 3eme objet sur la 3me connection TCP, le 4eme objet sur la 1ere connection TCP,
 		le 5eme objet sur la 2eme connection TCP*/
-		srcTCPss_sendFile(src->srcTCP[i%(src->nbTCP)], s) ;
+		srcTCPss_sendFile(src->srcTCP[i%(src->nbTCP)], s);
 	}
-
-	/*Calcul fin de boucle pour ne pas vérifier la terminaison de l'envoi sur une connexion où aucun envoi n'a été fait,
-	ERREUR  corrigée : le nombre de connexion a terminé ne change pas, on risque de ne vérifier qu'une*/
-	int fin;
-	if (src->nbTCP > Nd) {
-		fin = Nd;
-		// Correction, on termine les sources non vérifiées
-		// pour que le test dans la fonction suivante soit correcte
-		src->nbTCPTermine = src->nbTCPTermine + src->nbTCP - Nd;
-		printf("%d : nbTCPTermine, correction\n",src->nbTCPTermine);
-	} else {
-		fin = src->nbTCP;
-	}
-	printf_debug(DEBUG_HTTP,"min entre nbTCP et obj embarqués : %d\n",fin);
-
 	//On vérifie qu'on a envoyé les objets embarqués
+	printf("Programmation event sur EOT\n\n");
 	for (i = 0; i<fin; i++) {
-		printf_debug(DEBUG_HTTP,"Dans la boucle de vérification de fin d'envoi\n");
 	//On déclenche l'événement fin de transmission des Objets Embarquées principale
-		printf_debug(DEBUG_HTTP,"%d-ème event\n",i);
 		srcTCPss_addEOTEvent(src->srcTCP[i], event_create(srcHTTPSS_EOTEmbeddedObjects, src, 0));
-		printf_debug(DEBUG_HTTP,"%d : nbTCPTermine\n",src->nbTCPTermine);
+		// !!! Si le sendFile c'est finit avant la programmation de l'event, TCP va s'en foutre.
+		// Solution : on appelle wakeUp pour que TCP run l'EOT event s'il ne passe plus dans le sendFile
+		srcTCPss_wakeUp(src->srcTCP[i]);
 	}
+
+
 }
 
 
 /*Les objets Embarqués ont été envoyés*/
 void srcHTTPSS_EOTEmbeddedObjects(void * arg) {
-printf_debug(DEBUG_HTTP,"Entrée dans la fonction de vérif de fin d'envoi\n");
+printf("Entrée dans la fonction de vérif de fin d'envoi\n");
 	//On caste arg en une sourcce HTTP
 	struct srcHTTPSS_t * src = (struct srcHTTPSS_t *) arg;
 
 	// Une source TCP a terminé, on incrémente le nombre de connection TCP ayant fini
 	src->nbTCPTermine++;
-	printf_debug(DEBUG_HTTP,"Vérification par if de si tout les connections TCP ont terminé\n");
+	printf("Vérifie si tout les connections TCP ont terminé\n");
 	if (src->nbTCPTermine == src->nbTCP) {
 		//On a lu une page entière
 		src->nbPage++;
-		printf_debug(DEBUG_HTTP,"Tout est terminé, pages lues : %d\n",src->nbPage);
+		printf("nbTCPTermine = %d\n\n",src->nbTCPTermine);
+		printf("Tout est terminé, pages lues : %d\n",src->nbPage);
 
 		
 		//On prépare le chargement de la nouvelle page
 		//On calcule le temps de lecture
-		int tempsReading = randomGenerator_getNextDouble(src->Dpc);
-		printf_debug(DEBUG_HTTP, "Tirage du temps de lecture : %d\n", tempsReading);
+		double tempsReading = randomGenerator_getNextDouble(src->Dpc);
+		printf("Temps de lecture : %lf\n", tempsReading);
 
 		// Si on a pas finit la session on programme la nouvelle page
 		// Ici la session c'est la lecture de 2 pages
 		if (src->nbPage < src->nbPageMax) {
-			printf_debug(DEBUG_HTTP,"Programmation de l'event lire une nouvelle page\n");
+			printf("Programmation de l'event lire une nouvelle page\n");
 			event_add(srcHTTPSS_sessionStart, src, motSim_getCurrentTime()+ tempsReading);
-			printf_debug(DEBUG_HTTP,"Programmé\n\n");
-		} else {
-			printf("%d : nombre de page lu FINIII", src->nbPage);
 		}
 
 	} else {
-		printf_debug(DEBUG_HTTP,"Toutes les connections TCP ne sont pas terminées");
-		printf_debug(DEBUG_HTTP,"%d : nbTCPTermine = %d\n\n",src->nbTCPTermine);
+		printf("nbTCPTermine = %d\n\n",src->nbTCPTermine);
 	}
 }
