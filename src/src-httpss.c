@@ -299,8 +299,6 @@ void srcHTTPSS_sendEmbeddedObjects(void * arg)
 		// Solution : on appelle wakeUp pour que TCP run l'EOT event s'il ne passe plus dans le sendFile
 		srcTCPss_wakeUp(src->srcTCP[i]);
 	}
-
-
 }
 
 
