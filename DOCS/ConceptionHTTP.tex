@@ -1,0 +1,1051 @@
+% This file was converted to LaTeX by Writer2LaTeX ver. 1.0.2
+% see http://writer2latex.sourceforge.net for more info
+\documentclass[a4paper]{article}
+\usepackage[ascii]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french,english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb,amsfonts,textcomp}
+\usepackage{color}
+\usepackage{array}
+\usepackage{hhline}
+\usepackage{hyperref}
+\hypersetup{pdftex, colorlinks=true, linkcolor=blue, citecolor=blue, filecolor=blue, urlcolor=blue, pdftitle=, pdfauthor=, pdfsubject=, pdfkeywords=}
+% List styles
+\newcommand\liststyleWWviiiNumi{%
+\renewcommand\labelitemi{[F0B7?]}
+\renewcommand\labelitemii{[F0B7?]}
+\renewcommand\labelitemiii{[F0B7?]}
+\renewcommand\labelitemiv{[F0B7?]}
+}
+\newcommand\liststyleWWviiiNumii{%
+\renewcommand\labelitemi{[F0B7?]}
+\renewcommand\labelitemii{[F0B7?]}
+\renewcommand\labelitemiii{[F0B7?]}
+\renewcommand\labelitemiv{[F0B7?]}
+}
+\newcommand\liststyleWWviiiNumiii{%
+\renewcommand\labelitemi{[F0B7?]}
+\renewcommand\labelitemii{[F0B7?]}
+\renewcommand\labelitemiii{[F0B7?]}
+\renewcommand\labelitemiv{[F0B7?]}
+}
+\newcommand\liststyleWWviiiNumiv{%
+\renewcommand\labelitemi{[F0B7?]}
+\renewcommand\labelitemii{[F0B7?]}
+\renewcommand\labelitemiii{[F0B7?]}
+\renewcommand\labelitemiv{[F0B7?]}
+}
+\newcommand\liststyleWWviiiNumv{%
+\renewcommand\labelitemi{[F0B7?]}
+\renewcommand\labelitemii{[F0B7?]}
+\renewcommand\labelitemiii{[F0B7?]}
+\renewcommand\labelitemiv{[F0B7?]}
+}
+% Page layout (geometry)
+\setlength\voffset{-1in}
+\setlength\hoffset{-1in}
+\setlength\topmargin{0.7874in}
+\setlength\oddsidemargin{0.7874in}
+\setlength\textheight{10.118099in}
+\setlength\textwidth{6.6932993in}
+\setlength\footskip{0.0cm}
+\setlength\headheight{0cm}
+\setlength\headsep{0cm}
+% Footnote rule
+\setlength{\skip\footins}{0.0469in}
+\renewcommand\footnoterule{\vspace*{-0.0071in}\setlength\leftskip{0pt}\setlength\rightskip{0pt plus 1fil}\noindent\textcolor{black}{\rule{0.25\columnwidth}{0.0071in}}\vspace*{0.0398in}}
+% Pages styles
+\makeatletter
+\newcommand\ps@Standard{
+  \renewcommand\@oddhead{}
+  \renewcommand\@evenhead{}
+  \renewcommand\@oddfoot{}
+  \renewcommand\@evenfoot{}
+  \renewcommand\thepage{\arabic{page}}
+}
+\makeatother
+\pagestyle{Standard}
+\title{}
+\author{}
+\date{2015-03-11T04:25:58.947358726}
+\begin{document}
+{\bfseries
+\ \ Explanations:}
+
+
+\bigskip
+
+\ \ In the HTTP part, we need to create an HTTP object which would allow
+us to simulate a session. This object contains informations on the
+different Random Generators used by HTTP model, the number of TCP
+connection (burst mode or persistent), the parameters of an initial TCP
+connection. So this object can be represented this way :
+
+
+\bigskip
+
+{\selectlanguage{english}
+An HTTP page has for parameters \textbf{struct srcHTTPSS}:}
+
+
+\begin{itemize}
+\item randomGenerator SM : Size of the main object in a page
+\end{itemize}
+\begin{itemize}
+\item randomGenerator Se : Size of an embedded object in a page
+\end{itemize}
+\begin{itemize}
+\item randomGenerator Nd : Number of embedded objects in a page
+\end{itemize}
+\begin{itemize}
+\item randomGenerator Dpc : Reading time
+\end{itemize}
+\begin{itemize}
+\item randomGenerator Tp : Parsing time for the main page.
+\item Int MTU
+\item Int nbTCP : number of TCP connections according to the mode ( = 1
+in persistant mode)
+\item Int nbPage : number of page visited
+\item {\selectlanguage{english}
+boolean version : True si 1.1, false si 1.0}
+\item struct srcHTTPSS\_t * src : source HTTP
+\item void * destination : is a pointer to the destination entity for
+TCP
+\item processPDU\_t destProcessPDU : is the PDU processing function of
+the destination
+\item double RTTmd : is the Round Trip Time minus transmission time on
+the access link
+\item int initialWindow : is the initial value of cwnd
+\item struct srcTCPSS\_t * srcTCP[4] : TCP sources for burst or
+persitant mode, maximum 4 TCP sources
+\item {\selectlanguage{french}
+int nbTCPTermine : number of TCP connections which have endded in burst
+mode}
+\end{itemize}
+
+\bigskip
+
+{\selectlanguage{english}
+First of all, we create a HTTP object by defining his parameters. This
+following function will help us to perform this task.}
+
+{\selectlanguage{english}\bfseries
+struct srcHTTPSS\_t * srcHTTPSS\_init(struct randomGenerator\_t * Sm,}
+
+{\selectlanguage{french}\bfseries
+\ \ \ \ \ \ \ \ \ \ struct randomGenerator\_t * Se,}
+
+{\selectlanguage{french}\bfseries
+\ \ \ \ \ \ \ \ \ \ struct randomGenerator\_t * Nd,}
+
+{\selectlanguage{french}\bfseries
+\ \ \ \ \ \ \ \ \ \ struct randomGenerator\_t * Dpc,}
+
+{\selectlanguage{french}\bfseries
+\ \ \ \ \ \ \ \ \ \ struct randomGenerator\_t * Tp,}
+
+{\selectlanguage{french}\bfseries
+\ \ \ \ \ \ \ \ \ \ int MTU, int nbTCP, int version,}
+
+{\selectlanguage{french}\bfseries
+\ \ \ \ \ \ \ \ \ \ void * destination,}
+
+{\selectlanguage{french}\bfseries
+\ \ \ \ \ \ \ \ \ \ processPDU\_t destProcessPDU,}
+
+{\selectlanguage{french}\bfseries
+\ \ \ \ \ \ \ \ \ \ double RTTmd,}
+
+{\selectlanguage{french}\bfseries
+\ \ \ \ \ \ \ \ \ \ int initialWindow,}
+
+{\selectlanguage{french}\bfseries
+\ \ \ \ \ \ \ \ \ \ int nbPageMax)}
+
+
+\bigskip
+
+{\selectlanguage{english}
+After having created the HTTP object, we can start the session by using
+this following function:}
+
+{\selectlanguage{english}\bfseries
+\ \ void srcHTTPSS\_sessionStart(void * arg)}
+
+{\selectlanguage{english}
+\ \ The goal first aim of this function is to send via TCP the main
+object. The parameter of this function is an void pointer, it will be
+casted into an HTTP object : \textbf{struct srcHTTPSS\_t * src =
+(struct srcHTTPSS\_t *) arg}.}
+
+{\selectlanguage{english}
+\ \ This function will be called at first, each time the simulator need
+to upload a new page.}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ Then we create a TCP source using the data of the parameter
+\textbf{src}. Then the main object will be sent on this connection
+newly created by using the function \textbf{void
+srcTCPss\_sendFile(struct srcTCPSS\_t * src, int nbBytes)}. The
+argument \textbf{nbBytes }size of the main object will be obtenaid via
+the \textbf{getDoubleNext }of the Random Generators.}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ Then we program an event indicating us the end of transmission of
+the maine object. This event programming is made possible by the
+function on the file event.c : \textbf{void event\_add(void (*run)(void
+*data), void * data, motSimDate\_t date).}}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ The moment when this event is launched, we would know that the main
+object have been completely sent by the TCP connection. It will also
+take us to this function : \textbf{void srcHTTPSS\_EOTMainObjet
+(fonctionsHttpssArguments * arg).}}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ In this function, we know that the main object have been totally
+sent, so we need to simulate the parsing time. For performing that
+task, we need to get the parsing time of \textbf{Tp }via
+\textbf{getDoubleNext }\ of the Random Generator file. Then we create
+the event end of parsing that will take place after \textbf{Tp }seconds
+added to the current time.}
+
+{\selectlanguage{french}
+\ \ We use again the function \textbf{void event\_add(void (*run)(void
+*data), void * data, motSimDate\_t date) }\ to create this event.}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ At the end of the parsing, we can send the embedded objects. So the
+end of parsing event will take us to this function : \textbf{void
+srcHTTPSS\_sendEmbeddedObjects(fonctionsHttpssArguments * arg)}}
+
+{\selectlanguage{english}
+\ \ We will create \textbf{nbTCP }TCP connections according to the mode
+(burst or persistent).}
+
+{\selectlanguage{english}
+\ \ We determine the number \textbf{Nd }\ of embedded objects by using
+\textbf{getDoubleNext }of the random generators.}
+
+{\selectlanguage{english}
+\ \ We send the \textbf{Nd }embedded objects on the \textbf{nbTCP} TCP
+connections by giving them also the size of the embedded objects.}
+
+{\selectlanguage{english}
+\ \ Then we create the event end of transmission of the embedded
+objects.}
+
+{\selectlanguage{english}
+\ \ We have added also another function on TCP in order to wake up the
+TCP connections which have finished too quickly before the event is
+programmed.(it may happen when the size of objects are too small).}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ When a TCP connection have finished his transmission, we will be
+directed towards this function : \textbf{void
+srcHTTPSS\_EOTEmbeddedObjects(fonctionsHttpssArguments * arg)}}
+
+{\selectlanguage{english}
+\ \ First in this function, we compute the number of TCP connection
+which have passed through this function.}
+
+{\selectlanguage{english}
+\ \ \ \ If we got all the TCP connections used for the transmission of
+the embedded objects, we update the number of page read. We will only
+add an event corresponding to the reading time \textbf{Dpc}. If we need
+to read another page, the end of the event will take us again to the
+function : \textbf{void
+srcHTTPSS\_sessionStart(fonctionsHttpssArguments * arg)}.}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ Otherwise, we update the number of TCP connections which have
+ended.}
+
+\clearpage\clearpage\setcounter{page}{1}\pagestyle{Standard}
+{\selectlanguage{english}
+\ \ Refining\textbf{:}}
+
+
+\bigskip
+
+{\selectlanguage{english}
+An HTTP object has for parameters struct srcHTTPSS:}
+
+
+\begin{itemize}
+\item randomGenerator SM : Size of the main object in a page
+\end{itemize}
+\begin{itemize}
+\item randomGenerator Se : Size of an embedded object in a page
+\end{itemize}
+\begin{itemize}
+\item randomGenerator Nd : Number of embedded objects in a page
+\end{itemize}
+\begin{itemize}
+\item randomGenerator Dpc : Reading time
+\end{itemize}
+\begin{itemize}
+\item randomGenerator Tp : Parsing time for the main page.
+\item Int MTU
+\item Int nbTCP : number of TCP connections according to the mode ( = 1
+in persistant mode)
+\item Int nbPage : number of page visited
+\item {\selectlanguage{english}
+boolean version : True si 1.1, false si 1.0}
+\item struct srcHTTPSS\_t * src : source HTTP
+\item void * destination : is a pointer to the destination entity for
+TCP
+\item processPDU\_t destProcessPDU : is the PDU processing function of
+the destination
+\item double RTTmd : is the Round Trip Time minus transmission time on
+the access link
+\item int initialWindow : is the initial value of cwnd
+\item {\selectlanguage{english}
+struct srcTCPSS\_t * srcTCP[4] : TCP sources for burst or persitant
+mode, maximum 4 TCP sources}
+\item {\selectlanguage{english}
+int nbTCPTermine : number of TCP connections which have ended in burst
+mode}
+\end{itemize}
+
+\bigskip
+
+
+\bigskip
+
+{\selectlanguage{english}
+R0 : Simulate a HTTP session}
+
+{\selectlanguage{french}
+R1 : /*\foreignlanguage{english}{Simulate a HTTP session*/}}
+
+{\selectlanguage{english}
+\ \ Configure HTTP parameters}
+
+{\selectlanguage{english}
+\ \ Launch HTTP session}
+
+
+\bigskip
+
+{\selectlanguage{english}
+R2 :}
+
+{\selectlanguage{english}
+\ \ /*Configure HTTP parameters*/}
+
+{\selectlanguage{english}
+\ \ \ \ /*Initialise HTTP parameters*/}
+
+{\selectlanguage{english}
+\ \ \ \ struct srcHTTPSS\_t * srcHTTPSS\_init(struct randomGenerator\_t
+* Sm,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ struct randomGenerator\_t * Se,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ struct randomGenerator\_t * Nd,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ struct randomGenerator\_t * Dpc,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ struct randomGenerator\_t * Tp,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ int MTU, int nbTCP, int version,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ void * destination,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ processPDU\_t destProcessPDU,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ double RTTmd,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ int initialWindow,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ int nbPageMax)\{\ \ }
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ struct srcHTTPSS\_t * result = }
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ (struct srcHTTPSS\_t *) sim\_malloc(sizeof(struct srcHTTPSS\_t
+));}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} Sm = Sm;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} Se = Se;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} Nd = Nd;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} Dpc = Dpc;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} Tp = Tp;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} MTU = MTU;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} nbTCP = nbTCP; }
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} nbPage = 0;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} version = version;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} destination = destination;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} destProcessPDU = destProcessPDU;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} RTTmd = RTTmd;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} initialWindow = initialWindow;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ result -{\textgreater} nbPageMax = nbPageMax;}
+
+
+\bigskip
+
+
+{\selectlanguage{english}
+\ \ return result;}
+
+{\selectlanguage{english}
+\}}
+
+{\selectlanguage{english}
+\ \ \ \ /*Setters*/}
+
+{\selectlanguage{english}
+\ \ \ \ struct srcHTTPSS * srcHTTPSS\_setSm(struct randomGenerator\_t *
+\ Sm)}
+
+{\selectlanguage{english}
+\ \ \ \ struct srcHTTPSS * srcHTTPSS\_setSe(struct randomGenerator\_t[]
+* \ Se)}
+
+{\selectlanguage{english}
+\ \ \ \ struct srcHTTPSS * srcHTTPSS\_setNd(struct randomGenerator\_t *
+\ Nd)}
+
+{\selectlanguage{english}
+\ \ \ \ struct srcHTTPSS * srcHTTPSS\_setDpc(struct randomGenerator\_t *
+\ Dpc)}
+
+{\selectlanguage{english}
+\ \ \ \ struct srcHTTPSS * srcHTTPSS\_setTp(struct randomGenerator\_t *
+\ Tp)}
+
+{\selectlanguage{english}
+\ \ \ \ struct srcHTTPSS * srcHTTPSS\_setMTU(int MTU)}
+
+{\selectlanguage{english}
+\ \ \ \ struct srcHTTPSS * srcHTTPSS\_setversion(boolean \ version)}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ /*Launch HTTP session*/}
+
+{\selectlanguage{english}
+\ \ \ \ Start HTTP session}
+
+{\selectlanguage{english}
+\ \ \ \ Load Embedded Objects}
+
+{\selectlanguage{english}
+\ \ \ \ Load New Page}
+
+\clearpage{\selectlanguage{english}
+R3 : /*Simulate a HTTP session*/}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ /*Configure HTTP parameters*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ /*Initialise HTTP parameters*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ /*struct srcHTTPSS * srcHTTPSS\_init({\dots}) \{ {\dots}. \}
+*/}
+
+
+\bigskip
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ /*Launch HTTP session*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ /*Load the main object trough a single TCP connection and schedule the event end of}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ transmission of the main object*/}\linebreak
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \textbf{void srcHTTPSS\_sessionStart(}\textbf{void
+*}\textbf{ arg)} \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}-Initialise at 0 the number of TCP connection having ended (it will be used at the end}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ of transmission of the embedded objects.}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}-Free the first TCP connection if we are in burst mode and read at least one page}
+
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}-Create one single TCP connection in order to send the main object.}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}-Send the main object trough the TCP connection. Ge the size of main object by using the}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ random generator of \textbf{Sm.}}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}-Add the event end of transmission of the main object. This event will redirect us to}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ the function \textbf{srcHTTPSS\_EOTMainObject} with arg as argument for this function.}
+
+\bigskip
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ /*The TCP source has sent the main object, so we program need to compute the parsing time, and}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ schedule its end in order to send the embedded objects.*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \textbf{void srcHTTPSS\_addEOTMainObjet (void * arg)} \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}-Compute the parsing time of the main object.}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}-Schedule the event end of parsing in order to load the embedded objects. This event}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ will take us to the function \textbf{srcHTTPSS\_sendEmbeddedObjects}}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ /*Send the embedded objects after the parsing time.*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \textbf{void srcHTTPSS\_sendEmbeddedObjects(void * arg)} \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}- If burst mode (version == 0) we need to free the TCP connections before creating new}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ ones}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}-Create the \textbf{nbTCP} TCP connections}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ Warning \textbf{nbTCP} {\textless} 4}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}-Compute the number of embedded objects \textbf{Nd.}}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}-Compute the essential number of TCP connections which will be effectively used.}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ If we have \textbf{nbTCP {\textgreater}Nd }, then \textbf{Nd }TCP will be used,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ otherwise all of them will be used.}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}-Send the \textbf{Nd }embedded objects on the \textbf{nbTCP }TCP connections.}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ {}-Schedule the event end of transmission of the embedded objects. This event will take us}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ to this function \textbf{srcHTTPSS\_EOTEmbeddedObjects}}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ /*The TCP sources have sent the embedded objects. We need then to schedule the end of the}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ reading, and if needed to load a new page after this event.*/}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \textbf{void srcHTTPSS\_EOTEmbbededObjects(}\textbf{void *}\textbf{ arg)} \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ If all the TCP connection used have finished their transmission of embedded objects \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ {}-Update the number of page read}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ {}-Compute the time of reading of the page \textbf{Dpc}}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ {}-Schedule the event end of reading, and we will read a new page if needed. Which in}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ this later case it will take us to the function \textbf{srcHTTPSS\_sendEmbeddedObjects}}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \} Else \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ {}-A TCP connection has ended to send his embedded objects, so we update the number of}
+
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ TCP connection having finished}
+
+\pagebreak
+
+\clearpage{\selectlanguage{english}
+R4 :}
+
+{\selectlanguage{english}
+\ \ /*Configure HTTP parameters*/}
+
+{\selectlanguage{english}
+\ \ \ \ /*Initialise HTTP parameters*/}
+
+{\selectlanguage{english}
+\ \ \ \ /*struct srcHTTPSS * srcHTTPSS\_init({\dots}) \{ {\dots}. \} */}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ /*Setters*/}
+
+{\selectlanguage{english}
+\ \ \ \ /*struct ...*/}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ *Launch HTTP session*/}
+
+{\selectlanguage{english}
+\ \ \ \ /*Load the main object trough a single TCP connection and schedule the event end of transmission}
+
+{\selectlanguage{english}
+\ \ \ \ of the main object*/}
+
+{\selectlanguage{english}
+\ \ \ \ \textbf{void srcHTTPSS\_sessionStart(}\textbf{void *}\textbf{arg)} \{}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ //We cast arg on a HTTP object}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ struct srcHTTPSS\_t * src = (struct srcHTTPSS\_t *) arg;}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ /*Initialise at 0 the number of TCP connection having ended (it will be used at the end of}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ transmission of the embedded objects.*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ src-{\textgreater}nbTCPTermine = 0;}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ /*Free the first TCP connection if we are in burst mode and read at least one page*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ if (src-{\textgreater}nbPage {\textgreater} 0) \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ // free the TCP first TCP source}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ srcTCPss\_free(src-{\textgreater}srcTCP[0]);}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ /*Create one single TCP connection in order to send the main object.*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ src-{\textgreater}srcTCP[0] = srcTCPss\_create(src-{\textgreater}MTU, src-{\textgreater}RTTmd,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ src-{\textgreater}initialWindow,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ src-{\textgreater}destination,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ src-{\textgreater}destProcessPDU);}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ /*Add the event end of transmission of the main object. This event will redirect us to the}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ function \textbf{srcHTTPSS\_EOTMainObject} with arg as argument for this function.*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ srcTCPss\_addEOTEvent(src-{\textgreater}srcTCP[0], event\_create(srcHTTPSS\_EOTMainObject,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ src, 0));}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ /*Send the main object trough the TCP connection. Get the size of main object by using the}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ random generator of \textbf{Sm.*/}}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ double sm = randomGenerator\_getNextDouble(src-{\textgreater}Sm);}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ srcTCPss\_sendFile(src-{\textgreater}srcTCP[0], sm);}
+
+{\selectlanguage{english}
+\ \ \ \ \}}
+
+\pagebreak
+
+{\selectlanguage{english}
+\ \ \ \ /*The TCP source has sent the main object, so we program need to compute the parsing time, and}
+
+{\selectlanguage{english}
+\ \ \ \ schedule its end in order to send the embedded objects.*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \textbf{void srcHTTPSS\_addEOTMainObjet (void * arg)} \{}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ //We cast arg on a HTTP object}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ struct srcHTTPSS\_t * src = (struct srcHTTPSS\_t *) arg;}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ /*Compute the parsing time of the main object.*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ double tempsParsing = randomGenerator\_getNextDouble(src-{\textgreater}Tp);}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ /*Schedule the event end of parsing in order to load the embedded objects. This event will}
+
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ take us to the function \textbf{srcHTTPSS\_sendEmbeddedObjects*/}}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ event\_add(srcHTTPSS\_sendEmbeddedObjects, src, motSim\_getCurrentTime() + tempsParsing);}
+
+\pagebreak
+
+{\selectlanguage{english}
+\ \ \ \ /*Send the embedded objects after the parsing time.*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \textbf{void srcHTTPSS\_sendEmbeddedObjects(void * arg)} \{}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ //We cast arg on a HTTP object}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ struct srcHTTPSS\_t * src = (struct srcHTTPSS\_t *) arg;}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ int i;}
+
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ /*If burst mode (version == 0) we need to free the TCP connections before creating new}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ ones*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ if (src-{\textgreater}version == 0) \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ for ( i=0; i {\textless} src-{\textgreater}nbTCP; i++) }
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ if (src-{\textgreater}nbPage {\textgreater} 0) \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ srcTCPss\_free(src-{\textgreater}srcTCP[i]);}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ \}}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ /*Create the \textbf{nbTCP} TCP connections}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ Warning \textbf{nbTCP} {\textless} 4 according to the model*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ src-{\textgreater}srcTCP[i] = srcTCPss\_create(src-{\textgreater}MTU,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ src-{\textgreater}RTTmd, src-{\textgreater}initialWindow,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ src-{\textgreater}destination, src-{\textgreater}destProcessPDU);}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ /*Compute the number of embedded objects \textbf{Nd.*/}}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ int Nd = randomGenerator\_TruncParetoGetNext(src-{\textgreater}Nd);}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ /*Compute the essential number of TCP connections which will be effectivly used.}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ If we have \textbf{nbTCP {\textgreater}Nd }, then \textbf{Nd }TCP will be used,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ otherwise all of them will be used.*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ int fin;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ if (src-{\textgreater}nbTCP {\textgreater} Nd) \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ fin = Nd;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ src-{\textgreater}nbTCPTermine = src-{\textgreater}nbTCPTermine +}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ src-{\textgreater}nbTCP - Nd;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \} else \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ fin = src-{\textgreater}nbTCP;}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ /*Send the \textbf{Nd }embedded objects on the \textbf{nbTCP }TCP connections.*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ for (i = 0; i{\textless}Nd; i++) }
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ //Compute the size of an embedded object}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ double s = randomGenerator\_getNextDouble(src-{\textgreater}Se);}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ int sizeEbOb = (int) s;}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ /*We send the i-th embedded object on the \textbf{i modulo nbTCP th }TCP connection.}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ For example if we have 3 TCP connections and 5 embedded objects, we send the first}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ embedded object on the first TCP connection, the second object on the second TCP}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ connection. The third object on the third TCP connection. The fourth object on the}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ first TCP connection and the fith object on the second TCP connection.*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ srcTCPss\_sendFile(src-{\textgreater}srcTCP[i\%(src-{\textgreater}nbTCP)], s);}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ /*Schedule the event end of transmission of the embedded objects. This event will take us
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ to this function textbf{srcHTTPSS\_EOTEmbeddedObjects*/}}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ for (i = 0; i{\textless}fin; i++) \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ //Launch the end of transmission of a single TCP connection}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ srcTCPss\_addEOTEvent(src-{\textgreater}srcTCP[i], event\_create(srcHTTPSS}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ EOTEmbeddedObjects, src,0));}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ // !!! If sendFile of TCP has already finished, we will wake him up in order the event}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ can be scheduled.}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ srcTCPss\_wakeUp(src-{\textgreater}srcTCP[i]);}
+
+\pagebreak
+
+{\selectlanguage{french}
+\ \ \ \ /*The TCP sources have sent the embedded objects. We need then to schedule the end of the reading,}
+
+{\selectlanguage{french}
+\ \ \ \ and if needed to load a new page after this event.*/}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \textbf{void srcHTTPSS\_EOTEmbbededObjects(}\textbf{void *}\textbf{ arg)} \{}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ /*A TCP connection has ended to send his embedded objects, so we update the number of TCP}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ connection having finished*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ src-{\textgreater}nbTCPTermine++;}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ /*If all the TCP connection used have finished their transmission of embedded objects*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ if (src-{\textgreater}nbTCPTermine == src-{\textgreater}nbTCP) \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ /*Update the number of page read*/}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ src-{\textgreater}nbPage++;}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ /*Compute the time of reading of the page \textbf{Dpc*/}}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ double tempsReading = randomGenerator\_getNextDouble(src-{\textgreater}Dpc);}
+
+\bigskip
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ /*Schedule the event end of reading, and we will read a new page if needed. Which in this}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ later case it will take us to the function \textbf{srcHTTPSS\_sendEmbeddedObjects*/}}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ if (src-{\textgreater}nbPage {\textless} src-{\textgreater}nbPageMax) \{}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ event\_add(srcHTTPSS\_sessionStart, src,}
+
+{\selectlanguage{english}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ motSim\_getCurrentTime()+ tempsReading);}
+\end{document}
